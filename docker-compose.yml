@@ -11,7 +11,7 @@ services:
       - "4000:4000"
     environment:
       PORT: 4000
-    command: "yarn dev"
+    command: "yarn start:dev"
     depends_on:
       - db
   front:

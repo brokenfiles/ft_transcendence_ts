@@ -8,14 +8,14 @@ Ce guide vous permettra de setup le site web factilement en plusieurs étapes.
 
 ## Conventions
 
-Nous utilisons pour ce projet NuxtJS en front et <EXPRESS?> en back.
+Nous utilisons pour ce projet NuxtJS en front et NestJS en back.
 Typescript est utilisé des deux côtés.
 La base de données est en PostgreSQL.
 
 ## Organisation des dossiers
 
 Le dossier front correspond au projet NuxtJS. <br />
-Le dossier back correspond au projet <EXPRESS?>. <br />
+Le dossier back correspond au projet NestJS. <br />
 Le dossier tmp (non présent pas défaut) est le dossier où les données postgre sont sauvegardées.
 
 ## Maquette
