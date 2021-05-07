@@ -40,7 +40,7 @@ La branche `master` est la branche à jour.
 ## Problèmes rencontrés
 
 * Sur windows, si le dossier "nodes_modules" ne se crée pas, il faut installer les dépendances à la main via la commande `yarn install` dans le dossier `front`
- et `back`. Si le problème persiste, vérifiez que le partge de données via les volumes fonctionnent.
+ et `back`. Si le problème persiste, vérifiez que le partage de données via les volumes fonctionnent.
   
 ## Imcompatibilités
 
