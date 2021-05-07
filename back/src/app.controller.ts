@@ -6,15 +6,18 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get("/helloworld")
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
   @Get()
   getIndex(@Res() res: Response) {
     res.status(HttpStatus.OK).json({
       message: `C'est good`
     });
   }
+
+  @Get("/bonjour")
+  getBonjour(@Res() res: Response) {
+    res.status(HttpStatus.BAD_REQUEST).json({
+      error: "Mon frérot ?"
+    })
+  }
 }
+
