@@ -2,6 +2,10 @@
 
 Ce guide vous permettra de setup le site web factilement en plusieurs étapes.
 
+<div style="width: 80%;">
+  <img style="width: 100%;" src="github/images/mock_preview.png">
+</div>
+
 ## Conventions
 
 Nous utilisons pour ce projet NuxtJS en front et <EXPRESS?> en back.
