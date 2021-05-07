@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  front:
+    build: ./front/
+    container_name: website-front
+    restart: always
+    volumes:
+      - ./front:/app
+    ports:
+      - "3000:3000"
+    environment:
+      BACKEND_PORT: 4000
+    command: "yarn dev"
+  back:
+    build: ./back/
+    container_name: website-back
+    restart: always
+    volumes:
+      - ./back:/app
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+    command: "yarn dev"
+#  db:
+#    image: postgres
+#    volumes:
+#      - ./.tmp/db:/var/lib/postgresql/data
+#    environment:
+#      POSTGRES_PASSWORD: password
+#      PGDATA: /tmp
