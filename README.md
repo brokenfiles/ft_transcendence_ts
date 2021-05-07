@@ -8,6 +8,12 @@ Nous utilisons pour ce projet NuxtJS en front et <EXPRESS?> en back.
 Typescript est utilisé des deux côtés.
 La base de données est en PostgreSQL.
 
+## Organisation des dossiers
+
+Le dossier front correspond au projet NuxtJS. <br />
+Le dossier back correspond au projet <EXPRESS?>. <br />
+Le dossier tmp (non présent pas défaut) est le dossier où les données postgre sont sauvegardées.
+
 ## Maquette
 
 Les maquettes sont sur Figma, demander à `llaurent` pour avoir les accès.
@@ -29,5 +35,9 @@ La branche `master` est la branche à jour.
 
 ## Problèmes rencontrés
 
-Sur windows, si le dossier "nodes_modules" ne se crée pas, il faut installer les dépendances à la main via la commande `yarn install` dans le dossier `front`
- et `back`
+* Sur windows, si le dossier "nodes_modules" ne se crée pas, il faut installer les dépendances à la main via la commande `yarn install` dans le dossier `front`
+ et `back`. Si le problème persiste, vérifiez que le partge de données via les volumes fonctionnent.
+  
+## Imcompatibilités
+
+* Docker pour Windows sans Windows Pro ne fonctionne pas car les volumes ne sont pas partagés. Pour résoudre le problème, passez par une machine virtuelle.  
