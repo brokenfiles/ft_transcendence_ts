@@ -37,11 +37,15 @@ La branche `master` est la branche à jour.
 
     `` docker-compose up --build`` (ajoutez un -d pour se détacher des containers)
 
+## Documentation
+
+NestJS (backend) : `https://docs.nestjs.com/` <br/>
+ORM utilisé pour le projet : `https://typeorm.io/#/` <br/>
+NuxtJS (frontend) : `https://fr.nuxtjs.org/docs/2.x/get-started/installation` <br/>
+
+
 ## Problèmes rencontrés
 
 * Sur windows, si le dossier "nodes_modules" ne se crée pas, il faut installer les dépendances à la main via la commande `yarn install` dans le dossier `front`
  et `back`. Si le problème persiste, vérifiez que le partage de données via les volumes fonctionnent.
   
-## Imcompatibilités
-
-* Docker pour Windows sans Windows Pro ne fonctionne pas car les volumes ne sont pas partagés. Pour résoudre le problème, passez par une machine virtuelle.  

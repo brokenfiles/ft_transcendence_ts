@@ -11,7 +11,8 @@ import {GuildsService} from "../guilds/guilds.service";
         TypeOrmModule.forFeature([User, Guild]),
     ],
     controllers: [UsersController],
-    providers: [UsersService, GuildsService]
+    providers: [UsersService, GuildsService],
+    exports: [UsersService]
 })
 export class UsersModule {
 }

@@ -1,4 +1,4 @@
-import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 import {type} from "os";
 import {User} from "../../users/entities/user.entity";
 
@@ -25,5 +25,9 @@ export class Guild {
 
     @OneToMany(type => User, user => user.guild)
     users: User[]
+
+    @OneToOne(type => User)
+    @JoinColumn()
+    owner: User
 
 }

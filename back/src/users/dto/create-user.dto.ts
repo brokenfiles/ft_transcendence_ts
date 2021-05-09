@@ -1,6 +1,6 @@
-import {Column, OneToOne} from "typeorm";
+import {Column, OneToOne, Unique} from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
-import {IsNotEmpty, Length} from "class-validator";
+import {IsNotEmpty, IsString, Length} from "class-validator";
 
 export class CreateUserDto {
 
@@ -11,6 +11,11 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     readonly login: string
+
+    @IsString()
+    @IsNotEmpty()
+    @Length(5, 30)
+    readonly password: string
 
     readonly oauth_token: string
     readonly double_auth: boolean

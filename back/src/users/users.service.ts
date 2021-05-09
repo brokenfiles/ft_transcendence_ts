@@ -33,6 +33,13 @@ export class UsersService {
         })
     }
 
+    findByDisplayName(displayName: string) : Promise<User | undefined> {
+        return this.usersRepository.findOne({
+            where: {display_name: displayName},
+            relations: ['guild']
+        })
+    }
+
     async update(id: number, updateUserDto: UpdateUserDto) {
         await this.usersRepository.update(id, updateUserDto)
         return this.findOne(id)
