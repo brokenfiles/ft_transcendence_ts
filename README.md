@@ -42,7 +42,7 @@ La branche `master` est la branche à jour.
 NestJS (backend) : `https://docs.nestjs.com/` <br/>
 ORM utilisé pour le projet : `https://typeorm.io/#/` <br/>
 NuxtJS (frontend) : `https://fr.nuxtjs.org/docs/2.x/get-started/installation` <br/>
-
+Socket.io client : `https://www.npmjs.com/package/vue-socket.io` <br/>
 
 ## Problèmes rencontrés
 

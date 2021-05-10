@@ -20,6 +20,7 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
+    { src: '~/plugins/socket.io.js', mode: 'client' }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -49,7 +50,13 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    '@nuxtjs/axios',
   ],
+
+  axios: {
+    baseURL: process.env.SSR_BACKEND_BASE_URL,
+    browserBaseURL: process.env.BROWSER_BACKEND_BASE_URL
+  },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {

@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import config from "../ormconfig";
 import {GuildsModule} from "./guilds/guilds.module";
 import { AuthModule } from './auth/auth.module';
+import { ChatGateway } from './chat.gateway';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { AuthModule } from './auth/auth.module';
       AuthModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule {}

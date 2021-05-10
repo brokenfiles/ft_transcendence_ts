@@ -12,12 +12,5 @@ export class AppController {
       message: `C'est good`
     });
   }
-
-  @Get("/bonjour")
-  getBonjour(@Res() res: Response) {
-    res.status(HttpStatus.BAD_REQUEST).json({
-      error: "Mon frérot ?"
-    })
-  }
 }
 
