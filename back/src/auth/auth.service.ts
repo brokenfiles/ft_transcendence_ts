@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
 import {JwtService} from "@nestjs/jwt";
+import axios from "axios";
 
 @Injectable()
 export class AuthService {
@@ -24,12 +25,34 @@ export class AuthService {
         }
     }
 
-    async getUserFromToken(accessToken: string): Promise<User | null>
-    {
-        const content = await this.validateToken(accessToken);
-        if (content) {
-            return await this.usersService.findOne(content.sub)
+    async generateToken(payload: any, args?: any): Promise<string> {
+        return this.jwtService.sign(payload, args)
+    }
+
+    async refreshToken(refreshToken: string): Promise<any | null> {
+        const payload = await this.validateToken(refreshToken)
+        if (payload) {
+            return await this.generateToken({
+                username: payload.username,
+                sub: payload.sub
+            })
         } else {
+            return null
+        }
+    }
+
+    async getFortyTwoUser(code: string): Promise<any | null>
+    {
+        try {
+            const tokens = await axios.post(`https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=${process.env.FORTYTWO_OAUTH_UID}&client_secret=${process.env.FORTYTWO_OAUTH_SECRET}&code=${code}&redirect_uri=http://localhost:3000/auth/42`)
+                .then(response => response.data)
+            const fortyTwoUser = await axios.get(`https://api.intra.42.fr/v2/me`,{
+                headers: {
+                    Authorization: `Bearer ${tokens.access_token}`
+                }
+            }).then(response => response.data)
+            return (fortyTwoUser)
+        } catch (err) {
             return null
         }
     }

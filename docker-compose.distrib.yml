@@ -29,6 +29,7 @@ services:
     environment:
       BROWSER_BACKEND_BASE_URL: http://localhost:4000
       SSR_BACKEND_BASE_URL: http://back:4000
+      OAUTH_REDIRECT_URL: http://localhost:3000/auth/42
     command: "yarn dev"
     depends_on:
       - back

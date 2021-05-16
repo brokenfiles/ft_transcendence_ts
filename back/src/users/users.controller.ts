@@ -1,7 +1,5 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, Request, HttpStatus, UseGuards, Req} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Response } from "express";
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {GuildsService} from "../guilds/guilds.service";
 
@@ -15,7 +13,7 @@ export class UsersController {
   // }
 
   @Get()
-  findAll() {
+  findAll(@Req() req) {
     return this.usersService.findAll();
   }
 

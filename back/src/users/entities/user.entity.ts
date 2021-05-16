@@ -31,8 +31,8 @@ export class User {
     })
     login: string
 
-    @Column({default: 0})
-    role: number
+    @Column({default: false})
+    admin: boolean
 
     @Column({default: 0})
     points: number
