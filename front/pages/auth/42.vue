@@ -10,6 +10,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import {mapGetters} from "vuex";
 
 export default Vue.extend({
   mounted() {
@@ -19,8 +20,16 @@ export default Vue.extend({
         data : {
           code
         }
+      }).then(() => {
+        this.$toast.success(`Logged in as ${this.loggedInUser.login}`)
+      }).catch((err) => {
+        this.$toast.error(`Error when trying to login to 42`)
       })
     }
+  },
+
+  computed: {
+    ...mapGetters(['isAuthenticated', 'loggedInUser'])
   }
 })
 </script>

@@ -78,6 +78,7 @@ export default Vue.extend({
     },
     async logout() {
       await this.$auth.logout()
+      this.$toast.success(`Successfully logged out !`)
     }
   },
 
