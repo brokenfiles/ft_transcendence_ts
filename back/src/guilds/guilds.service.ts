@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common";
+import {HttpException, HttpStatus, Injectable} from "@nestjs/common";
 import {Guild} from "./entities/guild.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
@@ -14,6 +14,10 @@ export class GuildsService {
             relations: [
                 'users', 'owner'
             ]
+        }).catch((err) => {
+            throw new HttpException({
+                error: err.message
+            }, HttpStatus.BAD_REQUEST)
         })
     }
 
@@ -22,6 +26,10 @@ export class GuildsService {
             relations: [
                 'users', 'owner'
             ]
+        }).catch((err) => {
+            throw new HttpException({
+                error: err.message
+            }, HttpStatus.BAD_REQUEST)
         })
     }
 
@@ -37,6 +45,11 @@ export class GuildsService {
 
     async update(id: number, updateGuild: UpdateGuildDto) : Promise<Guild> {
         await this.guildRepository.update(id, updateGuild)
+            .catch((err) => {
+                throw new HttpException({
+                    error: err.message
+                }, HttpStatus.BAD_REQUEST)
+            })
         return this.findOne(id)
     }
 }

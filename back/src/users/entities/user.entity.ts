@@ -1,5 +1,4 @@
 import {
-    BeforeInsert,
     Column,
     Entity,
     JoinColumn,
@@ -7,7 +6,6 @@ import {
     PrimaryGeneratedColumn
 } from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
-import * as bcrypt from 'bcrypt';
 
 @Entity("users")
 export class User {
@@ -19,6 +17,9 @@ export class User {
         unique: true
     })
     display_name: string
+
+    @Column({ default: null })
+    first_name: string
 
     @ManyToOne(type => Guild)
     @JoinColumn()
@@ -39,9 +40,6 @@ export class User {
     @Column({default: null})
     avatar: string
 
-    @Column({default: null})
-    oauth_token: string
-
     @Column({default: false})
     double_auth: boolean
 
@@ -51,10 +49,4 @@ export class User {
     @Column({default: null})
     ban_reason: string
 
-    @Column({default: null})
-    password: string
-
-    // @BeforeInsert() async hashPassword() {
-    //     this.password = await bcrypt.hash(this.password, 10)
-    // }
 }

@@ -9,10 +9,10 @@ import {GuildsService} from "../guilds/guilds.service";
 export class UsersController {
   constructor(private readonly usersService: UsersService, private readonly guildsService : GuildsService) {}
 
-  @Post()
-  async create(@Body() createUser: CreateUserDto) {
-    return this.usersService.create(createUser)
-  }
+  // @Post()
+  // async create(@Body() createUser: CreateUserDto) {
+  //   return this.usersService.create(createUser)
+  // }
 
   @Get()
   findAll() {

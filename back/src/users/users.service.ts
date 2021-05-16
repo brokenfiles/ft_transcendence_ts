@@ -1,11 +1,9 @@
-import {Injectable} from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {User} from "./entities/user.entity";
-import {Guild} from "../guilds/entities/guild.entity";
-import {validate} from "class-validator";
 
 @Injectable()
 export class UsersService {
@@ -26,22 +24,31 @@ export class UsersService {
     }
 
     findOne(id: number): Promise<User> {
-        return this.usersRepository.findOne(id, {
+        return this.usersRepository.findOneOrFail(id, {
             relations: [
                 'guild'
             ]
+        }).catch((err) => {
+            throw new HttpException({
+                error: err.message
+            }, HttpStatus.BAD_REQUEST)
         })
     }
 
-    findByDisplayName(displayName: string) : Promise<User | undefined> {
+    findByLogin(login: string) : Promise<User | undefined> {
         return this.usersRepository.findOne({
-            where: {display_name: displayName},
+            where: {login: login},
             relations: ['guild']
         })
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
         await this.usersRepository.update(id, updateUserDto)
+            .catch((err) => {
+                throw new HttpException({
+                    error: err.message
+                }, HttpStatus.BAD_REQUEST)
+            })
         return this.findOne(id)
     }
 

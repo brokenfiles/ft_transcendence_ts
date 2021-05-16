@@ -12,10 +12,9 @@ services:
       - "81:81"
     environment:
       PORT: 4000
-      FORTYTWO_OAUTH_UID: "d9a640fbf91b4972fb036c891250529f1d7568bc8128fd3c76d5d7197e365cc8"
-      FORTYTWO_OAUTH_SECRET: "dfb0144b6eaf6e50674e9709b24f2190d8f0340ee129e526f361d443672a3b56"
-      FORTYTWO_AUTH_URL: "https://api.intra.42.fr/oauth/authorize?client_id=d9a640fbf91b4972fb036c891250529f1d7568bc8128fd3c76d5d7197e365cc8&redirect_uri=http%3A%2F%2Flocalhost%3A3000&response_type=code"
-      JWT_SECRET: "KJknI779D7SZqm6LVtIU6c25HORGUgAWJwmkpkRfsLeDrE64Az3ag53X3g6nAN0eW2JTsBUGaFi8hCWv6lSLvFbZxPpHBDx7mVb4E9b7gpYGCCNkSkPDqcbvmZUi4nVBJCOB1ElJoUwSAPYpgc6l3l+YzH73Il05mq+FLu+jklHzS7grGMjBpePcwmFuwTSZaqKSFLJ0NtaZr0hkOd4OFcgnnXhh5CKiuzwdfmimhFyyqCtgFD+FYGDZpxloi2KLvUViMidBx9Qqa8QhbYhxrYqDKKg3gyENDSWB4PCOJpewoHbA61tYHkBXZrBkTN8tvbhEaNTsku1yab8U3Uhndw=="
+      FORTYTWO_OAUTH_UID: <42 oauth uid>
+      FORTYTWO_OAUTH_SECRET: <42 oauth secret>
+      JWT_SECRET: <generate a secret pass>
     command: "yarn start:dev"
     depends_on:
       - db

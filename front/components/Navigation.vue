@@ -2,7 +2,9 @@
   <nav id="navbar" class="navbar fixed left-0 right-0 top-0 z-10 bg-secondary text-cream z-20">
     <ul class="flex flex-wrap items-center py-4 pr-4">
       <li class="nav-item navbar-brand w-10 h-10 font-bold mx-4 text-4xl text-center">
-        T
+        <nuxt-link to="/">
+          T
+        </nuxt-link>
       </li>
       <li class="nav-item flex-1 ml-4">
         <div id="search-bar" class="max-w-md px-4 py-2 border-2 border rounded flex items-center border-cream">
@@ -12,19 +14,24 @@
           <input type="text" class="flex-1 border-none bg-transparent outline-none mx-4 placeholder-cream" placeholder="Search...">
         </div>
       </li>
-      <li class="nav-item">
-        <button id="logout" class="py-2 px-8 bg-yellow text-primary">logout</button>
+      <li class="nav-item" v-if="!isAuthenticated">
+        <nuxt-link to="login">
+          <button class="py-2 px-8 bg-yellow text-primary">login or register</button>
+        </nuxt-link>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" v-if="isAuthenticated">
+        <button id="logout" @click="logout" class="py-2 px-8 bg-yellow text-primary">logout</button>
+      </li>
+      <li class="nav-item" v-if="isAuthenticated">
         <div class="profile flex flex-wrap items-center">
           <div class="profile-img">
-            <img src="https://cdn.intra.42.fr/users/medium_llaurent.jpg" alt="Image de profile"
+            <img :src="loggedInUser.avatar" alt="Image de profile"
                  class="rounded-full w-10 h-10 mx-4">
           </div>
           <div class="dropdown">
             <button class="username flex flex-wrap items-center focus:outline-none" id="dropdown-button"
                     @click="toggleDropdown">
-              <span>llaurent</span>
+              <span>{{ loggedInUser.first_name }}</span>
               <svg id="dropdown-icon" :class="{'transform rotate-180': dropdown}" class="-mr-1 ml-2 h-5 w-5 transition duration-150 ease-in-out"
                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd"
@@ -54,6 +61,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import {mapGetters} from "vuex";
 
 export default Vue.extend({
   name: "Navigation",
@@ -67,7 +75,14 @@ export default Vue.extend({
   methods: {
     toggleDropdown() {
       this.dropdown = !this.dropdown
+    },
+    async logout() {
+      await this.$auth.logout()
     }
+  },
+
+  computed: {
+    ...mapGetters(['isAuthenticated', 'loggedInUser']),
   }
 })
 </script>

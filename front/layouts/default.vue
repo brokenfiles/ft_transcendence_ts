@@ -2,7 +2,10 @@
   <div>
     <Navigation />
     <Sidebar />
-    <div class="application">
+    <client-only>
+      <chat />
+    </client-only>
+    <div class="application bg-gray min-h-screen text-cream">
       <Nuxt />
     </div>
   </div>
@@ -12,12 +15,14 @@
 import Vue from 'vue'
 import Navigation from "~/components/Navigation.vue";
 import Sidebar from "~/components/Sidebar.vue";
+import Chat from "~/components/Chat/Chat.vue";
 
 export default Vue.extend({
   components: {
     Navigation,
     Sidebar,
-  }
+    Chat,
+  },
 })
 </script>
 

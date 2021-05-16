@@ -51,7 +51,55 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     '@nuxtjs/axios',
+    '@nuxtjs/auth-next'
   ],
+
+  auth: {
+    localStorage: false,
+    cookie: {
+      prefix: 'auth.',
+      options: {
+        path: '/',
+        maxAge: 10800
+      }
+    },
+    strategies: {
+      local: {
+        scheme: 'refresh',
+        token: {
+          property: 'access_token',
+          required: true,
+          type: 'Bearer',
+          maxAge: 7200,
+        },
+        refreshToken: {
+          property: 'refresh_token',
+          maxAge: 60 * 60 * 24 * 30
+        },
+        user: {
+          property: false,
+          autoFetch: true
+        },
+        endpoints: {
+          login: { url: '/auth/42/token', method: 'post' },
+          user: { url: '/auth/42/me', method: 'get' },
+          refresh: { url: '/auth/42/refresh', method: 'post' },
+          logout: false
+        }
+      },
+      fortytwo: {
+        scheme: 'oauth2',
+        endpoints: {
+          authorization: 'https://api.intra.42.fr/oauth/authorize',
+        },
+        responseType: 'code',
+        grantType: 'authorization_code',
+        state: '8KweTmHsb13KNHZny4XCrZySP8Q=',
+        redirectUri: 'http://localhost:3000/auth/42',
+        clientId: 'd9a640fbf91b4972fb036c891250529f1d7568bc8128fd3c76d5d7197e365cc8',
+      },
+    }
+  },
 
   axios: {
     baseURL: process.env.SSR_BACKEND_BASE_URL,

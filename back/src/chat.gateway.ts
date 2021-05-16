@@ -27,6 +27,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   createChannelEvent(client: Socket, payload: string): void {
     this.logger.log(`Client ${client.id} created channel ${payload}`)
     this.channels.push(payload)
+    // this.server.emit('channels', this.channels)
     this.sendChannels(client)
   }
 

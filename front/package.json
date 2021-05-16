@@ -10,13 +10,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "@nuxtjs/auth-next": "5.0.0-1620773067.c356fed",
     "@nuxtjs/axios": "^5.13.1",
     "@types/socket.io-client": "^1.4.36",
     "core-js": "^3.9.1",
     "fs": "^0.0.1-security",
     "nuxt": "^2.15.3",
-    "socket.io": "^4.0.2",
-    "socket.io-client": "^4.0.2",
+    "socket.io": "^4.1.1",
+    "socket.io-client": "^4.1.1",
     "vue-socket.io": "^3.0.10",
     "vue-socket.io-extended": "^4.2.0"
   },

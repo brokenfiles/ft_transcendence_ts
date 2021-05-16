@@ -11,11 +11,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
     readonly guild: Guild
 
-    @IsNotEmpty()
-    @IsOptional()
-    readonly login: string
-
-    readonly oauth_token: string
     readonly double_auth: boolean
 
 }
