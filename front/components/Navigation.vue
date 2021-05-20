@@ -41,8 +41,8 @@
             </button>
             <div
               class="dropdown-items absolute text-right min-w-8 right-0 transition duration-150 ease-in-out focus:outline-none bg-primary text-cream"
-              id="dropdown-menu" v-if="dropdown" tabindex="0">
-              <nuxt-link to="#" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
+              id="dropdown-menu" ref="dropdown-menu" v-if="dropdown" tabindex="0">
+              <nuxt-link to="/user/account" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
                 My account
               </nuxt-link>
               <nuxt-link to="#" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
@@ -78,7 +78,7 @@ export default Vue.extend({
     },
     async logout() {
       await this.$auth.logout()
-      this.$toast.success(`Successfully logged out !`)
+      this.$toast.success(`Successfully logged out`)
     }
   },
 

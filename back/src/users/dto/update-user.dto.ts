@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import {IsNotEmpty, IsOptional, Length} from "class-validator";
+import {IsOptional, Length} from "class-validator";
 import {Guild} from "../../guilds/entities/guild.entity";
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
@@ -9,8 +9,13 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     @IsOptional()
     readonly display_name: string
 
+    @IsOptional()
     readonly guild: Guild
 
+    @IsOptional()
     readonly double_auth: boolean
+
+    @IsOptional()
+    readonly points: number
 
 }

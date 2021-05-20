@@ -7,9 +7,12 @@ import {
 } from '@nestjs/websockets';
 import {Logger} from "@nestjs/common";
 import {Server, Socket} from 'socket.io'
+import {ChatService} from "./chat.service";
 
 @WebSocketGateway(81)
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+
+  constructor(private chatService: ChatService) {}
 
   @WebSocketServer() server: Server
 

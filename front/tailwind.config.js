@@ -10,6 +10,9 @@ module.exports = {
         yellow: '#FFDA18',
         gray: '#1d242c',
         fortytwo: '#00babc'
+      },
+      backgroundImage: {
+        transGradient: 'linear-gradient(90deg, #A831D1 -2.11%, #B81261 100%)'
       }
     },
   },

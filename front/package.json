@@ -17,10 +17,12 @@
     "core-js": "^3.9.1",
     "fs": "^0.0.1-security",
     "nuxt": "^2.15.3",
+    "nuxt-property-decorator": "^2.9.1",
     "socket.io": "^4.1.1",
     "socket.io-client": "^4.1.1",
     "vue-socket.io": "^3.0.10",
-    "vue-socket.io-extended": "^4.2.0"
+    "vue-socket.io-extended": "^4.2.0",
+    "vuex-module-decorators": "^1.0.1"
   },
   "devDependencies": {
     "@fortawesome/free-brands-svg-icons": "^5.15.3",

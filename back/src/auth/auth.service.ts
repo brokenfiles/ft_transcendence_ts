@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {HttpService, Injectable} from '@nestjs/common';
 import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
 import {JwtService} from "@nestjs/jwt";
-import axios from "axios";
 
 @Injectable()
 export class AuthService {
 
-    constructor(private usersService : UsersService, private readonly jwtService: JwtService) {}
+    constructor(private usersService : UsersService,
+                private readonly jwtService: JwtService,
+                private readonly httpService: HttpService
+    ) {}
 
     async findUserFromLogin(login: string): Promise<User | null> {
         const user = await this.usersService.findByLogin(login)
@@ -44,13 +46,14 @@ export class AuthService {
     async getFortyTwoUser(code: string): Promise<any | null>
     {
         try {
-            const tokens = await axios.post(`https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=${process.env.FORTYTWO_OAUTH_UID}&client_secret=${process.env.FORTYTWO_OAUTH_SECRET}&code=${code}&redirect_uri=http://localhost:3000/auth/42`)
+            const tokens = await this.httpService.post(`https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=${process.env.FORTYTWO_OAUTH_UID}&client_secret=${process.env.FORTYTWO_OAUTH_SECRET}&code=${code}&redirect_uri=http://localhost:3000/auth/42`)
+                .toPromise()
                 .then(response => response.data)
-            const fortyTwoUser = await axios.get(`https://api.intra.42.fr/v2/me`,{
+            const fortyTwoUser = await this.httpService.get(`https://api.intra.42.fr/v2/me`,{
                 headers: {
                     Authorization: `Bearer ${tokens.access_token}`
                 }
-            }).then(response => response.data)
+            }).toPromise().then(response => response.data)
             return (fortyTwoUser)
         } catch (err) {
             return null

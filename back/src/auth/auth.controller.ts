@@ -4,14 +4,11 @@ import {
     Get,
     HttpException,
     HttpStatus,
-    Param,
     Post,
     Req,
-    Request,
     Res,
     UseGuards
 } from "@nestjs/common";
-import axios from "axios";
 import {Response} from "express";
 import {AuthService} from "./auth.service";
 import {UsersService} from "../users/users.service";

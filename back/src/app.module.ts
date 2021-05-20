@@ -6,16 +6,18 @@ import { UsersModule } from './users/users.module';
 import config from "../ormconfig";
 import {GuildsModule} from "./guilds/guilds.module";
 import { AuthModule } from './auth/auth.module';
-import { ChatGateway } from './chat.gateway';
+import { ChatGateway } from './chat/chat.gateway';
+import {ChatModule} from "./chat/chat.module";
 
 @Module({
   imports: [
       TypeOrmModule.forRoot(config),
       UsersModule,
       GuildsModule,
-      AuthModule
+      AuthModule,
+      ChatModule
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [AppService],
 })
 export class AppModule {}

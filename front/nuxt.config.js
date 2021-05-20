@@ -109,7 +109,7 @@ export default {
 
   axios: {
     baseURL: process.env.SSR_BACKEND_BASE_URL,
-    browserBaseURL: process.env.BROWSER_BACKEND_BASE_URL
+    browserBaseURL: process.env.BASE_URL
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

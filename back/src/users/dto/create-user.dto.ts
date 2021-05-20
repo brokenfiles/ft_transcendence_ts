@@ -1,19 +1,25 @@
 import {Column, OneToOne, Unique} from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
-import {IsNotEmpty} from "class-validator";
+import {IsNotEmpty, IsOptional} from "class-validator";
 
 export class CreateUserDto {
 
+    @IsNotEmpty()
     display_name: string
 
+    @IsOptional()
     guild: Guild
 
+    @IsOptional()
     avatar: string
 
+    @IsNotEmpty()
     first_name: string
 
-    @IsNotEmpty() login: string
+    @IsNotEmpty()
+    login: string
 
+    @IsOptional()
     double_auth: boolean
 
     set_display_name(value: string) {

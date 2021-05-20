@@ -24,6 +24,7 @@ export default Vue.extend({
         this.$toast.success(`Logged in as ${this.loggedInUser.login}`)
       }).catch((err) => {
         this.$toast.error(`Error when trying to login to 42`)
+        this.$router.push('/')
       })
     }
   },
