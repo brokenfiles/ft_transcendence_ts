@@ -36,7 +36,7 @@ La branche `master` est la branche à jour.
 * Remplir les valeurs de `FORTYTWO_OAUTH_UID`, `FORTYTWO_OAUTH_SECRET`, `JWT_SECRET` dans le fichier docker-compose.distrib.yml <br/>
   `FORTYTWO_OAUTH_UID`: L'identifiant de votre application 42 </br>
   `FORTYTWO_OAUTH_SECRET`: L'identifiant secret de votre application 42 </br>
-  `JWT_SECRET`: Un mot de passe fort (vous pouvez en générer un avec cette commande : `node -e "console.log(require('crypto').randomBytes(16).toString('base64'))"`) </br>
+  `JWT_SECRET`: Un mot de passe fort (vous pouvez en générer un avec cette commande : ```node -e "console.log(require('crypto').randomBytes(16).toString('base64'))"```) </br>
   
 * Renommer le fichier `docker-compose.distrib.yml` en `docker-compose.yml`
 
