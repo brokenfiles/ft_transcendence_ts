@@ -1,5 +1,8 @@
 <template>
-  <img :src="imageUrl" alt="Profile picture" class="rounded-full">
+  <div class="relative">
+    <img :src="imageUrl" alt="Profile picture" class="rounded-full">
+    <slot></slot>
+  </div>
 </template>
 
 <script lang="ts">

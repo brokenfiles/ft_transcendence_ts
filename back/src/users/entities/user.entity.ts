@@ -1,13 +1,14 @@
 import {
     Column,
     Entity,
-    JoinColumn, ManyToMany,
+    JoinColumn, JoinTable, ManyToMany,
     ManyToOne, OneToMany,
     PrimaryGeneratedColumn
 } from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
-import {Channel} from "../../chat/entities/channel.entity";
-import {Message} from "../../chat/entities/message.entity";
+import {Channel} from "../../gateways/chat/entities/channel.entity";
+import {Message} from "../../gateways/chat/entities/message.entity";
+import {Achievement} from "../../achievement/entities/achievement.entity";
 
 @Entity("users")
 export class User {
@@ -34,6 +35,12 @@ export class User {
         cascade: true
     })
     channels: Channel[]
+
+    @ManyToMany(() => Achievement, achievement => achievement.users, {
+        cascade: true
+    })
+    @JoinTable()
+    achievements: Achievement[]
 
     @Column({
         default: null,

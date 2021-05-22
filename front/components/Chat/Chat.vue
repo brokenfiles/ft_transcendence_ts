@@ -80,8 +80,8 @@ export default Vue.extend({
     },
 
     msgToClient(message: string) {
-      // this.audio = new Audio('sounds/message.mp3');
-      // this.audio.play();
+      // const audio = new Audio('sounds/message.mp3');
+      // audio.play();
       this.$data.messages.push(message)
     },
 
@@ -92,24 +92,24 @@ export default Vue.extend({
   },
 
   mounted() {
-    this.$socket.emit('getChannels')
+    this.$socket.client.emit('getChannels')
     this.connected = this.$socket.connected
   },
 
   methods: {
     sendMessage() {
-      this.$socket.emit('msgToServer', this.models.message)
+      this.$socket.client.emit('msgToServer', this.models.message)
     },
 
     createChannel() {
       if (this.models.channel.length > 3) {
-        this.$socket.emit('createChannel', this.models.channel)
+        this.$socket.client.emit('createChannel', this.models.channel)
         this.models.channel = ''
       }
     },
 
     pickChannel(channelIndex: number) {
-      this.$socket.emit('changedChanel', this.channels[channelIndex])
+      this.$socket.client.emit('changedChanel', this.channels[channelIndex])
       this.picked.channel = this.channels[channelIndex]
       this.messages = []
     },

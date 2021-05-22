@@ -18,7 +18,7 @@ export class UsersService {
     findAll(): Promise<User[]> {
         return this.usersRepository.find({
             relations: [
-                'guild'
+                'guild', 'achievements'
             ]
         })
     }
@@ -26,7 +26,7 @@ export class UsersService {
     findOne(id: number): Promise<User> {
         return this.usersRepository.findOneOrFail(id, {
             relations: [
-                'guild'
+                'guild', 'achievements'
             ]
         }).catch((err) => {
             throw new HttpException({
@@ -35,25 +35,31 @@ export class UsersService {
         })
     }
 
-    findByLogin(login: string) : Promise<User | undefined> {
+    findByLogin(login: any) : Promise<User | undefined> {
         return this.usersRepository.findOne({
             where: {login: login},
-            relations: ['guild']
+            relations: ['guild', 'achievements']
         })
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
-        await this.usersRepository.update(id, updateUserDto)
+        let user = await this.findOne(id)
+        Object.assign(user, updateUserDto)
+        return this.usersRepository.save(user)
             .catch((err) => {
                 throw new HttpException({
                     error: err.message
                 }, HttpStatus.BAD_REQUEST)
             })
-        return this.findOne(id)
     }
 
     async remove(id: number): Promise<User> {
         const user = await this.findOne(id)
         return this.usersRepository.remove(user)
+            .catch((err) => {
+                throw new HttpException({
+                    error: err.message
+                }, HttpStatus.BAD_REQUEST)
+            })
     }
 }

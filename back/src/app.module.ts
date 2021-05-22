@@ -6,8 +6,8 @@ import { UsersModule } from './users/users.module';
 import config from "../ormconfig";
 import {GuildsModule} from "./guilds/guilds.module";
 import { AuthModule } from './auth/auth.module';
-import { ChatGateway } from './chat/chat.gateway';
-import {ChatModule} from "./chat/chat.module";
+import {ChatModule} from "./gateways/chat/chat.module";
+import {AchievementsModule} from "./achievement/achievements.module";
 
 @Module({
   imports: [
@@ -15,7 +15,8 @@ import {ChatModule} from "./chat/chat.module";
       UsersModule,
       GuildsModule,
       AuthModule,
-      ChatModule
+      ChatModule,
+      AchievementsModule
   ],
   controllers: [AppController],
   providers: [AppService],

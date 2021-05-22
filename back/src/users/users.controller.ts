@@ -1,4 +1,5 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, Request, HttpStatus, UseGuards, Req} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards, Req} from '@nestjs/common';
+import {Request} from 'express';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {GuildsService} from "../guilds/guilds.service";
@@ -13,7 +14,9 @@ export class UsersController {
   // }
 
   @Get()
-  findAll(@Req() req) {
+  findAllOrByLogin(@Req() req: Request) {
+    if (req.query.login)
+      return this.usersService.findByLogin(req.query.login)
     return this.usersService.findAll();
   }
 

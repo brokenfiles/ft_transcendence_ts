@@ -9,10 +9,16 @@ module.exports = {
         cream: '#EEEBDE',
         yellow: '#FFDA18',
         gray: '#1d242c',
-        fortytwo: '#00babc'
+        fortytwo: '#00babc',
+        // online status colors
+        onlineGreen: '#27AE60',
+        offlineGray: '#BDBDBD',
       },
       backgroundImage: {
         transGradient: 'linear-gradient(90deg, #A831D1 -2.11%, #B81261 100%)'
+      },
+      borderWidth: {
+        '10': '10px'
       }
     },
   },

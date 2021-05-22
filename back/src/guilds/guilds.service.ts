@@ -44,12 +44,13 @@ export class GuildsService {
     }
 
     async update(id: number, updateGuild: UpdateGuildDto) : Promise<Guild> {
-        await this.guildRepository.update(id, updateGuild)
+        let guild = await this.findOne(id)
+        Object.assign(guild, updateGuild)
+        return this.guildRepository.save(guild)
             .catch((err) => {
                 throw new HttpException({
                     error: err.message
                 }, HttpStatus.BAD_REQUEST)
             })
-        return this.findOne(id)
     }
 }

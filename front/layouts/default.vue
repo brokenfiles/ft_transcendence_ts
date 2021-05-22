@@ -16,14 +16,36 @@ import Vue from 'vue'
 import Navigation from "~/components/Navigation.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import Chat from "~/components/Chat/Chat.vue";
+import {mapGetters} from "vuex";
+import {Component} from "nuxt-property-decorator";
+import {Socket} from "vue-socket.io-extended";
 
-export default Vue.extend({
+@Component({
   components: {
     Navigation,
     Sidebar,
     Chat,
   },
+
 })
+export default class Default extends Vue {
+
+  mounted() {
+    this.$socket.client.connect()
+  }
+
+  @Socket('connect')
+  connectEvent() {
+    if (process.client) {
+      if (this.$auth && this.$auth.loggedIn && this.$auth.user) {
+        this.$socket.client.emit('loggedIn', {
+          userId: this.$auth.user.id
+        })
+      }
+    }
+  }
+
+}
 </script>
 
 <style>

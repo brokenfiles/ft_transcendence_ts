@@ -8,8 +8,15 @@ import {
 import {Logger} from "@nestjs/common";
 import {Server, Socket} from 'socket.io'
 import {ChatService} from "./chat.service";
+import {ClientInterface} from "./interfaces/client.interface";
 
-@WebSocketGateway(81)
+@WebSocketGateway(81,
+    {
+      cors: {
+        origin: "http://localhost:3000",
+        credentials: true
+      }
+    })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(private chatService: ChatService) {}
@@ -18,6 +25,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   private logger: Logger = new Logger('ChatGateway')
   private channels: string[] = []
+  private clients: ClientInterface[] = []
   // private clients: Socket[]
 
   @SubscribeMessage('msgToServer')
@@ -44,8 +52,33 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.logger.log('Init');
   }
 
+  @SubscribeMessage("loggedIn")
+  loggedInEvent(client: Socket, payload: ClientInterface) {
+    payload.id = client.id
+    if (this.clients.filter(client => client.userId == payload.userId).length == 0) {
+      this.clients.push(payload)
+      this.server.emit('onlineStateUpdated', {
+        userId: payload.userId,
+        online: true
+      })
+    }
+  }
+
+  @SubscribeMessage("isOnline")
+  isOnlineEvent(client: Socket, userId: number) {
+    this.server.emit('onlineState', this.clients.map(client => client.userId).indexOf(userId) !== -1)
+  }
+
   handleDisconnect(client: Socket) {
     this.logger.log(`Client ${client.id} disconnected`);
+    const index = this.clients.map(clt => clt.id).indexOf(client.id)
+    if (index !== -1) {
+      this.server.emit('onlineStateUpdated', {
+        userId: this.clients[index].userId,
+        online: false,
+      })
+      this.clients.splice(index, 1)
+    }
   }
 
   handleConnection(client: Socket, ...args: any[]) {

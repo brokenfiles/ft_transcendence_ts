@@ -21,6 +21,9 @@ export default Vue.extend({
           code
         }
       }).then(() => {
+        if (this.$socket.connected)
+          this.$socket.client.disconnect()
+        this.$socket.client.connect()
         this.$toast.success(`Logged in as ${this.loggedInUser.login}`)
       }).catch((err) => {
         this.$toast.error(`Error when trying to login to 42`)

@@ -25,6 +25,7 @@
     },
     "types": [
       "@nuxt/types",
+      "@nuxtjs/auth",
       "@types/node",
       "@nuxtjs/axios",
       "@nuxtjs/auth-next",
