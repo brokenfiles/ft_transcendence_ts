@@ -33,6 +33,13 @@ La branche `master` est la branche à jour.
 
     `` git clone https://github.com/brokenfiles/ft_transcendence_ts ``
 
+* Remplir les valeurs de `FORTYTWO_OAUTH_UID`, `FORTYTWO_OAUTH_SECRET`, `JWT_SECRET` dans le fichier docker-compose.distrib.yml <br/>
+  `FORTYTWO_OAUTH_UID`: L'identifiant de votre application 42
+  `FORTYTWO_OAUTH_SECRET`: L'identifiant secret de votre application 42
+  `JWT_SECRET`: Un mot de passe fort (vous pouvez en générer un avec cette commande : `node -e "console.log(require('crypto').randomBytes(16).toString('base64'))"`)
+  
+* Renommer le fichier `docker-compose.distrib.yml` en `docker-compose.yml`
+
 * Build et up les containers
 
     `` docker-compose up --build`` (ajoutez un -d pour se détacher des containers)
