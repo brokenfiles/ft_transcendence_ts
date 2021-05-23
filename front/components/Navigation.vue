@@ -1,17 +1,20 @@
 <template>
   <nav id="navbar" class="navbar fixed left-0 right-0 top-0 z-10 bg-secondary text-cream z-20">
     <ul class="flex flex-wrap items-center py-4 pr-4">
-      <li class="nav-item navbar-brand w-10 h-10 font-bold mx-4 text-4xl text-center">
+      <li class="nav-item hidden md:inline-block navbar-brand w-10 h-10 font-bold mx-4 text-4xl text-center">
         <nuxt-link to="/">
           T
         </nuxt-link>
       </li>
+      <li class="nav-item ml-4 inline-block md:hidden">
+        <font-awesome-icon :icon="['fas', 'bars']"></font-awesome-icon>
+      </li>
       <li class="nav-item flex-1 ml-4">
-        <div id="search-bar" class="max-w-md px-4 py-2 border-2 border rounded flex items-center border-cream">
+        <div id="search-bar" class="md:max-w-md max-w-0 px-4 py-2 md:border border-0 rounded flex items-center border-cream">
           <div class="search-icon">
             <font-awesome-icon :icon="['fas', 'search']"></font-awesome-icon>
           </div>
-          <input type="text" class="flex-1 border-none bg-transparent outline-none mx-4 placeholder-cream" placeholder="Search...">
+          <input type="text" class="flex-1 md:inline-block hidden border-none bg-transparent outline-none mx-4 placeholder-cream" placeholder="Search...">
         </div>
       </li>
       <li class="nav-item" v-if="!isAuthenticated">
@@ -19,14 +22,13 @@
           <button class="py-2 px-8 bg-yellow text-primary">login or register</button>
         </nuxt-link>
       </li>
-      <li class="nav-item" v-if="isAuthenticated">
+      <li class="nav-item hidden md:inline-block" v-if="isAuthenticated">
         <button id="logout" @click="logout" class="py-2 px-8 bg-yellow text-primary">logout</button>
       </li>
       <li class="nav-item" v-if="isAuthenticated">
         <div class="profile flex flex-wrap items-center">
-          <div class="profile-img">
-            <img :src="loggedInUser.avatar" alt="Image de profile"
-                 class="rounded-full w-10 h-10 mx-4">
+          <div class="profile-img hidden md:inline-block">
+            <avatar class="h-10 w-10 mx-4" :image-url="loggedInUser.avatar"/>
           </div>
           <div class="dropdown">
             <button class="username flex flex-wrap items-center focus:outline-none" id="dropdown-button"
@@ -62,32 +64,34 @@
 <script lang="ts">
 import Vue from 'vue'
 import {mapGetters} from "vuex";
+import {Component, namespace} from "nuxt-property-decorator";
+import Avatar from "~/components/User/Profile/Avatar.vue";
 
-export default Vue.extend({
-  name: "Navigation",
-
-  data() {
-    return {
-      dropdown: false
-    }
-  },
-
-  methods: {
-    toggleDropdown() {
-      this.dropdown = !this.dropdown
-    },
-    async logout() {
-      this.$socket.client.disconnect()
-      await this.$auth.logout()
-      this.$socket.client.connect()
-      this.$toast.success(`Successfully logged out`)
-    }
-  },
-
+@Component({
   computed: {
     ...mapGetters(['isAuthenticated', 'loggedInUser']),
+  },
+
+  components: {
+    Avatar
   }
 })
+export default class Navigation extends Vue {
+
+  dropdown: boolean = false
+
+  toggleDropdown() {
+    this.dropdown = !this.dropdown
+  }
+
+  async logout() {
+    this.$socket.client.disconnect()
+    await this.$auth.logout()
+    this.$socket.client.connect()
+    this.$toast.success(`Successfully logged out`)
+  }
+
+}
 </script>
 
 <style scoped>

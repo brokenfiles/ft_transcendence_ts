@@ -1,10 +1,15 @@
-import {IsArray, IsString, Length} from "class-validator";
-import {User} from "../../users/entities/user.entity";
+import {IsOptional, IsString, Length} from "class-validator";
 
 export class CreateAchievementDto {
 
     @IsString()
     @Length(3, 16)
     name: string
+
+    @IsString()
+    color: string
+
+    @IsString()
+    description: string
 
 }

@@ -21,10 +21,6 @@ export default class UserOnlineIcon extends Vue {
 </script>
 
 <style scoped>
-.online-icon {
-  width: 28px;
-  height: 28px;
-}
 
 .sonar-wave {
   @apply bg-onlineGreen;

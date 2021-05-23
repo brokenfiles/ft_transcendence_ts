@@ -106,7 +106,7 @@ export default {
         grantType: 'authorization_code',
         state: '8KweTmHsb13KNHZny4XCrZySP8Q=',
         redirectUri: process.env.OAUTH_REDIRECT_URL,
-        clientId: 'd9a640fbf91b4972fb036c891250529f1d7568bc8128fd3c76d5d7197e365cc8',
+        clientId: process.env.FORTYTWO_OAUTH_UID,
       },
     }
   },

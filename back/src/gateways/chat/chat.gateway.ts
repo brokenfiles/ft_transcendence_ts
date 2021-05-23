@@ -57,37 +57,32 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     payload.id = client.id
     if (this.clients.filter(client => client.userId == payload.userId).length == 0) {
       this.clients.push(payload)
-      this.server.emit('onlineStateUpdated', {
-        userId: payload.userId,
-        online: true
-      })
+      this.server.emit('onlineClientsUpdated', this.onlineClients)
     }
-  }
-
-  @SubscribeMessage("isOnline")
-  isOnlineEvent(client: Socket, userId: number) {
-    this.server.emit('onlineState', this.clients.map(client => client.userId).indexOf(userId) !== -1)
   }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client ${client.id} disconnected`);
     const index = this.clients.map(clt => clt.id).indexOf(client.id)
     if (index !== -1) {
-      this.server.emit('onlineStateUpdated', {
-        userId: this.clients[index].userId,
-        online: false,
-      })
       this.clients.splice(index, 1)
+      this.server.emit('onlineClientsUpdated', this.onlineClients)
     }
   }
 
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client ${client.id} connected`);
+    client.emit('onlineClientsUpdated', this.onlineClients)
     // this.clients.push(client)
   }
 
   private sendChannels(client: Socket) {
     client.emit('channels', this.channels)
   }
+
+  private get onlineClients() {
+    return this.clients.map(client => client.userId)
+  }
+
 }
 

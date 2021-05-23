@@ -10,6 +10,16 @@ export class Achievement {
     @Column()
     name: string
 
+    @Column({
+        default: 'A sample description'
+    })
+    description: string
+
+    @Column({
+        default: '#FFFFFF'
+    })
+    color: string
+
     @ManyToMany(() => User, user => user.achievements)
     users: User[]
 

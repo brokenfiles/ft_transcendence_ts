@@ -10,19 +10,22 @@
 import Vue from 'vue'
 import {Component, Prop} from "nuxt-property-decorator";
 
-@Component
+@Component({
+
+})
 export default class LevelBar extends Vue {
 
   @Prop({required: true}) readonly points!: number
 
   get level(): number {
-    return(this.points / 100)
+    return (this.points / 100)
   }
 
   get width(): number {
     const level = this.level
     return ((level - (Math.trunc(level))) * 100)
   }
+
 }
 </script>
 

@@ -1,4 +1,4 @@
-import {IsArray, IsOptional, Length} from "class-validator";
+import {IsArray, IsOptional, IsString, Length} from "class-validator";
 import {User} from "../../users/entities/user.entity";
 
 export class UpdateAchievementDto {
@@ -11,4 +11,11 @@ export class UpdateAchievementDto {
     @IsArray()
     users: User[]
 
+    @IsOptional()
+    @IsString()
+    color: string
+
+    @IsOptional()
+    @IsString()
+    description: string
 }

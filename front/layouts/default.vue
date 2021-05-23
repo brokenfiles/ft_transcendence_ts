@@ -1,12 +1,14 @@
 <template>
   <div>
     <Navigation />
-    <Sidebar />
+    <Sidebar @toggle="toggleSidebar"/>
     <client-only>
       <chat />
     </client-only>
-    <div class="application bg-gray min-h-screen text-cream">
-      <Nuxt />
+    <div class="application bg-gray min-h-screen text-cream w-screen">
+      <div class="md:w-11/12 md:mx-auto mx-4">
+        <Nuxt />
+      </div>
     </div>
   </div>
 </template>
@@ -16,9 +18,9 @@ import Vue from 'vue'
 import Navigation from "~/components/Navigation.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import Chat from "~/components/Chat/Chat.vue";
-import {mapGetters} from "vuex";
-import {Component} from "nuxt-property-decorator";
+import {Component, namespace} from "nuxt-property-decorator";
 import {Socket} from "vue-socket.io-extended";
+const onlineClients = namespace('onlineClients')
 
 @Component({
   components: {
@@ -26,12 +28,17 @@ import {Socket} from "vue-socket.io-extended";
     Sidebar,
     Chat,
   },
-
 })
 export default class Default extends Vue {
 
+  sidebarExpanded: boolean = false
+
   mounted() {
     this.$socket.client.connect()
+  }
+
+  toggleSidebar(state: boolean) {
+    this.sidebarExpanded = state
   }
 
   @Socket('connect')
@@ -43,6 +50,24 @@ export default class Default extends Vue {
         })
       }
     }
+  }
+
+  @onlineClients.Getter
+  public clients: number[]
+
+  @onlineClients.Mutation
+  public setClients!: (clients: number[]) => void
+
+
+  /**
+   * When a client status changed to online -> offline or inverse
+   *
+   * This function update online clients in the store
+   * @param {number[]} clients
+   */
+  @Socket('onlineClientsUpdated')
+  onlineClientUpdatedEvent(clients: number[]) {
+    this.setClients(clients)
   }
 
 }
@@ -62,6 +87,12 @@ html {
 .application {
   padding-left: 72px;
   padding-top: 72px;
+}
+
+@media screen and (max-width: 768px) {
+  .application {
+    padding-left: 0;
+  }
 }
 
 </style>
