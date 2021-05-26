@@ -3,7 +3,7 @@ import {
     Controller,
     Get,
     HttpException,
-    HttpStatus,
+    HttpStatus, Logger,
     Post,
     Req,
     Res,
@@ -24,6 +24,8 @@ export class AuthController {
 
     constructor(private readonly authService: AuthService, private readonly jwtService: JwtService, private readonly usersService: UsersService) {}
 
+    private logger: Logger = new Logger('AuthController')
+
     @UseGuards(JwtAuthGuard)
     @Get("/me")
     async me(@Req() request, @Res() response: Response) {
@@ -36,6 +38,7 @@ export class AuthController {
         const refreshToken = refreshDto.refresh_token
         const newAccessToken = await this.authService.refreshToken(refreshToken)
         if (newAccessToken) {
+            this.logger.log(`A user refreshed his token`)
             return response.status(200).json({
                 access_token: newAccessToken,
                 expires_in: jwtConstants.expiresIn
@@ -70,13 +73,15 @@ export class AuthController {
         }
         const payload = {
             username: user.display_name,
-            sub: user.id
+            sub: user.id,
+            role: user.role
         }
         const access_token = await this.authService.generateToken(payload)
         const refresh_token = await this.authService.generateToken(payload, {
             expiresIn: `${60 * 60 * 24 * 30}s`
         })
 
+        this.logger.log(`A user gets a new access & refresh token`)
         return res.status(200).json({
             access_token,
             refresh_token,

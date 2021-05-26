@@ -33,31 +33,68 @@ export default class Default extends Vue {
 
   sidebarExpanded: boolean = false
 
-  mounted() {
-    this.$socket.client.connect()
-  }
-
   toggleSidebar(state: boolean) {
     this.sidebarExpanded = state
   }
 
+  mounted() {
+    // define the ws token for the ws requests
+    this.defineSocketToken()
+    // when the user is connecting, we have also to define his token for ws requests
+    this.$root.$on('beforeWsConnect', () => this.defineSocketToken())
+    // by default, connect the user even if he is not authenticated
+    this.$socket.client.connect()
+  }
+
+  /**
+   * Used to define the token in socket requests
+  **/
+  defineSocketToken() {
+    if (this.$auth.loggedIn) {
+      const token = this.getTokenWithoutBearer
+      this.$socket.client.io.opts.query = {
+        token: token
+      }
+    }
+  }
+
+  /**
+   * Returns the token without the bearer
+   */
+  get getTokenWithoutBearer(): string {
+    const bearerToken = (this.$auth.strategy as any).token.get()
+    if (bearerToken.length > 0) {
+      const tokenParts = bearerToken.split(' ')
+      if (tokenParts.length > 1) {
+        if (tokenParts[0].toLowerCase() === 'bearer')
+          return (tokenParts[1])
+      } else if (tokenParts.length === 1 && tokenParts[0].toLowerCase() !== 'bearer') {
+        return (tokenParts[0]);
+      }
+    }
+    return ''
+  }
+
+  @onlineClients.Getter
+  public clients!: number[]
+
+  @onlineClients.Mutation
+  public setClients!: (clients: number[]) => void
+
+  /**
+   * Send to the ws server that we are connected
+   **/
   @Socket('connect')
   connectEvent() {
     if (process.client) {
       if (this.$auth && this.$auth.loggedIn && this.$auth.user) {
-        this.$socket.client.emit('loggedIn', {
+        // set set the token to socket.io client
+        this.$socket.client.emit('userOnline', {
           userId: this.$auth.user.id
         })
       }
     }
   }
-
-  @onlineClients.Getter
-  public clients: number[]
-
-  @onlineClients.Mutation
-  public setClients!: (clients: number[]) => void
-
 
   /**
    * When a client status changed to online -> offline or inverse

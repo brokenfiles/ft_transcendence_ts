@@ -4,6 +4,7 @@ import {UpdateUserDto} from './dto/update-user.dto';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {User} from "./entities/user.entity";
+import {UpdateMeDto} from "./dto/update-me.dto";
 
 @Injectable()
 export class UsersService {
@@ -35,14 +36,18 @@ export class UsersService {
         })
     }
 
-    findByLogin(login: any) : Promise<User | undefined> {
-        return this.usersRepository.findOne({
+    findByLogin(login) : Promise<User | undefined> {
+        return this.usersRepository.findOneOrFail({
             where: {login: login},
             relations: ['guild', 'achievements']
+        }).catch((err) => {
+            throw new HttpException({
+                error: err.message
+            }, HttpStatus.BAD_REQUEST)
         })
     }
 
-    async update(id: number, updateUserDto: UpdateUserDto) {
+    async update(id: number, updateUserDto: UpdateUserDto | UpdateMeDto) {
         let user = await this.findOne(id)
         Object.assign(user, updateUserDto)
         return this.usersRepository.save(user)

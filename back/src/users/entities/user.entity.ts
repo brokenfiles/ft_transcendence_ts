@@ -9,6 +9,7 @@ import {Guild} from "../../guilds/entities/guild.entity";
 import {Channel} from "../../gateways/chat/entities/channel.entity";
 import {Message} from "../../gateways/chat/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
+import {Role} from "../../auth/roles/enums/role.enum";
 
 @Entity("users")
 export class User {
@@ -48,8 +49,8 @@ export class User {
     })
     login: string
 
-    @Column({default: false})
-    admin: boolean
+    @Column({default: Role.User})
+    role: string
 
     @Column({default: 0})
     points: number

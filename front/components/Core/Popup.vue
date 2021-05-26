@@ -1,7 +1,7 @@
 <template>
-  <div class="absolute bg-cream text-primary py-2 px-4 bottom-0 right-full w-max cursor-auto" :class="{'hidden': !open}">
+  <div class="absolute bg-cream text-primary py-2 px-4 w-max cursor-auto bottom-0 right-full text-sm" :class="{'hidden': !open}">
     <h2 class="font-bold">{{ header }}</h2>
-    <p>{{ body }}</p>
+    <p class="font-normal">{{ body }}</p>
   </div>
 </template>
 

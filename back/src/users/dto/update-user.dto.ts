@@ -1,8 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-import {IsArray, IsBoolean, IsOptional, Length} from "class-validator";
+import {IsArray, IsBoolean, IsOptional, IsString, Length} from "class-validator";
 import {Guild} from "../../guilds/entities/guild.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
+import {Role} from "../../auth/roles/enums/role.enum";
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 
@@ -23,5 +24,9 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     @IsOptional()
     @IsArray()
     readonly achievements: Achievement[]
+
+    @IsOptional()
+    @IsString()
+    readonly role: Role
 
 }

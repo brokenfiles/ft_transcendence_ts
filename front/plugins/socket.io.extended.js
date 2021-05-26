@@ -3,7 +3,7 @@ import { io, protocol } from 'socket.io-client';
 import VueSocketIOExt from 'vue-socket.io-extended';
 
 const socket = io('http://localhost:81', {
-  autoConnect: false
+  autoConnect: false,
 });
 
 export default ({ store }) => {

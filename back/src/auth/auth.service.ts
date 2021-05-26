@@ -36,7 +36,8 @@ export class AuthService {
         if (payload) {
             return await this.generateToken({
                 username: payload.username,
-                sub: payload.sub
+                sub: payload.sub,
+                role: payload.role
             })
         } else {
             return null

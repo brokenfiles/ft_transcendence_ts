@@ -19,6 +19,9 @@ module.exports = {
       },
       borderWidth: {
         '10': '10px'
+      },
+      outline: {
+        cream: '1px dotted #EEEBDE'
       }
     },
   },

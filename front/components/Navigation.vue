@@ -18,7 +18,7 @@
         </div>
       </li>
       <li class="nav-item" v-if="!isAuthenticated">
-        <nuxt-link to="login">
+        <nuxt-link to="/login">
           <button class="py-2 px-8 bg-yellow text-primary">login or register</button>
         </nuxt-link>
       </li>

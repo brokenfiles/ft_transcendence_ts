@@ -21,11 +21,14 @@ export default Vue.extend({
           code
         }
       }).then(() => {
+        // reconnect the client if he is connected / connect if he is not connected
         if (this.$socket.connected)
           this.$socket.client.disconnect()
+        this.$root.$emit('beforeWsConnect')
         this.$socket.client.connect()
         this.$toast.success(`Logged in as ${this.loggedInUser.login}`)
-      }).catch(() => {
+      }).catch((error) => {
+        console.log(error)
         this.$toast.error(`Error when trying to login to 42`)
         this.$router.push('/')
       })
@@ -33,7 +36,7 @@ export default Vue.extend({
   },
 
   computed: {
-    ...mapGetters(['isAuthenticated', 'loggedInUser'])
+    ...mapGetters(['isAuthenticated', 'loggedInUser']),
   }
 })
 </script>

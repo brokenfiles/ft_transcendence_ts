@@ -20,7 +20,7 @@ import Popup from "~/components/Core/Popup.vue";
 })
 export default class Achievement extends Vue {
 
-  hasMouseHover!: boolean = false
+  hasMouseHover: boolean = false
 
   @Prop({required: true}) readonly name!: string
   @Prop({required: true}) readonly description!: string
