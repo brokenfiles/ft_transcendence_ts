@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post, UseGuards} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards} from '@nestjs/common';
 import {CreateGuildDto} from "./dto/create-guild.dto";
 import {GuildsService} from "./guilds.service";
 import {UpdateGuildDto} from "./dto/update-guild.dto";
@@ -21,7 +21,7 @@ export class GuildsController {
     }
 
     @Get(":id")
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id', ParseIntPipe) id: number) {
         return this.guildService.findOne(id)
     }
 

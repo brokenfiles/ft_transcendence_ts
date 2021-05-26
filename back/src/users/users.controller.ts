@@ -1,4 +1,16 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards, Req} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+  UseGuards,
+  Req,
+  ParseIntPipe
+} from '@nestjs/common';
 import {Request} from 'express';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,7 +40,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(+id);
   }
 

@@ -8,8 +8,7 @@ import {UpdateMeDto} from "./dto/update-me.dto";
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectRepository(User) private usersRepository: Repository<User>) {
-    }
+    constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
 
     create(createUser: CreateUserDto): Promise<User> {
         const newUser = this.usersRepository.create(createUser)
@@ -37,13 +36,9 @@ export class UsersService {
     }
 
     findByLogin(login) : Promise<User | undefined> {
-        return this.usersRepository.findOneOrFail({
+        return this.usersRepository.findOne({
             where: {login: login},
             relations: ['guild', 'achievements']
-        }).catch((err) => {
-            throw new HttpException({
-                error: err.message
-            }, HttpStatus.BAD_REQUEST)
         })
     }
 
