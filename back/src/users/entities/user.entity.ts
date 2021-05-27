@@ -43,6 +43,10 @@ export class User {
     @JoinTable()
     achievements: Achievement[]
 
+    @ManyToMany(() => User, user => user.friends)
+    @JoinTable()
+    friends: User[]
+
     @Column({
         default: null,
         unique: true

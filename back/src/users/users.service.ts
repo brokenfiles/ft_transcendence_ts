@@ -23,16 +23,30 @@ export class UsersService {
         })
     }
 
-    findOne(id: number): Promise<User> {
-        return this.usersRepository.findOneOrFail(id, {
+    async findOne(id: number, relations: string[] = []): Promise<User> {
+        const friends = await this.usersRepository.query(
+            `SELECT *
+              FROM Users U
+              WHERE U.id <> $1
+                AND EXISTS(
+                      SELECT 1
+                      FROM users_friends_users F
+                      WHERE (F."usersId_1" = $1 AND F."usersId_2" = U.id)
+                         OR (F."usersId_2" = $1 AND F."usersId_1" = U.id)
+                  );`,
+            [id],
+        );
+        let user = await this.usersRepository.findOneOrFail(id, {
             relations: [
-                'guild', 'achievements'
+                'guild', 'achievements', ...relations
             ]
         }).catch((err) => {
             throw new HttpException({
                 error: err.message
             }, HttpStatus.BAD_REQUEST)
         })
+        user.friends = friends
+        return Promise.resolve(user)
     }
 
     findByLogin(login) : Promise<User | undefined> {
@@ -62,4 +76,32 @@ export class UsersService {
                 }, HttpStatus.BAD_REQUEST)
             })
     }
+
+    /**
+     * Add the friend to user entity
+     * @param requester
+     * @param requested
+     */
+    async addFriend(requester: User, requested: User): Promise<User | undefined> {
+        const alreadyFriends = requester.friends.map(friend => friend.id).indexOf(requested.id) !== -1
+        if (!alreadyFriends)
+            requester.friends.push(requested)
+        return !alreadyFriends ? this.usersRepository.save(requester) : undefined
+    }
+
+    /**
+     * Remove a friend
+     * @param {User} user the authenticated user
+     * @param {User} friend
+     */
+    async removeFriend(user: User, friend: User) {
+        const index = user.friends.map(fd => fd.id).indexOf(friend.id)
+        if (index === -1)
+            throw new HttpException({
+                error: 'You are not friend with this user'
+            }, HttpStatus.BAD_REQUEST)
+        user.friends.splice(index, 1)
+        return this.usersRepository.save(user)
+    }
+
 }

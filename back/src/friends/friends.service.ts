@@ -66,10 +66,44 @@ export class FriendsService {
 
     /**
      * Accept a request
-     * @param sub
+     * @param {number} sub the requested user id
      * @param requester
      */
-    acceptRequest(sub: number, requester: User): Promise<User> {
-        return Promise.resolve(undefined);
+    async acceptRequest(sub: number, requester: User): Promise<User> {
+        let requested = await this.usersService.findOne(sub)
+        if (!requested)
+            throw new HttpException({
+                error: "Requested user does not exist"
+            }, HttpStatus.BAD_REQUEST)
+        const friendRequest = await this.friendRequestRepository.findOne({ where: { requester, requested } })
+        if (!friendRequest)
+            throw new HttpException({
+                error: "The request does not exist"
+            }, HttpStatus.BAD_REQUEST)
+        // add friend
+        requested = await this.usersService.addFriend(requested, requester)
+        if (!requested)
+            throw new HttpException({
+                error: 'You are already friends'
+            }, HttpStatus.BAD_REQUEST)
+        // remove friend request
+        await this.friendRequestRepository.remove(friendRequest)
+        return requested;
     }
+
+    /**
+     * Remove a friend
+     * @param {number} sub the authenticated user
+     * @param {User} friend
+     */
+    async removeFriend(sub: number, friend: User) {
+        const user = await this.usersService.findOne(sub)
+        friend = await this.usersService.findOne(friend.id)
+        if (!user)
+            throw new HttpException({
+                error: 'User does not exist'
+            }, HttpStatus.BAD_REQUEST)
+        return this.usersService.removeFriend(friend, user)
+    }
+
 }

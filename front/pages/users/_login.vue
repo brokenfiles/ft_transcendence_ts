@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="relative">
     <div class="flex flex-col items-center w-full mt-12" v-if="user">
       <avatar class="h-24 w-24" :image-url="user.avatar">
         <user-online-icon class="absolute h-7 w-7 top-0 right-0" :is-online="isOnline"/>
@@ -16,7 +16,10 @@
       <div v-if="user.role !== 'user'">
         <p>ft_transcendence's {{ user.role }}</p>
       </div>
-      <level-bar class="my-8" :points="user.points"/>
+      <friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
+                     class="mt-2 text-sm block md:absolute top-0 right-0"
+                     :friend-state="friendState"/>
+      <level-bar class="my-4" :points="user.points"/>
       <div class="flex flex-wrap justify-center my-2 mb-4 w-2/3">
         <!--statistics-->
         <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
@@ -43,6 +46,9 @@ import {Component, namespace} from "nuxt-property-decorator";
 import Achievement from "~/components/User/Profile/Statistics/Achievement.vue";
 import Statistic from "~/components/User/Profile/Statistics/Statistic.vue";
 import EditableField from "~/components/User/Profile/Editable/EditableField.vue";
+import FriendButton from "~/components/User/Profile/FriendButton.vue";
+import {FriendState} from "~/utils/enums/friend-state.enum";
+
 const onlineClients = namespace('onlineClients')
 
 interface UserState {
@@ -58,6 +64,7 @@ interface UserState {
     Achievement,
     Statistic,
     EditableField,
+    FriendButton,
   },
 })
 export default class Account extends Vue {
@@ -65,14 +72,17 @@ export default class Account extends Vue {
   guild: any = null
   user: any = null
   connected: boolean = false
+  friendRequests: any[] = []
 
   @onlineClients.Getter
   clients!: number[]
 
   async fetch() {
-    this.user = await this.$axios.get(`/users?login=${this.$route.params.login}`).then(result => result.data)
+    this.user = await this.$axios.$get(`/users?login=${this.$route.params.login}`)
     if (this.user.guild)
-      this.guild = await this.$axios.get(`/guilds/${this.user.guild.id}`).then(result => result.data)
+      this.guild = await this.$axios.$get(`/guilds/${this.user.guild.id}`)
+    if (this.$auth.loggedIn)
+      this.friendRequests = await this.$axios.$get(`/friends/requests`)
   }
 
   /**
@@ -94,10 +104,55 @@ export default class Account extends Vue {
   }
 
   /**
+   * Event when the user request or remove the friend
+   * @param {FriendState} friendState
+   */
+  updateFriend(friendState: FriendState) {
+    if (friendState === FriendState.NOT_FRIEND) {
+      this.$axios.post(`friends/requests`, {
+        requested: {
+          id: this.user.id
+        }
+      }).then((result) => {
+        this.$toast.success('Your friend request has been sent')
+        this.friendRequests.push(result.data)
+      }).catch((err) => {
+        this.$toast.error(err.response.data.message[0])
+      })
+    } else if (friendState === FriendState.FRIEND) {
+      this.$axios.delete(`friends`, {
+        data: {
+          friend: {
+            id: this.user.id
+          }
+        }
+      }).then(() => {
+        this.$toast.success(`${this.user.display_name} is no longer your friend`)
+        this.$auth.fetchUser()
+      }).catch((err) => {
+        this.$toast.error(err.response.data.message[0])
+      })
+    }
+  }
+
+  /**
    * Getter (isOnline)
    */
   get isOnline(): boolean {
     return (this.user && this.clients.indexOf(this.user.id) !== -1)
+  }
+
+  /**
+   * Is friend with user
+   */
+  get friendState(): FriendState {
+    if (!this.$auth.loggedIn) return FriendState.NOT_FRIEND
+    const friends = (this.$auth.user as any).friends
+    if ((friends as any[]).map(friend => friend.id).indexOf(this.user.id) !== -1)
+      return FriendState.FRIEND
+    if (this.friendRequests.filter(req => req.requested.id === this.user.id).length > 0)
+      return FriendState.REQUESTED
+    return FriendState.NOT_FRIEND
   }
 
 }

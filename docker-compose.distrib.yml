@@ -36,6 +36,8 @@ services:
       - back
   db:
     image: postgres
+    ports:
+      - "5432:5432"
     volumes:
       - ./postgres/.tmp/db:/var/lib/postgresql/data
       - ./postgres/create_database.sql:/docker-entrypoint-initdb.d/create_database.sql

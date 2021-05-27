@@ -13,6 +13,15 @@ module.exports = {
         // online status colors
         onlineGreen: '#27AE60',
         offlineGray: '#BDBDBD',
+        // friends
+        friend: {
+          200: '#6FCF97',
+          500: '#005F28'
+        },
+        notFriend: {
+          200: '#F2C94C',
+          500: '#AA3028'
+        }
       },
       backgroundImage: {
         transGradient: 'linear-gradient(90deg, #A831D1 -2.11%, #B81261 100%)'
