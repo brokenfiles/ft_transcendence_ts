@@ -87,7 +87,33 @@ export class AuthController {
             refresh_token,
             expires_in: jwtConstants.expiresIn,
         })
+    }
 
+    /**
+     * TODO: REMOVE THIS THIS IS A FAKE TOKEN AUTHENTIFICATION
+     * Pour utiliser ce endpoint : faire un GET sur http://localhost:4000/auth/42/faketoken?user=<user>
+     * @param req
+     * @param res
+     */
+    @Get("/faketoken")
+    async callbackFake(@Req() req, @Res() res: Response) {
+        let user = await this.authService.findUserFromLogin(req.query.user)
+        const payload = {
+            username: user.display_name,
+            sub: user.id,
+            role: user.role
+        }
+        const access_token = await this.authService.generateToken(payload)
+        const refresh_token = await this.authService.generateToken(payload, {
+            expiresIn: `${60 * 60 * 24 * 30}s`
+        })
+
+        this.logger.log(`A user gets a new access & refresh token`)
+        return res.status(200).json({
+            access_token,
+            refresh_token,
+            expires_in: jwtConstants.expiresIn,
+        })
     }
 
 }

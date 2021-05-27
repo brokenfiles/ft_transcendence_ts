@@ -8,6 +8,7 @@ import {GuildsModule} from "./guilds/guilds.module";
 import { AuthModule } from './auth/auth.module';
 import {ChatModule} from "./gateways/chat/chat.module";
 import {AchievementsModule} from "./achievement/achievements.module";
+import {FriendsModule} from "./friends/friends.module";
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import {AchievementsModule} from "./achievement/achievements.module";
       GuildsModule,
       AuthModule,
       ChatModule,
-      AchievementsModule
+      AchievementsModule,
+      FriendsModule
   ],
   controllers: [AppController],
   providers: [AppService],

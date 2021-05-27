@@ -22,9 +22,7 @@ export class AchievementsService {
     }
 
     async find(): Promise<Achievement[]> {
-        return this.achievementRepository.find({
-            relations: ['users']
-        })
+        return this.achievementRepository.find()
     }
 
     async create(createAchievementDto: CreateAchievementDto): Promise<Achievement> {

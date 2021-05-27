@@ -25,7 +25,7 @@ import {IsInt} from "class-validator";
 @Controller('users')
 export class UsersController {
 
-  constructor(private readonly usersService: UsersService, private readonly guildsService : GuildsService) {}
+  constructor(private readonly usersService: UsersService) {}
 
   // @Post()
   // async create(@Body() createUser: CreateUserDto) {
