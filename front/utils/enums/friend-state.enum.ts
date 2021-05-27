@@ -1,5 +1,6 @@
 export enum FriendState {
   NOT_FRIEND = 0,
-  REQUESTED = 1,
-  FRIEND = 2
+  PENDING_REQUESTER = 1,
+  PENDING_REQUESTED = 2,
+  FRIEND = 3
 }

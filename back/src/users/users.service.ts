@@ -91,11 +91,16 @@ export class UsersService {
 
     /**
      * Remove a friend
-     * @param {User} user the authenticated user
-     * @param {User} friend
+     * @param userId
+     * @param friendId
      */
-    async removeFriend(user: User, friend: User) {
-        const index = user.friends.map(fd => fd.id).indexOf(friend.id)
+    async removeFriend(userId: number, friendId: number) {
+        const friend1 = await this.usersRepository.findOne(userId, { relations: ['friends'] })
+        const friend = await this.usersRepository.findOne(friendId, { relations: ['friends'] })
+        // select the user containing friendship
+        const user = friend1.friends.length > 0 ? friend1 : friend
+        const otherUser = friend1.friends.length === 0 ? friend1 : friend
+        const index = user.friends.map(fd => fd.id).indexOf(otherUser.id)
         if (index === -1)
             throw new HttpException({
                 error: 'You are not friend with this user'

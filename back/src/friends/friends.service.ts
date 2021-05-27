@@ -97,13 +97,7 @@ export class FriendsService {
      * @param {User} friend
      */
     async removeFriend(sub: number, friend: User) {
-        const user = await this.usersService.findOne(sub)
-        friend = await this.usersService.findOne(friend.id)
-        if (!user)
-            throw new HttpException({
-                error: 'User does not exist'
-            }, HttpStatus.BAD_REQUEST)
-        return this.usersService.removeFriend(friend, user)
+        return this.usersService.removeFriend(friend.id, sub)
     }
 
 }

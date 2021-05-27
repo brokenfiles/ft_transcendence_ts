@@ -7,6 +7,9 @@
       Request sent
     </span>
     <span v-else-if="friendState === 2">
+      Accept request
+    </span>
+    <span v-else-if="friendState === 3">
       Best friends
     </span>
   </button>

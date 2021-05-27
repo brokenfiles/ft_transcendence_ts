@@ -132,6 +132,17 @@ export default class Account extends Vue {
       }).catch((err) => {
         this.$toast.error(err.response.data.message[0])
       })
+    } else if (friendState === FriendState.PENDING_REQUESTED) {
+      this.$axios.post(`friends/accept`, {
+        requester: {
+          id: this.user.id
+        }
+      }).then(() => {
+        this.$toast.success(`${this.user.display_name} is now your friend`)
+        this.$auth.fetchUser()
+      }).catch((err) => {
+        this.$toast.error(err.response.data.message[0])
+      })
     }
   }
 
@@ -150,8 +161,10 @@ export default class Account extends Vue {
     const friends = (this.$auth.user as any).friends
     if ((friends as any[]).map(friend => friend.id).indexOf(this.user.id) !== -1)
       return FriendState.FRIEND
+    if (this.friendRequests.filter(req => req.requester.id === this.user.id).length > 0)
+      return FriendState.PENDING_REQUESTED
     if (this.friendRequests.filter(req => req.requested.id === this.user.id).length > 0)
-      return FriendState.REQUESTED
+      return FriendState.PENDING_REQUESTER
     return FriendState.NOT_FRIEND
   }
 
