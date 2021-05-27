@@ -10,5 +10,6 @@ import {ChatGateway} from "./chat.gateway";
         TypeOrmModule.forFeature([Channel, Message])
     ],
     providers: [ChatService, ChatGateway],
+    exports: [ChatService]
 })
 export class ChatModule {}

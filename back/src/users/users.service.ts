@@ -5,10 +5,12 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {User} from "./entities/user.entity";
 import {UpdateMeDto} from "./dto/update-me.dto";
+import {ChatService} from "../gateways/chat/chat.service";
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
+    constructor(@InjectRepository(User) private usersRepository: Repository<User>,
+                private chatService: ChatService) {}
 
     create(createUser: CreateUserDto): Promise<User> {
         const newUser = this.usersRepository.create(createUser)
@@ -106,6 +108,7 @@ export class UsersService {
                 error: 'You are not friend with this user'
             }, HttpStatus.BAD_REQUEST)
         user.friends.splice(index, 1)
+        this.chatService.notify(userId, `You lost a friend :(`)
         return this.usersRepository.save(user)
     }
 

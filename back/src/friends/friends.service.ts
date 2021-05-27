@@ -4,11 +4,13 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {FriendRequest} from "./entities/friend-request.entity";
 import {Repository} from "typeorm";
 import {User} from "../users/entities/user.entity";
+import {ChatService} from "../gateways/chat/chat.service";
 
 @Injectable()
 export class FriendsService {
 
     constructor(private usersService: UsersService,
+                private chatService: ChatService,
                 @InjectRepository(FriendRequest) private friendRequestRepository: Repository<FriendRequest>) {}
 
     /**
@@ -22,6 +24,7 @@ export class FriendsService {
             const friendRequest = this.friendRequestRepository.create({
                 requester, requested
             })
+            this.chatService.notify(requested.id, `${requester.display_name} wants to be your friend`)
             return this.friendRequestRepository.save(friendRequest)
         } else {
             throw new HttpException({
@@ -86,6 +89,8 @@ export class FriendsService {
             throw new HttpException({
                 error: 'You are already friends'
             }, HttpStatus.BAD_REQUEST)
+        // notify user
+        this.chatService.notify(requester.id, `You are now friend with ${requested.display_name}`)
         // remove friend request
         await this.friendRequestRepository.remove(friendRequest)
         return requested;

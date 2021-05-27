@@ -117,7 +117,7 @@ export default class Account extends Vue {
         this.$toast.success('Your friend request has been sent')
         this.friendRequests.push(result.data)
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+        this.$toast.error(err.response.data.error)
       })
     } else if (friendState === FriendState.FRIEND) {
       this.$axios.delete(`friends`, {
@@ -130,7 +130,7 @@ export default class Account extends Vue {
         this.$toast.success(`${this.user.display_name} is no longer your friend`)
         this.$auth.fetchUser()
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+        this.$toast.error(err.response.data.error)
       })
     } else if (friendState === FriendState.PENDING_REQUESTED) {
       this.$axios.post(`friends/accept`, {
@@ -141,7 +141,7 @@ export default class Account extends Vue {
         this.$toast.success(`${this.user.display_name} is now your friend`)
         this.$auth.fetchUser()
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+        this.$toast.error(err.response.data.error)
       })
     }
   }

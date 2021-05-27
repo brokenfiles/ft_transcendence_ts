@@ -24,8 +24,15 @@ export class ChatService {
         client.emit('onlineClientsUpdated', this.onlineClients)
     }
 
+    public notify(userId: number, message: string) {
+        const index = this.clients.map(client => client.userId).indexOf(userId)
+        if (index !== -1)
+            this.clients[index].socket.emit('notification', message)
+    }
+
     public addClient(client: Socket, payload: ClientInterface, server: Server) {
         payload.id = client.id
+        payload.socket = client
         if (this._clients.filter(client => client.userId == payload.userId).length == 0) {
             this._clients.push(payload)
             this.broadcastOnlineClients(server)

@@ -61,7 +61,8 @@ export default {
 
   toast: {
     position: 'top-center',
-    duration: 3000
+    duration: 3000,
+    progressBar: true
   },
 
   auth: {

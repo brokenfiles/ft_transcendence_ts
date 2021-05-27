@@ -107,6 +107,11 @@ export default class Default extends Vue {
     this.setClients(clients)
   }
 
+  @Socket("notification")
+  notificationEvent(message: string) {
+    this.$toast.info(message)
+  }
+
 }
 </script>
 

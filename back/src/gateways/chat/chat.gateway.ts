@@ -11,6 +11,7 @@ import {ChatService} from "./chat.service";
 import {ClientInterface} from "./interfaces/client.interface";
 import {WsJwtAuthGuard} from "../../auth/ws-jwt-auth.guard";
 import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFilter";
+import {JwtAuthGuard} from "../../auth/jwt-auth.guard";
 
 @WebSocketGateway(81,
     {
