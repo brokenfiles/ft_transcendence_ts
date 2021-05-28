@@ -4,12 +4,12 @@ import {FriendsService} from "./friends.service";
 import {UsersModule} from "../users/users.module";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {FriendRequest} from "./entities/friend-request.entity";
-import {ChatModule} from "../gateways/chat/chat.module";
+import {WebsocketModule} from "../gateways/websocket/websocket.module";
 
 @Module({
     imports: [
         UsersModule,
-        ChatModule,
+        WebsocketModule,
         TypeOrmModule.forFeature([FriendRequest])
     ],
     controllers: [FriendsController],

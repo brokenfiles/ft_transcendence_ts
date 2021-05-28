@@ -6,7 +6,7 @@ import { UsersModule } from './users/users.module';
 import config from "../ormconfig";
 import {GuildsModule} from "./guilds/guilds.module";
 import { AuthModule } from './auth/auth.module';
-import {ChatModule} from "./gateways/chat/chat.module";
+import {WebsocketModule} from "./gateways/websocket/websocket.module";
 import {AchievementsModule} from "./achievement/achievements.module";
 import {FriendsModule} from "./friends/friends.module";
 
@@ -16,7 +16,7 @@ import {FriendsModule} from "./friends/friends.module";
       UsersModule,
       GuildsModule,
       AuthModule,
-      ChatModule,
+      WebsocketModule,
       AchievementsModule,
       FriendsModule
   ],

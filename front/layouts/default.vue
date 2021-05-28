@@ -20,6 +20,7 @@ import Sidebar from "~/components/Sidebar.vue";
 import Chat from "~/components/Chat/Chat.vue";
 import {Component, namespace} from "nuxt-property-decorator";
 import {Socket} from "vue-socket.io-extended";
+import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
 const onlineClients = namespace('onlineClients')
 
 @Component({
@@ -107,9 +108,17 @@ export default class Default extends Vue {
     this.setClients(clients)
   }
 
+  /**
+   * Notification system from the backend
+   * @param options
+   */
   @Socket("notification")
-  notificationEvent(message: string) {
-    this.$toast.info(message)
+  notificationEvent(options: NotifyOptions) {
+    this.$toast.info(options.message)
+    // check when the user receive the notification, we have to re-fetch the user
+    if (this.$auth.loggedIn && options.fetchClient) {
+      this.$auth.fetchUser()
+    }
   }
 
 }

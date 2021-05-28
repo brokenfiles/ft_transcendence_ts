@@ -43,14 +43,14 @@
             </button>
             <div
               class="dropdown-items absolute text-right min-w-8 right-0 transition duration-150 ease-in-out focus:outline-none bg-primary text-cream"
-              id="dropdown-menu" ref="dropdown-menu" v-if="dropdown" tabindex="0">
+              id="dropdownMenu" ref="dropdownMenu" v-show="dropdown" tabindex="0" @click="dropdown = false">
               <nuxt-link :to="`/users/${this.loggedInUser.login}`" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
-                My account
+                My profile
               </nuxt-link>
               <nuxt-link to="#" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
                 Settings
               </nuxt-link>
-              <nuxt-link to="#" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
+              <nuxt-link to="/friends" class="dropdown-item block hover:bg-gray-600 pl-10 pr-4 py-2">
                 Friends
               </nuxt-link>
             </div>
@@ -64,7 +64,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import {mapGetters} from "vuex";
-import {Component, namespace} from "nuxt-property-decorator";
+import {Component} from "nuxt-property-decorator";
 import Avatar from "~/components/User/Profile/Avatar.vue";
 
 @Component({
@@ -82,6 +82,10 @@ export default class Navigation extends Vue {
 
   toggleDropdown() {
     this.dropdown = !this.dropdown
+    if (this.dropdown) {
+      const el = (this.$refs as any).dropdownMenu
+      this.$nextTick(() =>  el.focus())
+    }
   }
 
   async logout() {

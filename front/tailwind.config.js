@@ -29,8 +29,8 @@ module.exports = {
       borderWidth: {
         '10': '10px'
       },
-      outline: {
-        cream: '1px dotted #EEEBDE'
+      fontSize: {
+        xxs: ['0.65rem', '0.80rem']
       }
     },
   },
