@@ -1,6 +1,6 @@
 <template>
   <div class="text-center">
-    <nuxt-link tag="a" :to="`/users/${friend.login}`"
+    <nuxt-link :to="`/users/${friend.login}`"
                class="bg-secondary py-8 px-2 flex flex-col items-center justify-center">
       <avatar class="h-20 w-20" :image-url="friend.avatar">
         <user-online-icon class="absolute h-5 w-5 top-0 right-0" :is-online="isOnline"/>

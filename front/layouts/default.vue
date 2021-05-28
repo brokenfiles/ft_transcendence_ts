@@ -5,7 +5,7 @@
     <client-only>
       <chat />
     </client-only>
-    <div class="application bg-gray min-h-screen text-cream w-screen">
+    <div class="application bg-ftgray min-h-screen text-cream w-screen">
       <div class="md:w-11/12 md:mx-auto mx-4">
         <Nuxt />
       </div>
@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import Navigation from "~/components/Navigation.vue";
+import Navigation from "~/components/Navigation/Navigation.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import Chat from "~/components/Chat/Chat.vue";
 import {Component, namespace} from "nuxt-property-decorator";
