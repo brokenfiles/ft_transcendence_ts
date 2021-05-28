@@ -24,8 +24,7 @@ import Vue from 'vue'
 import {Component, Watch} from 'nuxt-property-decorator'
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import Avatar from "~/components/User/Profile/Avatar.vue";
-import {Debounce} from "vue-debounce-decorator";
-
+import {Debounce} from "~/utils/debounce/vue-debounce-decorator";
 
 @Component({
   components: {
