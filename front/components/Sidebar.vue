@@ -1,5 +1,6 @@
 <template>
-  <div id="sidebar" class="fixed left-0 bottom-0 top-0 py-4 overflow-y-hidden whitespace-nowrap z-10 bg-primary text-cream">
+  <div id="sidebar" :class="{'extended': extended, 'closed': !extended}"
+       class="fixed left-0 bottom-0 top-0 py-4 overflow-y-hidden whitespace-nowrap z-50 bg-primary text-cream">
     <ul class="sidebar-items">
       <li class="sidebar-item my-4">
         <div class="flex">
@@ -57,10 +58,18 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import {Component} from "nuxt-property-decorator";
 
-export default Vue.extend({
-  name: "Sidebar"
-})
+@Component({})
+export default class Sidebar extends Vue {
+
+  extended: boolean = false
+
+  mounted() {
+    this.$root.$on('toggleSidebar', () => this.extended = !this.extended)
+  }
+
+}
 </script>
 
 <style scoped>
@@ -68,6 +77,22 @@ export default Vue.extend({
   top: 72px;
   max-width: 72px;
   transition: all 0.3s ease;
+}
+
+@media screen and (max-width: 768px) {
+
+  #sidebar .item-content {
+    max-height: 500px;
+  }
+
+  #sidebar.closed {
+    @apply transform -translate-x-full;
+  }
+
+  #sidebar.extended {
+    @apply w-screen max-w-full;
+  }
+
 }
 
 .item-img {

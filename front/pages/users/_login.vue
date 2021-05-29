@@ -20,13 +20,13 @@
                      class="mt-2 text-sm block md:absolute top-0 right-0"
                      :friend-state="friendState"/>
       <level-bar class="my-4" :points="user.points"/>
-      <div class="flex flex-wrap justify-center my-2 mb-4 w-2/3">
+      <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
         <!--statistics-->
-        <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
-        <statistic class="w-1/6 mx-2" unity="loses" value="643"/>
-        <statistic class="w-1/6 mx-2" unity="tournaments wins" value="54"/>
-        <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
-        <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" value="643"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="tournaments wins" value="54"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
       </div>
       <div class="flex flex-wrap items-center justify-center space-x-2">
         <!--achievements-->
