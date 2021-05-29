@@ -50,6 +50,7 @@ import FriendButton from "~/components/User/Profile/FriendButton.vue";
 import {FriendState} from "~/utils/enums/friend-state.enum";
 import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
 import {Socket} from "vue-socket.io-extended";
+import {Context} from "@nuxt/types";
 
 const onlineClients = namespace('onlineClients')
 
@@ -74,11 +75,11 @@ export default class Account extends Vue {
   @onlineClients.Getter
   clients!: number[]
 
-  async validate({params}) {
+  async validate({params}: Context) {
     return (params.login.length >= 3 && params.login.length <= 16)
   }
 
-  async asyncData({app, params, error}) {
+  async asyncData({app, params, error}: Context) {
     const user = await app.$axios.$get(`/users?login=${params.login}`)
       .catch(() => {
         error({

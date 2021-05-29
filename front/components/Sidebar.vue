@@ -105,11 +105,14 @@ export default class Sidebar extends Vue {
   max-height: 0;
 }
 
-#sidebar:hover {
-  max-width: 500px;
+@media screen and (min-width: 768px) {
+  #sidebar:hover {
+    max-width: 500px;
+  }
+
+  #sidebar:hover .item-content {
+    max-height: 500px;
+  }
 }
 
-#sidebar:hover .item-content {
-  max-height: 500px;
-}
 </style>

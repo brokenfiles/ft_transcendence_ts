@@ -3,12 +3,10 @@ import {
     CreateDateColumn,
     Entity,
     JoinColumn,
-    ManyToOne,
     OneToMany,
     OneToOne,
     PrimaryGeneratedColumn, UpdateDateColumn
 } from "typeorm";
-import {type} from "os";
 import {User} from "../../users/entities/user.entity";
 
 @Entity()
