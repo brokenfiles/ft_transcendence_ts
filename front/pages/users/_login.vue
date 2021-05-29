@@ -53,13 +53,10 @@ import Statistic from "~/components/User/Profile/Statistics/Statistic.vue";
 import EditableField from "~/components/User/Profile/Editable/EditableField.vue";
 import FriendButton from "~/components/User/Profile/FriendButton.vue";
 import {FriendState} from "~/utils/enums/friend-state.enum";
+import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
+import {Socket} from "vue-socket.io-extended";
 
 const onlineClients = namespace('onlineClients')
-
-interface UserState {
-  userId: number
-  online: boolean
-}
 
 @Component({
   components: {
@@ -87,7 +84,7 @@ export default class Account extends Vue {
     if (this.user.guild)
       this.guild = await this.$axios.$get(`/guilds/${this.user.guild.id}`)
     if (this.$auth.loggedIn)
-      this.friendRequests = await this.$axios.$get(`/friends/requests`)
+      await this.fetchRequests()
   }
 
   /**
@@ -112,7 +109,7 @@ export default class Account extends Vue {
    * Event when the user request or remove the friend
    * @param {FriendState} friendState
    */
-  updateFriend(friendState: FriendState) {
+  async updateFriend(friendState: FriendState) {
     if (friendState === FriendState.NOT_FRIEND) {
       this.$axios.post(`friends/requests`, {
         requested: {
@@ -122,7 +119,7 @@ export default class Account extends Vue {
         this.$toast.success('Your friend request has been sent')
         this.friendRequests.push(result.data)
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+        this.$toast.error(err.response.data.error)
       })
     } else if (friendState === FriendState.FRIEND) {
       this.$axios.delete(`friends`, {
@@ -135,7 +132,7 @@ export default class Account extends Vue {
         this.$toast.success(`${this.user.display_name} is no longer your friend`)
         this.$auth.fetchUser()
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+        this.$toast.error(err.response.data.error)
       })
     } else if (friendState === FriendState.PENDING_REQUESTED) {
       this.$axios.post(`friends/accept`, {
@@ -146,9 +143,17 @@ export default class Account extends Vue {
         this.$toast.success(`${this.user.display_name} is now your friend`)
         this.$auth.fetchUser()
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+        this.$toast.error(err.response.data.error)
       })
     }
+    await this.fetchRequests()
+  }
+
+  /**
+   * Fetch the requests
+   */
+  async fetchRequests() {
+    this.friendRequests = await this.$axios.$get(`/friends/requests`)
   }
 
   /**
@@ -171,6 +176,18 @@ export default class Account extends Vue {
     if (this.friendRequests.filter(req => req.requested.id === this.user.id).length > 0)
       return FriendState.PENDING_REQUESTER
     return FriendState.NOT_FRIEND
+  }
+
+  /**
+   * Overload the default notification system
+   * When we are on this page, if we receive a notification, we re-fetch the requests as well
+   * @param options
+   */
+  @Socket("notification")
+  async notificationEventOverload(options: NotifyOptions) {
+    if (this.$auth.loggedIn && options.fetchClient) {
+      await this.fetchRequests()
+    }
   }
 
 }

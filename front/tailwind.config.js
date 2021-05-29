@@ -8,7 +8,7 @@ module.exports = {
         secondary: '#141F31',
         cream: '#EEEBDE',
         yellow: '#FFDA18',
-        gray: '#1d242c',
+        ftgray: '#1d242c',
         fortytwo: '#00babc',
         // online status colors
         onlineGreen: '#27AE60',
@@ -29,8 +29,8 @@ module.exports = {
       borderWidth: {
         '10': '10px'
       },
-      outline: {
-        cream: '1px dotted #EEEBDE'
+      fontSize: {
+        xxs: ['0.65rem', '0.80rem']
       }
     },
   },

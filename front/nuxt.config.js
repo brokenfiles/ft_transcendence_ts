@@ -61,7 +61,8 @@ export default {
 
   toast: {
     position: 'top-center',
-    duration: 3000
+    duration: 3000,
+    progressBar: true
   },
 
   auth: {
@@ -144,5 +145,9 @@ export default {
     babel: {
       plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
     },
+  },
+
+  loading: {
+    color: '#FFF'
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-0 right-0 bg-red-500 mr-10 bg-primary text-cream" :class="{'closed': !isChatOpen, 'open': isChatOpen}" id="chat-rooms" v-show="connected && isAuthenticated">
+  <div class="fixed bottom-0 right-0 bg-red-500 mr-10 bg-primary text-cream z-50" :class="{'closed': !isChatOpen, 'open': isChatOpen}" id="chat-rooms" v-show="connected && isAuthenticated">
     <div class="flex py-2 px-32 items-center cursor-pointer w-full" @click="isChatOpen = !isChatOpen" id="chat-header">
       <h2 class="text-white flex-1 font-semibold">Chat</h2>
       <svg id="chatroom-icon" class="mx-2 h-5 w-5 transition duration-150 ease-in-out" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

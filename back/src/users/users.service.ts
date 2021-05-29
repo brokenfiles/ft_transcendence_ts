@@ -5,10 +5,12 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {User} from "./entities/user.entity";
 import {UpdateMeDto} from "./dto/update-me.dto";
+import {WebsocketService} from "../gateways/websocket/websocket.service";
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
+    constructor(@InjectRepository(User) private usersRepository: Repository<User>,
+                private chatService: WebsocketService) {}
 
     create(createUser: CreateUserDto): Promise<User> {
         const newUser = this.usersRepository.create(createUser)
@@ -98,15 +100,29 @@ export class UsersService {
         const friend1 = await this.usersRepository.findOne(userId, { relations: ['friends'] })
         const friend = await this.usersRepository.findOne(friendId, { relations: ['friends'] })
         // select the user containing friendship
-        const user = friend1.friends.length > 0 ? friend1 : friend
-        const otherUser = friend1.friends.length === 0 ? friend1 : friend
+        const user = friend1.friends
+            .filter(fd => fd.id === friend.id || fd.id === friend1.id).length > 0 ? friend1 : friend
+        const otherUser = friend1.friends
+            .filter(fd => fd.id === friend.id || fd.id === friend1.id).length === 0 ? friend1 : friend
         const index = user.friends.map(fd => fd.id).indexOf(otherUser.id)
         if (index === -1)
             throw new HttpException({
                 error: 'You are not friend with this user'
             }, HttpStatus.BAD_REQUEST)
         user.friends.splice(index, 1)
+        this.chatService.notify([userId], {
+            message: `You lost a friend :(`,
+            fetchClient: true
+        })
         return this.usersRepository.save(user)
     }
 
+    /**
+     * Returns a list of matched users
+     * @param search
+     */
+    searchUser(search: string): Promise<User[]> {
+        return this.usersRepository.query(`SELECT login, display_name, avatar FROM Users WHERE LOWER(login) LIKE CONCAT('%', $1::text, '%');`,
+            [search.toLowerCase()])
+    }
 }

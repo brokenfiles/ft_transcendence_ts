@@ -9,7 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   Req,
-  ParseIntPipe
+  ParseIntPipe, HttpException
 } from '@nestjs/common';
 import {Request} from 'express';
 import { UsersService } from './users.service';
@@ -37,6 +37,16 @@ export class UsersController {
     if (req.query.login)
       return this.usersService.findByLogin(req.query.login)
     return this.usersService.findAll();
+  }
+
+  @Get('search')
+  searchUser(@Req() req: Request) {
+    const search = req.query.input as string
+    if (!search)
+      throw new HttpException({
+        error: "You have to provide a search input"
+      }, HttpStatus.BAD_REQUEST)
+    return this.usersService.searchUser(search)
   }
 
   @Get(':id')

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import {Logger, UseFilters, UseGuards} from "@nestjs/common";
 import {Server, Socket} from 'socket.io'
-import {ChatService} from "./chat.service";
+import {WebsocketService} from "./websocket.service";
 import {ClientInterface} from "./interfaces/client.interface";
 import {WsJwtAuthGuard} from "../../auth/ws-jwt-auth.guard";
 import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFilter";
@@ -19,9 +19,9 @@ import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFil
         credentials: true
       }
     })
-export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-  constructor(private chatService: ChatService) {}
+  constructor(private chatService: WebsocketService) {}
 
   @WebSocketServer() server: Server
 

@@ -6,8 +6,8 @@ import {
     PrimaryGeneratedColumn
 } from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
-import {Channel} from "../../gateways/chat/entities/channel.entity";
-import {Message} from "../../gateways/chat/entities/message.entity";
+import {Channel} from "../../gateways/websocket/entities/channel.entity";
+import {Message} from "../../gateways/websocket/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
 import {Role} from "../../auth/roles/enums/role.enum";
 

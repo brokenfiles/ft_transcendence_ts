@@ -5,7 +5,7 @@
     <client-only>
       <chat />
     </client-only>
-    <div class="application bg-gray min-h-screen text-cream w-screen">
+    <div class="application bg-ftgray min-h-screen text-cream w-screen">
       <div class="md:w-11/12 md:mx-auto mx-4">
         <Nuxt />
       </div>
@@ -15,12 +15,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import Navigation from "~/components/Navigation.vue";
+import Navigation from "~/components/Navigation/Navigation.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import Chat from "~/components/Chat/Chat.vue";
 import {Component, namespace} from "nuxt-property-decorator";
 import {Socket} from "vue-socket.io-extended";
-import Ball from "~/components/Game/Pong/Ball.vue";
+import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
 const onlineClients = namespace('onlineClients')
 
 @Component({
@@ -109,6 +109,19 @@ export default class Default extends Vue {
   @Socket('onlineClientsUpdated')
   onlineClientUpdatedEvent(clients: number[]) {
     this.setClients(clients)
+  }
+
+  /**
+   * Notification system from the backend
+   * @param options
+   */
+  @Socket("notification")
+  notificationEvent(options: NotifyOptions) {
+    this.$toast.info(options.message)
+    // check when the user receive the notification, we have to re-fetch the user
+    if (this.$auth.loggedIn && options.fetchClient) {
+      this.$auth.fetchUser()
+    }
   }
 
 }

@@ -1,18 +1,22 @@
 <template>
-  <button @click="updateStatus" class="px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none" :class="classes">
-    <span v-if="friendState === 0">
+  <a href="https://wooooow-friend-cool.com" @click.prevent="updateStatus" class="px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none" :class="classes">
+    <div v-if="friendState === 0">
       Request friend
-    </span>
-    <span v-else-if="friendState === 1">
+      <span class="text-xxs block">(click to request)</span>
+    </div>
+    <div v-else-if="friendState === 1">
       Request sent
-    </span>
-    <span v-else-if="friendState === 2">
+      <span class="text-xxs block">(wait the answer)</span>
+    </div>
+    <div v-else-if="friendState === 2">
       Accept request
-    </span>
-    <span v-else-if="friendState === 3">
-      Best friends
-    </span>
-  </button>
+      <span class="text-xxs block">(click to accept)</span>
+    </div>
+    <div v-else-if="friendState === 3">
+      Friends
+      <span class="text-xxs block">(click to remove)</span>
+    </div>
+  </a>
 </template>
 
 <script lang="ts">
@@ -31,14 +35,15 @@ export default class FriendButton extends Vue {
   @Prop({required: true}) friendState!: FriendState
 
   updateStatus() {
-    this.$emit('update', this.friendState)
+    if (this.friendState !== FriendState.PENDING_REQUESTER)
+      this.$emit('update', this.friendState)
   }
 
   get classes() {
     if (this.friendState === FriendState.FRIEND) {
       return "bg-friend-200 text-friend-500"
     } else {
-      return "bg-notFriend-200 text-notFriend-500"
+      return "bg-notFriend-200 text-notFriend-500" + (this.friendState === FriendState.PENDING_REQUESTER ? ' cursor-default' : '')
     }
   }
 

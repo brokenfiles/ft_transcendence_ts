@@ -1,5 +1,5 @@
 <template>
-  <div class="online-icon rounded-full border-8" :class="{'border-onlineGreen bg-green-700': online, 'border-offlineGray bg-gray': !online}">
+  <div class="online-icon rounded-full border-8" :class="{'border-onlineGreen bg-green-700': online, 'border-offlineGray bg-ftgray': !online}">
     <div v-if="online" class="absolute w-full h-full rounded-full top-0 left-0 opacity-0 sonar-wave"></div>
   </div>
 </template>
