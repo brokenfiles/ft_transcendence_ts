@@ -9,18 +9,18 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import {Component} from "nuxt-property-decorator";
 
-export default Vue.extend({
+@Component({
   name: "login",
 
-  middleware: ['guest'],
-
-  methods: {
-    login(strategy: string) {
-      this.$auth.loginWith(strategy)
-    }
-  }
+  middleware: ['guest']
 })
+export default class Login extends Vue {
+  login(strategy: string) {
+    this.$auth.loginWith(strategy)
+  }
+}
 </script>
 
 <style scoped>
