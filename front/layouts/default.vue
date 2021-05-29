@@ -20,10 +20,12 @@ import Sidebar from "~/components/Sidebar.vue";
 import Chat from "~/components/Chat/Chat.vue";
 import {Component, namespace} from "nuxt-property-decorator";
 import {Socket} from "vue-socket.io-extended";
+import Ball from "~/components/Game/Pong/Ball.vue";
 const onlineClients = namespace('onlineClients')
 
 @Component({
   components: {
+    Ball,
     Navigation,
     Sidebar,
     Chat,
@@ -44,6 +46,7 @@ export default class Default extends Vue {
     this.$root.$on('beforeWsConnect', () => this.defineSocketToken())
     // by default, connect the user even if he is not authenticated
     this.$socket.client.connect()
+
   }
 
   /**
@@ -89,6 +92,7 @@ export default class Default extends Vue {
     if (process.client) {
       if (this.$auth && this.$auth.loggedIn && this.$auth.user) {
         // set set the token to socket.io client
+        console.log("CIIZEIEIEIE")
         this.$socket.client.emit('userOnline', {
           userId: this.$auth.user.id
         })

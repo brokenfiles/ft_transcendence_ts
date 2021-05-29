@@ -18,6 +18,7 @@ import {LoginDto} from "./dto/login.dto";
 import {RefreshDto} from "./dto/refresh.dto";
 import {CreateUserDto} from "../users/dto/create-user.dto";
 import {JwtAuthGuard} from "./jwt-auth.guard";
+import {FakeloginDto} from "./dto/fakelogin.dto";
 
 @Controller("/auth/42")
 export class AuthController {
@@ -96,14 +97,39 @@ export class AuthController {
      * @param req
      * @param res
      */
-    @Get("/faketoken")
-    async callbackFake(@Req() req, @Res() res: Response) {
-        let user = await this.authService.findUserFromLogin(req.query.user)
+    @Post("/faketoken")
+    async callbackFake(@Body() body: FakeloginDto, @Res() res: Response) {
+
+        let randomize = function () {
+            return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
+        }
+
+
+        if (!body.pseudo) {
+            return res.status(401).json({
+                statusCode: 401,
+                error: 'Unauthorized',
+                message: 'querystring.user is missing'
+            })
+        }
+        let user = await this.authService.findUserFromLogin("guest_" + body.pseudo)
+
+        if (!user) {
+            let dto = new CreateUserDto()
+                .set_avatar("https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg")
+                .set_display_name("guest_" + body.pseudo)
+                .set_first_name("guest_" + body.pseudo)
+                .set_login("guest_" + body.pseudo)
+
+            user = await this.usersService.create(dto)
+        }
+
         const payload = {
             username: user.display_name,
             sub: user.id,
             role: user.role
         }
+
         const access_token = await this.authService.generateToken(payload)
         const refresh_token = await this.authService.generateToken(payload, {
             expiresIn: `${60 * 60 * 24 * 30}s`

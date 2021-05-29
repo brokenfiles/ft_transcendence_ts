@@ -97,6 +97,29 @@ export default {
           logout: false
         }
       },
+      custom: {
+        scheme: 'refresh',
+        token: {
+          property: 'access_token',
+          required: true,
+          type: 'Bearer',
+          maxAge: 7200,
+        },
+        refreshToken: {
+          property: 'refresh_token',
+          maxAge: 60 * 60 * 24 * 30
+        },
+        user: {
+          property: false,
+          autoFetch: true
+        },
+        endpoints: {
+          login: { url: '/auth/42/faketoken', method: 'post' },
+          user: { url: '/auth/42/me', method: 'get' },
+          refresh: { url: '/auth/42/refresh', method: 'post' },
+          logout: false
+        }
+      },
       fortytwo: {
         scheme: 'oauth2',
         endpoints: {
