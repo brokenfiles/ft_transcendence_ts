@@ -62,9 +62,11 @@ export class UsersService {
         let user = await this.findOne(id)
         Object.assign(user, updateUserDto)
         return this.usersRepository.save(user)
-            .catch((err) => {
+            .catch(() => {
                 throw new HttpException({
-                    error: err.message
+                    message: [
+                        `This display name is already taken`
+                    ]
                 }, HttpStatus.BAD_REQUEST)
             })
     }

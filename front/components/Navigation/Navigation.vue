@@ -42,7 +42,7 @@
               <nuxt-link :to="`/users/${this.loggedInUser.login}`" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 My profile
               </nuxt-link>
-              <nuxt-link to="#" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
+              <nuxt-link to="/users/me/settings" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 Settings
               </nuxt-link>
               <nuxt-link to="/friends" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">

@@ -74,6 +74,10 @@ export default class Account extends Vue {
   @onlineClients.Getter
   clients!: number[]
 
+  validate({params}) {
+    return (params.login.length >= 3 && params.login.length <= 16)
+  }
+
   async fetch() {
     this.user = await this.$axios.$get(`/users?login=${this.$route.params.login}`)
     if (this.user.guild)
