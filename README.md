@@ -18,6 +18,10 @@ Le dossier front correspond au projet NuxtJS. <br />
 Le dossier back correspond au projet NestJS. <br />
 Le dossier tmp (non présent pas défaut) est le dossier où les données postgre sont sauvegardées.
 
+## Todolist du projet
+
+Notre todolist est sur notion.so, lien : https://www.notion.so/Ft_transcendence-TODOLIST-b18a6bc26edb4162a1b8d268b59e4d36
+
 ## Maquette
 
 Les maquettes sont sur Figma, demander à `llaurent` pour avoir les accès.

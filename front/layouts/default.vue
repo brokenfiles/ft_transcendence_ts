@@ -25,7 +25,6 @@ const onlineClients = namespace('onlineClients')
 
 @Component({
   components: {
-    Ball,
     Navigation,
     Sidebar,
     Chat,
@@ -92,10 +91,7 @@ export default class Default extends Vue {
     if (process.client) {
       if (this.$auth && this.$auth.loggedIn && this.$auth.user) {
         // set set the token to socket.io client
-        console.log("CIIZEIEIEIE")
-        this.$socket.client.emit('userOnline', {
-          userId: this.$auth.user.id
-        })
+        this.$socket.client.emit('userOnline')
       }
     }
   }

@@ -1,16 +1,11 @@
 <template>
   <div class="relative">
-
-    <div>
-      <p>{{ this.clients }}</p>
-    </div>
-
     <div class="flex flex-col items-center w-full mt-12" v-if="user">
       <avatar class="h-24 w-24" :image-url="user.avatar">
         <user-online-icon class="absolute h-7 w-7 top-0 right-0" :is-online="isOnline"/>
       </avatar>
       <h1 class="font-semibold mt-2 text-2xl">
-        <span v-if="guild">[{{guild.anagram}}]</span>
+        <nuxt-link class="text-yellow" :to="`/guilds/${guild.anagram}`" v-if="guild">[{{guild.anagram}}]</nuxt-link>
         <editable-field tag="div" classes="inline-block"
                         :editable="this.$auth.loggedIn && this.$auth.user.id === user.id"
                         :value="user.display_name" @stopEditing="saveDisplayName"/>
@@ -25,13 +20,13 @@
                      class="mt-2 text-sm block md:absolute top-0 right-0"
                      :friend-state="friendState"/>
       <level-bar class="my-4" :points="user.points"/>
-      <div class="flex flex-wrap justify-center my-2 mb-4 w-2/3">
+      <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
         <!--statistics-->
-        <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
-        <statistic class="w-1/6 mx-2" unity="loses" value="643"/>
-        <statistic class="w-1/6 mx-2" unity="tournaments wins" value="54"/>
-        <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
-        <statistic class="w-1/6 mx-2" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" value="643"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="tournaments wins" value="54"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
       </div>
       <div class="flex flex-wrap items-center justify-center space-x-2">
         <!--achievements-->
@@ -79,8 +74,22 @@ export default class Account extends Vue {
   @onlineClients.Getter
   clients!: number[]
 
+  async validate({params}) {
+    return (params.login.length >= 3 && params.login.length <= 16)
+  }
+
+  async asyncData({app, params, error}) {
+    const user = await app.$axios.$get(`/users?login=${params.login}`)
+      .catch(() => {
+        error({
+          statusCode: 404,
+          message: 'This user does not exist'
+        })
+      })
+    return ({user})
+  }
+
   async fetch() {
-    this.user = await this.$axios.$get(`/users?login=${this.$route.params.login}`)
     if (this.user.guild)
       this.guild = await this.$axios.$get(`/guilds/${this.user.guild.id}`)
     if (this.$auth.loggedIn)

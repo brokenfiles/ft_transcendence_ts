@@ -1,5 +1,5 @@
 <template>
-  <div class="w-1/3 border-2 border-white rounded-sm">
+  <div class="w-full md:w-1/3 border-2 border-white rounded-sm">
     <div class="py-1 text-center bg-transGradient bg-repeat-y" :style="{backgroundSize: `${width}% auto`}">
       lvl {{ level.toFixed(2) }}
     </div>

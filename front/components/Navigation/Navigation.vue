@@ -7,10 +7,10 @@
         </nuxt-link>
       </li>
       <li class="nav-item ml-4 inline-block md:hidden">
-        <font-awesome-icon :icon="['fas', 'bars']"></font-awesome-icon>
+        <font-awesome-icon @click="toggleSidebar" class="cursor-pointer" :icon="['fas', 'bars']"></font-awesome-icon>
       </li>
       <li class="nav-item flex-1 ml-4">
-        <search-bar/>
+        <search-bar class="md:w-auto w-11/12"/>
       </li>
       <li class="nav-item" v-if="!isAuthenticated">
         <nuxt-link to="/login">
@@ -42,7 +42,7 @@
               <nuxt-link :to="`/users/${this.loggedInUser.login}`" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 My profile
               </nuxt-link>
-              <nuxt-link to="#" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
+              <nuxt-link to="/users/me/settings" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 Settings
               </nuxt-link>
               <nuxt-link to="/friends" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
@@ -83,6 +83,10 @@ export default class Navigation extends Vue {
       const el = (this.$refs as any).dropdownMenu
       this.$nextTick(() =>  el.focus())
     }
+  }
+
+  toggleSidebar() {
+    this.$root.$emit('toggleSidebar')
   }
 
   async logout() {

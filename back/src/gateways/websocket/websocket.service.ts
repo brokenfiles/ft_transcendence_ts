@@ -38,13 +38,17 @@ export class WebsocketService {
         }
     }
 
-    public addClient(client: Socket, payload: ClientInterface, server: Server) {
-        payload.id = client.id
-        payload.socket = client
+    public addClient(client: Socket, sub: number, server: Server) {
+        const payload: ClientInterface = {
+            id: client.id,
+            socket: client,
+            userId: sub
+        }
         if (this._clients.filter(client => client.userId == payload.userId).length == 0) {
             this._clients.push(payload)
             this.broadcastOnlineClients(server)
         }
+
     }
 
     public removeClient(clientUid: string, server: Server): number {

@@ -21,7 +21,6 @@ export default class Duel extends Vue {
 
   mounted()
   {
-    console.log("bonjour")
   }
 
   get online(): number[]

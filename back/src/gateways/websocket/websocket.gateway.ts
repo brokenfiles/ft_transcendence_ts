@@ -63,17 +63,17 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * This event is triggered when the user is connected
    * It is used to prevent the server that the user is now online
    * @param {Socket} client
-   * @param {ClientInterface} payload
    */
   @UseGuards(WsJwtAuthGuard)
   @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage("userOnline")
-  userOnlineEvent(client: Socket, payload: ClientInterface) {
+  userOnlineEvent(client: Socket) {
     const { sub } = (client.handshake as any).user
-    if (sub === payload.userId) {
-      this.chatService.addClient(client, payload, this.server)
+    console.log(sub)
+    // if (sub === payload.userId) {
+      this.chatService.addClient(client, sub, this.server)
       this.logger.log(`User with id ${sub} is now online`)
-    }
+    // }
   }
 
   @SubscribeMessage('msgToServer')

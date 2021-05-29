@@ -1,4 +1,13 @@
-import {Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn} from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn, UpdateDateColumn
+} from "typeorm";
 import {type} from "os";
 import {User} from "../../users/entities/user.entity";
 
@@ -29,5 +38,11 @@ export class Guild {
     @OneToOne(type => User)
     @JoinColumn()
     owner: User
+
+    @CreateDateColumn()
+    created_at: Date
+
+    @UpdateDateColumn()
+    updated_at: Date
 
 }

@@ -11,8 +11,10 @@ export class UpdateGuildDto {
     @IsOptional()
     readonly anagram: string
 
+    @IsOptional()
     readonly owner: User
 
+    @IsOptional()
     readonly open: boolean
 
 }

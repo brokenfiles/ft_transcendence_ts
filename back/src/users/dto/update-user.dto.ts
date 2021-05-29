@@ -10,7 +10,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
     @Length(3, 16)
     @IsOptional()
-    readonly display_name: string
+    display_name: string
 
     @IsOptional()
     readonly guild: Guild

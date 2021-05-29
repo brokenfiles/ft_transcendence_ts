@@ -9,35 +9,33 @@
       Login with guest
 <!--      <img src="42.png" class="h-10 ml-4" alt="42">-->
     </button>
-    <PopUp v-if="this.GuestModal"></PopUp>
+    <fake-connect-pop-up v-if="this.GuestModal"/>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import PopUp from "~/components/Auth/PopUp.vue";
+import FakeConnectPopUp from "~/components/Auth/PopUp.vue";
+import {Component} from "nuxt-property-decorator";
 
-export default Vue.extend({
+@Component({
   name: "login",
-  components: {PopUp},
+  components: {FakeConnectPopUp},
   middleware: ['guest'],
-
-  data() {
-    return {
-      GuestModal: false
-    }
-  },
-
-  methods: {
-    login(strategy: string) {
-      this.$auth.loginWith(strategy)
-    },
-    ShowModal()
-    {
-      this.GuestModal = !this.GuestModal
-    }
-  }
 })
+export default class Login extends Vue {
+
+  GuestModal: boolean = false
+
+  login(strategy: string) {
+    this.$auth.loginWith(strategy)
+  }
+
+  ShowModal()
+  {
+    this.GuestModal = !this.GuestModal
+  }
+}
 </script>
 
 <style scoped>

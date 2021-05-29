@@ -40,39 +40,51 @@ export class AuthController {
         const newAccessToken = await this.authService.refreshToken(refreshToken)
         if (newAccessToken) {
             this.logger.log(`A user refreshed his token`)
-            return response.status(200).json({
-                access_token: newAccessToken,
-                expires_in: jwtConstants.expiresIn
-            })
+            return response.status(200).json({access_token: newAccessToken, expires_in: jwtConstants.expiresIn })
         } else {
-            return response.status(401).json({
-                statusCode: 401,
-                error: 'Unauthorized',
-                message: 'Invalid token.'
-            })
+            return response.status(401).json({statusCode: 401, error: 'Unauthorized', message: 'Invalid token.'})
         }
     }
 
     @Post("/token")
     async callback(@Body() body: LoginDto, @Res() res: Response) {
-        const code = body.code
-        const fortyTwoUser = await this.authService.getFortyTwoUser(code)
-        if (!fortyTwoUser) {
-            throw new HttpException({
-                error: `42 user can't be found`
-            }, HttpStatus.BAD_REQUEST)
-        }
-        fortyTwoUser.login = 'timlecou'
-        let user = await this.authService.findUserFromLogin(fortyTwoUser.login)
-        if (user === null) {
-            let dto = new CreateUserDto()
-                .set_avatar(fortyTwoUser.image_url)
-                .set_display_name(fortyTwoUser.displayname)
-                .set_first_name(fortyTwoUser.first_name)
-                .set_login(fortyTwoUser.login)
+        let user
 
-            user = await this.usersService.create(dto)
+        if (body.code) {
+            const code = body.code
+            const fortyTwoUser = await this.authService.getFortyTwoUser(code)
+
+            if (!fortyTwoUser) {
+                throw new HttpException({
+                    error: `42 user can't be found`
+                }, HttpStatus.BAD_REQUEST)
+            }
+            user = await this.authService.findUserFromLogin(fortyTwoUser.login)
+            if (user === null) {
+                let dto = new CreateUserDto()
+                    .set_avatar(fortyTwoUser.image_url)
+                    .set_display_name(fortyTwoUser.displayname)
+                    .set_first_name(fortyTwoUser.first_name)
+                    .set_login(fortyTwoUser.login)
+
+                user = await this.usersService.create(dto)
+            }
         }
+        else if (body.guest_name)
+        {
+            user = await this.authService.findUserFromLogin("guest_" + body.guest_name)
+
+            if (!user) {
+                let dto = new CreateUserDto()
+                    .set_avatar("https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg")
+                    .set_display_name("guest_" + body.guest_name)
+                    .set_first_name("guest_" + body.guest_name)
+                    .set_login("guest_" + body.guest_name)
+
+                user = await this.usersService.create(dto)
+            }
+        }
+
         const payload = {
             username: user.display_name,
             sub: user.id,
@@ -103,7 +115,6 @@ export class AuthController {
         let randomize = function () {
             return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
         }
-
 
         if (!body.pseudo) {
             return res.status(401).json({
