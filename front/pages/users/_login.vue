@@ -5,7 +5,7 @@
         <user-online-icon class="absolute h-7 w-7 top-0 right-0" :is-online="isOnline"/>
       </avatar>
       <h1 class="font-semibold mt-2 text-2xl">
-        <span v-if="guild">[{{guild.anagram}}]</span>
+        <nuxt-link class="text-yellow" :to="`/guilds/${guild.anagram}`" v-if="guild">[{{guild.anagram}}]</nuxt-link>
         <editable-field tag="div" classes="inline-block"
                         :editable="this.$auth.loggedIn && this.$auth.user.id === user.id"
                         :value="user.display_name" @stopEditing="saveDisplayName"/>
@@ -74,12 +74,22 @@ export default class Account extends Vue {
   @onlineClients.Getter
   clients!: number[]
 
-  validate({params}) {
+  async validate({params}) {
     return (params.login.length >= 3 && params.login.length <= 16)
   }
 
+  async asyncData({app, params, error}) {
+    const user = await app.$axios.$get(`/users?login=${params.login}`)
+      .catch(() => {
+        error({
+          statusCode: 404,
+          message: 'This user does not exist'
+        })
+      })
+    return ({user})
+  }
+
   async fetch() {
-    this.user = await this.$axios.$get(`/users?login=${this.$route.params.login}`)
     if (this.user.guild)
       this.guild = await this.$axios.$get(`/guilds/${this.user.guild.id}`)
     if (this.$auth.loggedIn)

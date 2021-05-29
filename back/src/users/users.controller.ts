@@ -33,9 +33,17 @@ export class UsersController {
   // }
 
   @Get()
-  findAllOrByLogin(@Req() req: Request) {
-    if (req.query.login)
-      return this.usersService.findByLogin(req.query.login)
+  async findAllOrByLogin(@Req() req: Request) {
+    if (req.query.login) {
+      const user = await this.usersService.findByLogin(req.query.login)
+      if (!user)
+        throw new HttpException({
+          message: [
+              `This user does not exist`
+          ]
+        }, HttpStatus.BAD_REQUEST)
+      return user
+    }
     return this.usersService.findAll();
   }
 

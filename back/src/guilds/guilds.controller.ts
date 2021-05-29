@@ -1,8 +1,24 @@
-import {Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards} from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException, HttpStatus,
+    Param,
+    ParseIntPipe,
+    Patch,
+    Post,
+    Req,
+    UseGuards
+} from '@nestjs/common';
 import {CreateGuildDto} from "./dto/create-guild.dto";
 import {GuildsService} from "./guilds.service";
 import {UpdateGuildDto} from "./dto/update-guild.dto";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
+import {Roles} from "../auth/roles/roles.decorator";
+import {Role} from "../auth/roles/enums/role.enum";
+import {RolesGuard} from "../auth/roles/roles.guard";
+import {Request} from "express";
 
 @Controller('guilds')
 export class GuildsController {
@@ -11,12 +27,14 @@ export class GuildsController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    async create(@Body() createGuild : CreateGuildDto){
-        return this.guildService.create(createGuild)
+    async create(@Req() request, @Body() createGuild : CreateGuildDto){
+        return this.guildService.create(request.user.sub, createGuild)
     }
 
     @Get()
-    findAll() {
+    findAll(@Req() req: Request) {
+        if (req.query.anagram)
+            return this.guildService.findByAnagram(req.query.anagram)
         return this.guildService.findAll()
     }
 
@@ -25,14 +43,22 @@ export class GuildsController {
         return this.guildService.findOne(id)
     }
 
-    @Patch(':id')
+    @Patch("mine")
     @UseGuards(JwtAuthGuard)
+    updateMine(@Req() request, @Body() updateGuild: UpdateGuildDto) {
+
+    }
+
+    @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.Moderator, Role.Administrator)
     update(@Param('id') id: number, @Body() updateGuild : UpdateGuildDto) {
         return this.guildService.update(+id, updateGuild)
     }
 
     @Delete(':id')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.Moderator, Role.Administrator)
     remove(@Param('id') id: number) {
         return this.guildService.remove(+id)
     }

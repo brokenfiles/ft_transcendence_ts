@@ -29,13 +29,13 @@
           </div>
           <div class="item-content pr-8 pl-4 font-semibold">
             <div class="item-link my-2 text-xl">
-              <a href="#">Guilds</a>
+              <nuxt-link to="/guilds">Guilds</nuxt-link>
             </div>
             <div class="item-link my-2 text-xl">
-              <a href="#">Create a guild</a>
+              <nuxt-link to="/guilds/create">Create a guild</nuxt-link>
             </div>
             <div class="item-link my-2 text-xl">
-              <a href="#">Join a guild</a>
+              <nuxt-link to="/">Join a guild</nuxt-link>
             </div>
           </div>
         </div>
