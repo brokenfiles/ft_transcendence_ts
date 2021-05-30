@@ -24,7 +24,8 @@ export default {
     {
       src: '~/plugins/socket.io.extended.js',
       mode: 'client',
-    }
+    },
+    { src: 'node_modules/nuxtjs-phaser', mode: 'client' }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -145,6 +146,7 @@ export default {
     babel: {
       plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
     },
+    extractCSS: true
   },
 
   loading: {

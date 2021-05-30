@@ -65,6 +65,7 @@ export default class Default extends Vue {
    */
   get getTokenWithoutBearer(): string {
     const bearerToken = (this.$auth.strategy as any).token.get()
+    console.log("bearer: " + bearerToken)
     if (bearerToken.length > 0) {
       const tokenParts = bearerToken.split(' ')
       if (tokenParts.length > 1) {
