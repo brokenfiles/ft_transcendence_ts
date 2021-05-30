@@ -52,9 +52,9 @@ export default class Default extends Vue {
   **/
   defineSocketToken() {
     if (this.$auth.loggedIn) {
-      const token = this.getTokenWithoutBearer
+      const token = this.getTokenWithoutBearer()
       this.$socket.client.io.opts.query = {
-        token: token
+        token
       }
     }
   }
@@ -62,7 +62,7 @@ export default class Default extends Vue {
   /**
    * Returns the token without the bearer
    */
-  get getTokenWithoutBearer(): string {
+  getTokenWithoutBearer(): string {
     const bearerToken = (this.$auth.strategy as any).token.get()
     if (bearerToken.length > 0) {
       const tokenParts = bearerToken.split(' ')

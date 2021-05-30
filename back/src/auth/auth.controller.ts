@@ -98,7 +98,17 @@ export class AuthController {
      */
     @Get("/faketoken")
     async callbackFake(@Req() req, @Res() res: Response) {
-        let user = await this.authService.findUserFromLogin(req.query.user)
+        const guest_user = `guest_${req.query.user}`
+        let user = await this.authService.findUserFromLogin(guest_user)
+        if (user === null) {
+            let dto = new CreateUserDto()
+                .set_avatar(`https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg`)
+                .set_display_name(guest_user)
+                .set_first_name(guest_user)
+                .set_login(guest_user)
+
+            user = await this.usersService.create(dto)
+        }
         const payload = {
             username: user.display_name,
             sub: user.id,
