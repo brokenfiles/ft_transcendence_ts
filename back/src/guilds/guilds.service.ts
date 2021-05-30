@@ -78,4 +78,32 @@ export class GuildsService {
             }, HttpStatus.BAD_REQUEST)
         })
     }
+
+    /**
+     * Leave the guild
+     * Deletes the guild if the user is the owner
+     * @param {number} sub
+     */
+    async leave(sub: number): Promise<Guild> {
+        let user = await this.usersService.findOne(sub)
+        let guild = user.guild
+        if (guild.owner.id === user.id) {
+            guild.users = []
+            guild.owner = null
+        } else {
+            const index = guild.users.map(u => u.id).indexOf(sub)
+            if (index === -1)
+                throw new HttpException({
+                    message: [
+                        'You are not part of your own guild. wait what ?'
+                    ]
+                }, HttpStatus.BAD_REQUEST)
+            guild.users.splice(index, 1)
+        }
+        if (guild.users.length > 0) {
+            return this.guildRepository.save(guild)
+        } else {
+            return this.guildRepository.remove(guild)
+        }
+    }
 }

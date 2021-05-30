@@ -79,6 +79,11 @@ export default class Account extends Vue {
     return (params.login.length >= 3 && params.login.length <= 16)
   }
 
+  mounted() {
+    if (this.$auth.loggedIn)
+      this.$auth.fetchUser()
+  }
+
   async asyncData({app, params, error}: Context) {
     const user = await app.$axios.$get(`/users?login=${params.login}`)
       .catch(() => {

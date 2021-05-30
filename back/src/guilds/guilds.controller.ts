@@ -49,6 +49,12 @@ export class GuildsController {
 
     }
 
+    @Post("mine/leave")
+    @UseGuards(JwtAuthGuard)
+    leaveGuild(@Req() request) {
+        return this.guildService.leave(request.user.sub)
+    }
+
     @Patch(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(Role.Moderator, Role.Administrator)

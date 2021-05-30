@@ -23,6 +23,10 @@ export default {
     {
       src: '~/plugins/socket.io.extended.js',
       mode: 'client',
+    },
+    {
+      src: '~/plugins/timeago.js',
+      mode: 'client'
     }
   ],
 
