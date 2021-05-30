@@ -1,6 +1,5 @@
 <template>
-  <div class="relative">
-    <img :src="imageUrl" alt="Profile picture" class="rounded-full">
+  <div class="relative rounded-full bg-cover" :style="{backgroundImage: `url(${imageUrl})`}">
     <slot></slot>
   </div>
 </template>
