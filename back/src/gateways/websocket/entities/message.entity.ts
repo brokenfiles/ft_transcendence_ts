@@ -1,4 +1,4 @@
-import {Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
+import {Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from "typeorm";
 import {Channel} from "./channel.entity";
 import {User} from "../../../users/entities/user.entity";
 
@@ -21,7 +21,7 @@ export class Message {
     @JoinColumn()
     owner: User
 
-    @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
+    @CreateDateColumn()
     created_at: Date
 
 }
