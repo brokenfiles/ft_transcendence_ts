@@ -1,18 +1,20 @@
 <template>
   <div>
     <div class="mt-8 px-4" v-if="guild">
-      <div class="flex flex-wrap w-full items-center">
+      <div class="flex flex-wrap space-y-4 w-full items-center">
         <h1 class="text-4xl font-semibold flex-1">{{ guild.name }} [{{ guild.anagram }}]</h1>
         <div>
           <div v-if="$auth.loggedIn" class="inline-block">
-            <button v-if="$auth.user.guild === null" class="bg-yellow text-primary py-2 px-4 rounded-md mr-2">
+            <button v-if="$auth.user.guild === null"
+                    class="bg-yellow text-primary py-2 px-4 rounded-md mr-2"
+                    @click="requestOrJoin">
               <span v-if="guild.open">Join the guild</span>
               <span v-else>Request to join</span>
             </button>
             <button v-else-if="$auth.user.guild.id === guild.id"
                     class="bg-yellow text-primary py-2 px-4 rounded-md mr-2"
                     @click="leaveOrDestroyGuild">
-              <span v-if="$auth.user.guild.id === guild.owner.id">Destroy guild</span>
+              <span v-if="$auth.user.id === guild.owner.id">Destroy guild</span>
               <span v-else>Leave guild</span>
             </button>
             <div v-else class="inline-block px-4">
@@ -87,7 +89,7 @@
           </div>
           <div class="px-1">
             <div class="max-h-80 overflow-y-auto" v-if="tab === 'members'">
-              <nuxt-link class="block flex items-center bg-cream text-primary px-4 py-2 my-2"
+              <nuxt-link class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
                          v-for="(user, index) in guild.users" :key="`user-guild-${index}`"
                          :to="`/users/${user.login}`">
                 <avatar class="h-12 w-12" :image-url="user.avatar"/>
@@ -127,7 +129,7 @@ export default class SingleGuild extends Vue {
 
   validate({params}: Context) {
     const anagram = params.anagram
-    return (anagram !== 'mine' && anagram.length >= 3 && anagram.length <= 5)
+    return (anagram !== 'mine' && anagram !== 'create' && anagram.length >= 3 && anagram.length <= 5)
   }
 
   async asyncData({app, params, error}: Context) {
@@ -143,10 +145,33 @@ export default class SingleGuild extends Vue {
 
   leaveOrDestroyGuild() {
     this.$axios.post('guilds/mine/leave')
-      .then(() => {
-        this.$toast.success(`You leaved your guild`)
+      .then((result) => {
+        if ((this.$auth.user as any).id === this.guild?.owner.id) {
+          this.$toast.success(`You destroyed your guild`)
+        } else {
+          this.$toast.success(`You left your guild`)
+        }
+        this.guild = result.data
+        this.$auth.fetchUser()
+        if (this.guild?.users.length === 0)
+          this.$router.push('/')
+        // this.$auth.user.guild = null
       }).catch((error) => {
         this.$toast.error(error.response.data.message[0])
+    })
+  }
+
+  requestOrJoin() {
+    this.$axios.post(`guilds/join`, {
+      guild: {
+        id: this.guild?.id
+      }
+    }).then((result) => {
+      this.$toast.success(`You joined the guild ${this.guild?.name}`)
+      this.$auth.fetchUser()
+      this.guild = result.data
+    }).catch((err) => {
+      this.$toast.error(err.response.data.message[0])
     })
   }
 

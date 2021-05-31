@@ -25,7 +25,9 @@ export class User {
     @Column({ default: null })
     first_name: string
 
-    @ManyToOne(type => Guild)
+    @ManyToOne(type => Guild, {
+        onDelete: "SET NULL",
+    })
     @JoinColumn()
     guild: Guild
 

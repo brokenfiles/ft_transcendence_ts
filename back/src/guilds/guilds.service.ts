@@ -5,6 +5,7 @@ import {Repository} from "typeorm";
 import {CreateGuildDto} from "./dto/create-guild.dto";
 import {UpdateGuildDto} from "./dto/update-guild.dto";
 import {UsersService} from "../users/users.service";
+import {JoinGuildDto} from "./dto/join-guild.dto";
 
 @Injectable()
 export class GuildsService {
@@ -86,11 +87,11 @@ export class GuildsService {
      */
     async leave(sub: number): Promise<Guild> {
         let user = await this.usersService.findOne(sub)
-        let guild = user.guild
+        let guild: Guild = await this.findOne(user.guild.id)
         if (guild.owner.id === user.id) {
-            guild.users = []
-            guild.owner = null
+            return this.guildRepository.remove(guild)
         } else {
+            //TODO: à tester : le leave
             const index = guild.users.map(u => u.id).indexOf(sub)
             if (index === -1)
                 throw new HttpException({
@@ -99,11 +100,25 @@ export class GuildsService {
                     ]
                 }, HttpStatus.BAD_REQUEST)
             guild.users.splice(index, 1)
-        }
-        if (guild.users.length > 0) {
             return this.guildRepository.save(guild)
-        } else {
-            return this.guildRepository.remove(guild)
         }
+    }
+
+    async joinOrRequestGuild(sub: number, joinGuild: JoinGuildDto) {
+        let user = await this.usersService.findOne(sub)
+        let guild = await this.findOne(joinGuild.guild.id)
+        const ids = guild.users.map(u => u.id)
+        if (ids.includes(user.id))
+            throw new HttpException({
+                message: [
+                    'You are already in this guild'
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        if (guild.open) {
+            guild.users.push(user)
+        } else {
+            // create a guild request
+        }
+        return this.guildRepository.save(guild)
     }
 }

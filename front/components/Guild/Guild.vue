@@ -15,8 +15,8 @@
           users
         </p>
         <p class="bg-primary px-4">
-          <span class="font-semibold">{{ 53 }} </span>
-          wars won
+          <span class="font-semibold">{{ guild.points }} </span>
+          points
         </p>
         <p class="bg-primary px-4">
           ratio
@@ -28,8 +28,7 @@
         <nuxt-link class="text-yellow" :to="`/users/${ this.guild.owner.login }`">{{ this.guild.owner.display_name }}</nuxt-link>
       </p>
       <nuxt-link :to="`/guilds/${guild.anagram}`" class="bg-yellow text-primary mt-2 py-2 w-full block">
-        <span v-if="guild.open">Join guild</span>
-        <span v-else>Request to join</span>
+        <span>See guild details</span>
       </nuxt-link>
     </div>
   </div>
