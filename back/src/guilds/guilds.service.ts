@@ -45,7 +45,7 @@ export class GuildsService {
             .catch(() => {
                 throw new HttpException({
                     message: [
-                        `Can't create a new guild. Maybe requester has already a guild`
+                        `Something went wrong when we tried to create your guild. Be sure that no other guild has the same name or anagram and that you does not have a guild`
                     ]
                 }, HttpStatus.BAD_REQUEST)
             })

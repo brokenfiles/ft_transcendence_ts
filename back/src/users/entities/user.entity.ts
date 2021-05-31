@@ -2,7 +2,7 @@ import {
     Column,
     Entity,
     JoinColumn, JoinTable, ManyToMany,
-    ManyToOne, OneToMany,
+    ManyToOne, OneToMany, OneToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
@@ -10,6 +10,7 @@ import {Channel} from "../../gateways/websocket/entities/channel.entity";
 import {Message} from "../../gateways/websocket/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
 import {Role} from "../../auth/roles/enums/role.enum";
+import {JoinRequest} from "../../guilds/entities/join-request.entity";
 
 @Entity("users")
 export class User {
@@ -30,6 +31,9 @@ export class User {
     })
     @JoinColumn()
     guild: Guild
+
+    @OneToOne(type => JoinRequest, joinRequest => joinRequest.requester)
+    joinRequest: JoinRequest
 
     @OneToMany(type => Message, message => message.owner)
     messages: Message[]

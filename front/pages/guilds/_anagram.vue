@@ -6,13 +6,13 @@
         <div>
           <div v-if="$auth.loggedIn" class="inline-block">
             <button v-if="$auth.user.guild === null"
-                    class="bg-yellow text-primary py-2 px-4 rounded-md mr-2"
+                    class="bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
                     @click="requestOrJoin">
               <span v-if="guild.open">Join the guild</span>
               <span v-else>Request to join</span>
             </button>
             <button v-else-if="$auth.user.guild.id === guild.id"
-                    class="bg-yellow text-primary py-2 px-4 rounded-md mr-2"
+                    class="bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
                     @click="leaveOrDestroyGuild">
               <span v-if="$auth.user.id === guild.owner.id">Destroy guild</span>
               <span v-else>Leave guild</span>
@@ -153,7 +153,7 @@ export default class SingleGuild extends Vue {
         }
         this.guild = result.data
         this.$auth.fetchUser()
-        if (this.guild?.users.length === 0)
+        if (this.guild?.owner.id === (this.$auth.user as any).id)
           this.$router.push('/')
         // this.$auth.user.guild = null
       }).catch((error) => {

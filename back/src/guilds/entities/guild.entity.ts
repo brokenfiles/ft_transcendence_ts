@@ -15,10 +15,15 @@ export class Guild {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string
 
-    @Column({default: null})
+    @Column({
+        default: null,
+        unique: true
+    })
     anagram: string
 
     @Column({default: 0})
