@@ -20,12 +20,14 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    // { src: '~/plugins/socket.io.ts', mode: 'client' }
     {
       src: '~/plugins/socket.io.extended.js',
       mode: 'client',
     },
-    { src: 'node_modules/nuxtjs-phaser', mode: 'client' }
+    {
+      src: '~/plugins/timeago.js',
+      mode: 'client'
+    }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -99,7 +101,7 @@ export default {
           logout: false
         }
       },
-      custom: {
+      fake: {
         scheme: 'refresh',
         token: {
           property: 'access_token',
@@ -116,7 +118,7 @@ export default {
           autoFetch: true
         },
         endpoints: {
-          login: { url: '/auth/42/faketoken', method: 'post' },
+          login: { url: '/auth/42/faketoken', method: 'get' },
           user: { url: '/auth/42/me', method: 'get' },
           refresh: { url: '/auth/42/refresh', method: 'post' },
           logout: false
@@ -146,7 +148,6 @@ export default {
     babel: {
       plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
     },
-    extractCSS: true
   },
 
   loading: {

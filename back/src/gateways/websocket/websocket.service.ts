@@ -1,11 +1,11 @@
 import {Injectable} from "@nestjs/common";
 import {InjectRepository} from "@nestjs/typeorm";
-import {Channel} from "./entities/channel.entity";
 import {Repository} from "typeorm";
-import {Message} from "./entities/message.entity";
 import {Server, Socket} from "socket.io";
 import {ClientInterface} from "./interfaces/client.interface";
 import {NotifyOptions} from "./interfaces/notification/notify.options.interface";
+import {Channel} from "../../chat/entities/channel.entity";
+import {Message} from "../../chat/entities/message.entity";
 
 @Injectable()
 export class WebsocketService {
@@ -38,17 +38,13 @@ export class WebsocketService {
         }
     }
 
-    public addClient(client: Socket, sub: number, server: Server) {
-        const payload: ClientInterface = {
-            id: client.id,
-            socket: client,
-            userId: sub
-        }
+    public addClient(client: Socket, payload: ClientInterface, server: Server) {
+        payload.id = client.id
+        payload.socket = client
         if (this._clients.filter(client => client.userId == payload.userId).length == 0) {
             this._clients.push(payload)
             this.broadcastOnlineClients(server)
         }
-
     }
 
     public removeClient(clientUid: string, server: Server): number {

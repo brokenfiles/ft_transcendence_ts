@@ -45,7 +45,6 @@ export default class Default extends Vue {
     this.$root.$on('beforeWsConnect', () => this.defineSocketToken())
     // by default, connect the user even if he is not authenticated
     this.$socket.client.connect()
-
   }
 
   /**
@@ -53,9 +52,9 @@ export default class Default extends Vue {
   **/
   defineSocketToken() {
     if (this.$auth.loggedIn) {
-      const token = this.getTokenWithoutBearer
+      const token = this.getTokenWithoutBearer()
       this.$socket.client.io.opts.query = {
-        token: token
+        token
       }
     }
   }
@@ -63,9 +62,8 @@ export default class Default extends Vue {
   /**
    * Returns the token without the bearer
    */
-  get getTokenWithoutBearer(): string {
+  getTokenWithoutBearer(): string {
     const bearerToken = (this.$auth.strategy as any).token.get()
-    console.log("bearer: " + bearerToken)
     if (bearerToken.length > 0) {
       const tokenParts = bearerToken.split(' ')
       if (tokenParts.length > 1) {
@@ -92,7 +90,9 @@ export default class Default extends Vue {
     if (process.client) {
       if (this.$auth && this.$auth.loggedIn && this.$auth.user) {
         // set set the token to socket.io client
-        this.$socket.client.emit('userOnline')
+        this.$socket.client.emit('userOnline', {
+          userId: this.$auth.user.id
+        })
       }
     }
   }

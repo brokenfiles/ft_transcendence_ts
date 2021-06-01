@@ -23,10 +23,6 @@
         "./*"
       ]
     },
-    "typeRoots": [
-      "./node_modules/phaser/types",
-      "nuxtjs-phaser/types"
-    ],
     "types": [
       "@nuxt/types",
       "@nuxtjs/auth",
@@ -34,13 +30,8 @@
       "@nuxtjs/axios",
       "@nuxtjs/auth-next",
       "@nuxtjs/toast",
-      "phaser",
-      "typings/plugins.d.ts"
     ]
   },
-//  "include": [
-//    "**/*.ts"
-//  ],
   "exclude": [
     "node_modules",
     ".nuxt",

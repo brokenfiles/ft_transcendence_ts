@@ -8,8 +8,8 @@
             <font-awesome-icon :icon="['fas', 'play-circle']"></font-awesome-icon>
           </div>
           <div class="item-content pr-8 pl-4 font-semibold">
-            <div class="item-link my-2 text-xl">
-              <a href="#">Play</a>
+            <div class="item-link my-2 text-xl" @click="extended = false">
+              <nuxt-link to="#">Play</nuxt-link>
             </div>
             <div class="item-link my-2">
               <div class="flex border-2 items-center rounded py-2 px-4">
@@ -28,13 +28,13 @@
             <font-awesome-icon :icon="['fas', 'users']"></font-awesome-icon>
           </div>
           <div class="item-content pr-8 pl-4 font-semibold">
-            <div class="item-link my-2 text-xl">
+            <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/guilds">Guilds</nuxt-link>
             </div>
-            <div class="item-link my-2 text-xl">
+            <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/guilds/create">Create a guild</nuxt-link>
             </div>
-            <div class="item-link my-2 text-xl">
+            <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/">Join a guild</nuxt-link>
             </div>
           </div>
@@ -46,8 +46,8 @@
             <font-awesome-icon :icon="['fas', 'star']"></font-awesome-icon>
           </div>
           <div class="item-content pr-8 pl-4 font-semibold">
-            <div class="item-link my-2 text-xl">
-              <a href="#">Leaderboard</a>
+            <div class="item-link my-2 text-xl" @click="extended = false">
+              <nuxt-link to="#">Leaderboard</nuxt-link>
             </div>
           </div>
         </div>
@@ -66,7 +66,7 @@ export default class Sidebar extends Vue {
   extended: boolean = false
 
   mounted() {
-    this.$root.$on('toggleSidebar', () => this.extended = !this.extended)
+    this.$root.$on('toggleSidebar',  () => this.extended = !this.extended)
   }
 
 }
@@ -105,11 +105,14 @@ export default class Sidebar extends Vue {
   max-height: 0;
 }
 
-#sidebar:hover {
-  max-width: 500px;
+@media screen and (min-width: 768px) {
+  #sidebar:hover {
+    max-width: 500px;
+  }
+
+  #sidebar:hover .item-content {
+    max-height: 500px;
+  }
 }
 
-#sidebar:hover .item-content {
-  max-height: 500px;
-}
 </style>

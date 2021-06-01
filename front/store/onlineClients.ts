@@ -1,5 +1,4 @@
 import {Module, Mutation, VuexModule} from "vuex-module-decorators";
-import {Getter, State} from "nuxt-property-decorator";
 
 @Module({
   name: 'onlineClients',

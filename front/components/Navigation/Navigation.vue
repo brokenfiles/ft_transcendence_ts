@@ -48,6 +48,9 @@
               <nuxt-link to="/friends" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 Friends
               </nuxt-link>
+              <button @click="logout" class="md:hidden block dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
+                Logout
+              </button>
             </div>
           </div>
         </div>

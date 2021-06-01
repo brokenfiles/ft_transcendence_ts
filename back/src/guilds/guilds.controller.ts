@@ -19,6 +19,7 @@ import {Roles} from "../auth/roles/roles.decorator";
 import {Role} from "../auth/roles/enums/role.enum";
 import {RolesGuard} from "../auth/roles/roles.guard";
 import {Request} from "express";
+import {JoinGuildDto} from "./dto/join-guild.dto";
 
 @Controller('guilds')
 export class GuildsController {
@@ -47,6 +48,18 @@ export class GuildsController {
     @UseGuards(JwtAuthGuard)
     updateMine(@Req() request, @Body() updateGuild: UpdateGuildDto) {
 
+    }
+
+    @Post("mine/leave")
+    @UseGuards(JwtAuthGuard)
+    leaveGuild(@Req() request) {
+        return this.guildService.leave(request.user.sub)
+    }
+
+    @Post("join")
+    @UseGuards(JwtAuthGuard)
+    joinOrRequest(@Req() request, @Body() joinGuild: JoinGuildDto) {
+        return this.guildService.joinOrRequestGuild(request.user.sub, joinGuild)
     }
 
     @Patch(':id')

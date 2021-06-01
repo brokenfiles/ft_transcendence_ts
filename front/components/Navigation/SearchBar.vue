@@ -1,15 +1,17 @@
 <template>
-  <div id="search-bar" :class="{'max-w-0': !extend, 'border': extend}" class="md:max-w-md px-4 py-2 md:border rounded flex items-center border-cream relative">
+  <div id="search-bar" class="border md:max-w-md px-4 py-2 md:border rounded flex items-center border-cream relative">
     <div class="search-icon">
-      <font-awesome-icon @click="extend = true" :icon="['fas', 'search']"></font-awesome-icon>
+      <font-awesome-icon :icon="['fas', 'search']"></font-awesome-icon>
     </div>
     <input type="text" v-model="search" @focus="focusBar = true" @blur="unFocus"
-           :class="{'w-0': !extend}"
+           ref="searchInput"
            class="flex-1 md:w-full overflow-y-hidden border-none bg-transparent outline-none mx-4 placeholder-cream"
            placeholder="Search...">
-    <div v-show="search.length >= 3 && results.length > 0 && focusBar" class="absolute w-full top-full left-0 right-0 bg-white text-primary">
+    <div v-show="search.length >= 3 && results.length > 0 && focusBar"
+         class="absolute w-full top-full left-0 right-0 bg-white text-primary overflow-y-auto max-h-80">
       <nuxt-link v-for="(user, index) in results" :key="`result-${index}`"
-                 :to="`/users/${user.login}`" class="block p-2 flex flex-wrap items-center hover:bg-gray-200">
+                 :to="`/users/${user.login}`" class="block p-2 flex flex-wrap items-center hover:bg-gray-200"
+                 :class="{'bg-gray-200': selectedResult >= 0 && results[selectedResult] === user}">
         <avatar class="w-10 h-10" :image-url="user.avatar"/>
         <p class="ml-2">
           {{ user.display_name }} <br/>
@@ -44,9 +46,42 @@ export default class SearchBar extends Vue {
 
   search: string = ""
   results: UserInterface[] = []
+  selectedResult: number = -1
   focusBar: boolean = false
   // cette variable correspond au mode téléphone
   extend: boolean = false
+
+  mounted() {
+    document.addEventListener('keydown', this.keyDownEvent)
+  }
+
+  beforeDestroy() {
+    document.removeEventListener('keydown', this.keyDownEvent)
+  }
+
+  keyDownEvent(event: KeyboardEvent) {
+    const key = event.key
+    const searchElement = (this.$refs.searchInput as HTMLElement)
+    if (event.ctrlKey && key === 'k') {
+      searchElement.focus()
+    }
+    if (this.focusBar) {
+      if (key === 'ArrowUp') {
+        if (this.selectedResult <= 0)
+          this.selectedResult = this.results.length - 1
+        else
+          this.selectedResult --
+      } else if (key === 'ArrowDown') {
+        if (this.selectedResult >= this.results.length - 1)
+          this.selectedResult = 0
+        else
+          this.selectedResult ++
+      } else if (key === 'Enter') {
+        searchElement.blur()
+        this.$router.push(`/users/${this.results[this.selectedResult].login}`)
+      }
+    }
+  }
 
   @Watch('search')
   @Debounce(500)
@@ -55,6 +90,10 @@ export default class SearchBar extends Vue {
       this.results = await this.$axios.$get(`/users/search?input=${this.search}`, {
         progress: false
       })
+      if (this.results.length > 0)
+        this.selectedResult = 0
+      else
+        this.selectedResult = -1
     }
   }
 
@@ -66,5 +105,7 @@ export default class SearchBar extends Vue {
 </script>
 
 <style scoped>
-
+#search-bar {
+  height: 42px;
+}
 </style>

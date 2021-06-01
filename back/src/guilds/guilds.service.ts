@@ -5,6 +5,7 @@ import {Repository} from "typeorm";
 import {CreateGuildDto} from "./dto/create-guild.dto";
 import {UpdateGuildDto} from "./dto/update-guild.dto";
 import {UsersService} from "../users/users.service";
+import {JoinGuildDto} from "./dto/join-guild.dto";
 
 @Injectable()
 export class GuildsService {
@@ -44,7 +45,7 @@ export class GuildsService {
             .catch(() => {
                 throw new HttpException({
                     message: [
-                        `Can't create a new guild. Maybe requester has already a guild`
+                        `Something went wrong when we tried to create your guild. Be sure that no other guild has the same name or anagram and that you does not have a guild`
                     ]
                 }, HttpStatus.BAD_REQUEST)
             })
@@ -77,5 +78,47 @@ export class GuildsService {
                 ]
             }, HttpStatus.BAD_REQUEST)
         })
+    }
+
+    /**
+     * Leave the guild
+     * Deletes the guild if the user is the owner
+     * @param {number} sub
+     */
+    async leave(sub: number): Promise<Guild> {
+        let user = await this.usersService.findOne(sub)
+        let guild: Guild = await this.findOne(user.guild.id)
+        if (guild.owner.id === user.id) {
+            return this.guildRepository.remove(guild)
+        } else {
+            //TODO: à tester : le leave
+            const index = guild.users.map(u => u.id).indexOf(sub)
+            if (index === -1)
+                throw new HttpException({
+                    message: [
+                        'You are not part of your own guild. wait what ?'
+                    ]
+                }, HttpStatus.BAD_REQUEST)
+            guild.users.splice(index, 1)
+            return this.guildRepository.save(guild)
+        }
+    }
+
+    async joinOrRequestGuild(sub: number, joinGuild: JoinGuildDto) {
+        let user = await this.usersService.findOne(sub)
+        let guild = await this.findOne(joinGuild.guild.id)
+        const ids = guild.users.map(u => u.id)
+        if (ids.includes(user.id))
+            throw new HttpException({
+                message: [
+                    'You are already in this guild'
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        if (guild.open) {
+            guild.users.push(user)
+        } else {
+            // create a guild request
+        }
+        return this.guildRepository.save(guild)
     }
 }

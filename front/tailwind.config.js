@@ -31,6 +31,9 @@ module.exports = {
       },
       fontSize: {
         xxs: ['0.65rem', '0.80rem']
+      },
+      boxShadow: {
+        tabSelected: 'inset 0 2px 7px 0 rgba(0, 0, 0, 0.5)',
       }
     },
   },

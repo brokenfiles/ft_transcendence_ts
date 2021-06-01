@@ -3,12 +3,10 @@ import {
     CreateDateColumn,
     Entity,
     JoinColumn,
-    ManyToOne,
     OneToMany,
     OneToOne,
     PrimaryGeneratedColumn, UpdateDateColumn
 } from "typeorm";
-import {type} from "os";
 import {User} from "../../users/entities/user.entity";
 
 @Entity()
@@ -17,10 +15,15 @@ export class Guild {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string
 
-    @Column({default: null})
+    @Column({
+        default: null,
+        unique: true
+    })
     anagram: string
 
     @Column({default: 0})

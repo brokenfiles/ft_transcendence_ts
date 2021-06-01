@@ -10,5 +10,7 @@ export interface GuildInterface {
   open: boolean
   users: UserInterface[]
   owner: UserInterface
+  created_at: Date,
+  updated_at: Date
 
 }

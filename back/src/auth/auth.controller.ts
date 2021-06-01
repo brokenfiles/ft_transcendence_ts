@@ -18,7 +18,6 @@ import {LoginDto} from "./dto/login.dto";
 import {RefreshDto} from "./dto/refresh.dto";
 import {CreateUserDto} from "../users/dto/create-user.dto";
 import {JwtAuthGuard} from "./jwt-auth.guard";
-import {FakeloginDto} from "./dto/fakelogin.dto";
 
 @Controller("/auth/42")
 export class AuthController {
@@ -40,51 +39,39 @@ export class AuthController {
         const newAccessToken = await this.authService.refreshToken(refreshToken)
         if (newAccessToken) {
             this.logger.log(`A user refreshed his token`)
-            return response.status(200).json({access_token: newAccessToken, expires_in: jwtConstants.expiresIn })
+            return response.status(200).json({
+                access_token: newAccessToken,
+                expires_in: jwtConstants.expiresIn
+            })
         } else {
-            return response.status(401).json({statusCode: 401, error: 'Unauthorized', message: 'Invalid token.'})
+            return response.status(401).json({
+                statusCode: 401,
+                error: 'Unauthorized',
+                message: 'Invalid token.'
+            })
         }
     }
 
     @Post("/token")
     async callback(@Body() body: LoginDto, @Res() res: Response) {
-        let user
-
-        if (body.code) {
-            const code = body.code
-            const fortyTwoUser = await this.authService.getFortyTwoUser(code)
-
-            if (!fortyTwoUser) {
-                throw new HttpException({
-                    error: `42 user can't be found`
-                }, HttpStatus.BAD_REQUEST)
-            }
-            user = await this.authService.findUserFromLogin(fortyTwoUser.login)
-            if (user === null) {
-                let dto = new CreateUserDto()
-                    .set_avatar(fortyTwoUser.image_url)
-                    .set_display_name(fortyTwoUser.displayname)
-                    .set_first_name(fortyTwoUser.first_name)
-                    .set_login(fortyTwoUser.login)
-
-                user = await this.usersService.create(dto)
-            }
+        const code = body.code
+        const fortyTwoUser = await this.authService.getFortyTwoUser(code)
+        if (!fortyTwoUser) {
+            throw new HttpException({
+                error: `42 user can't be found`
+            }, HttpStatus.BAD_REQUEST)
         }
-        else if (body.guest_name)
-        {
-            user = await this.authService.findUserFromLogin("guest_" + body.guest_name)
+        // fortyTwoUser.login = 'timlecou'
+        let user = await this.authService.findUserFromLogin(fortyTwoUser.login)
+        if (user === null) {
+            let dto = new CreateUserDto()
+                .set_avatar(fortyTwoUser.image_url)
+                .set_display_name(fortyTwoUser.displayname)
+                .set_first_name(fortyTwoUser.first_name)
+                .set_login(fortyTwoUser.login)
 
-            if (!user) {
-                let dto = new CreateUserDto()
-                    .set_avatar("https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg")
-                    .set_display_name("guest_" + body.guest_name)
-                    .set_first_name("guest_" + body.guest_name)
-                    .set_login("guest_" + body.guest_name)
-
-                user = await this.usersService.create(dto)
-            }
+            user = await this.usersService.create(dto)
         }
-
         const payload = {
             username: user.display_name,
             sub: user.id,
@@ -109,38 +96,24 @@ export class AuthController {
      * @param req
      * @param res
      */
-    @Post("/faketoken")
-    async callbackFake(@Body() body: FakeloginDto, @Res() res: Response) {
-
-        let randomize = function () {
-            return Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5)
-        }
-
-        if (!body.pseudo) {
-            return res.status(401).json({
-                statusCode: 401,
-                error: 'Unauthorized',
-                message: 'querystring.user is missing'
-            })
-        }
-        let user = await this.authService.findUserFromLogin("guest_" + body.pseudo)
-
-        if (!user) {
+    @Get("/faketoken")
+    async callbackFake(@Req() req, @Res() res: Response) {
+        const guest_user = `guest_${req.query.user}`
+        let user = await this.authService.findUserFromLogin(guest_user)
+        if (user === null) {
             let dto = new CreateUserDto()
-                .set_avatar("https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg")
-                .set_display_name("guest_" + body.pseudo)
-                .set_first_name("guest_" + body.pseudo)
-                .set_login("guest_" + body.pseudo)
+                .set_avatar(`https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg`)
+                .set_display_name(guest_user)
+                .set_first_name(guest_user)
+                .set_login(guest_user)
 
             user = await this.usersService.create(dto)
         }
-
         const payload = {
             username: user.display_name,
             sub: user.id,
             role: user.role
         }
-
         const access_token = await this.authService.generateToken(payload)
         const refresh_token = await this.authService.generateToken(payload, {
             expiresIn: `${60 * 60 * 24 * 30}s`

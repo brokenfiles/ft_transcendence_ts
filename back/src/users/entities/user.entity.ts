@@ -2,14 +2,15 @@ import {
     Column,
     Entity,
     JoinColumn, JoinTable, ManyToMany,
-    ManyToOne, OneToMany,
+    ManyToOne, OneToMany, OneToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
-import {Channel} from "../../gateways/websocket/entities/channel.entity";
-import {Message} from "../../gateways/websocket/entities/message.entity";
+import {Channel} from "../../chat/entities/channel.entity";
+import {Message} from "../../chat/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
 import {Role} from "../../auth/roles/enums/role.enum";
+import {JoinRequest} from "../../guilds/entities/join-request.entity";
 
 @Entity("users")
 export class User {
@@ -25,17 +26,26 @@ export class User {
     @Column({ default: null })
     first_name: string
 
-    @ManyToOne(type => Guild)
+    @ManyToOne(type => Guild, {
+        onDelete: "SET NULL",
+    })
     @JoinColumn()
     guild: Guild
 
-    @OneToMany(type => Message, message => message.owner)
+    @OneToOne(type => JoinRequest, joinRequest => joinRequest.requester)
+    joinRequest: JoinRequest
+
+
+
+    @OneToMany(() => Message, message => message.owner)
     messages: Message[]
 
     @ManyToMany(() => Channel, channel => channel.users, {
         cascade: true
     })
     channels: Channel[]
+
+
 
     @ManyToMany(() => Achievement, achievement => achievement.users, {
         cascade: true
