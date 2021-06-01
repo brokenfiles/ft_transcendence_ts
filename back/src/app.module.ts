@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import {WebsocketModule} from "./gateways/websocket/websocket.module";
 import {AchievementsModule} from "./achievement/achievements.module";
 import {FriendsModule} from "./friends/friends.module";
+import {ChatsModule} from "./chat/chats.module";
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import {FriendsModule} from "./friends/friends.module";
       AuthModule,
       WebsocketModule,
       AchievementsModule,
-      FriendsModule
+      FriendsModule,
+      ChatsModule
   ],
   controllers: [AppController],
   providers: [AppService],

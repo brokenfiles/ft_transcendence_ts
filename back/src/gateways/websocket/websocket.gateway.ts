@@ -11,6 +11,9 @@ import {WebsocketService} from "./websocket.service";
 import {ClientInterface} from "./interfaces/client.interface";
 import {WsJwtAuthGuard} from "../../auth/ws-jwt-auth.guard";
 import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFilter";
+import {ChatsService} from "../../chat/chats.service";
+import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
+import {Channel} from "../../chat/entities/channel.entity";
 
 @WebSocketGateway(81,
     {
@@ -21,12 +24,13 @@ import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFil
     })
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-  constructor(private chatService: WebsocketService) {}
+  constructor(private websocketService: WebsocketService,
+              private chatsService: ChatsService) {}
 
   @WebSocketServer() server: Server
 
   private logger: Logger = new Logger('ChatGateway')
-  private channels: string[] = []
+  // private channels: string[] = []
 
   /**
    * Hook when the gateway server is initiated
@@ -43,7 +47,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
    */
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client ${client.id} connected`);
-    this.chatService.sendOnlineClientsToClient(client)
+    this.websocketService.sendOnlineClientsToClient(client)
   }
 
   /**
@@ -53,7 +57,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   handleDisconnect(client: Socket) {
     let sub
     this.logger.log(`Client ${client.id} disconnected`);
-    if ((sub = this.chatService.removeClient(client.id, this.server)) !== -1) {
+    if ((sub = this.websocketService.removeClient(client.id, this.server)) !== -1) {
       this.logger.log(`User with id ${sub} is now offline`)
     }
   }
@@ -65,40 +69,47 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * @param {Socket} client
    * @param {ClientInterface} payload
    */
-  @UseGuards(WsJwtAuthGuard)
-  @UseFilters(new UnauthorizedExceptionFilter())
-  @SubscribeMessage("userOnline")
-  userOnlineEvent(client: Socket, payload: ClientInterface) {
-    const { sub } = (client.handshake as any).user
-    if (sub === payload.userId) {
-      this.chatService.addClient(client, payload, this.server)
-      this.logger.log(`User with id ${sub} is now online`)
-    }
-  }
 
-  @SubscribeMessage('msgToServer')
-  msgToServerEvent(client: Socket, payload: string): void {
-    this.logger.log(`Received message from ${client.id} : ${payload}`)
-    this.server.emit('msgToClient', payload)
-  }
+
+
+
+
+  // @UseGuards(WsJwtAuthGuard)
+  // @UseFilters(new UnauthorizedExceptionFilter())
+  // @SubscribeMessage("userOnline")
+  // userOnlineEvent(client: Socket, payload: ClientInterface) {
+  //   const { sub } = (client.handshake as any).user
+  //   if (sub === payload.userId) {
+  //     this.chatService.addClient(client, payload, this.server)
+  //     this.logger.log(`User with id ${sub} is now online`)
+  //   }
+  // }
+  //
+  // @SubscribeMessage('msgToServer')
+  // msgToServerEvent(client: Socket, payload: string): void {
+  //   this.logger.log(`Received message from ${client.id} : ${payload}`)
+  //   this.server.emit('msgToClient', payload)
+  // }
+  //
+
 
   @SubscribeMessage('createChannel')
-  createChannelEvent(client: Socket, payload: string): void {
-    this.logger.log(`Client ${client.id} created channel ${payload}`)
-    this.channels.push(payload)
-    // this.server.emit('channels', this.channels)
-    this.sendChannels(client)
+  createChannelEvent(client: Socket, payload: CreateChannelDto): void {
+    this.logger.log(`Client ${client.id} created channel ${payload.name}`)
+    this.chatsService.createChannel(payload)
+    this.server.emit('getChannels', ["coucou", "pute"])
   }
 
   @SubscribeMessage('getChannels')
-  getChannelsEvent(client: Socket) : void {
-    this.logger.log(`Client ${client.id} requested the channels`)
-    this.sendChannels(client)
+  getChannelsEvent(client: Socket): void {
+    this.logger.log(`Client ${client.id} requested the channelszeeeeeeeeeeeeer`);
   }
 
-  private sendChannels(client: Socket) {
-    client.emit('channels', this.channels)
-  }
+
+  //
+  // private sendChannels(client: Socket) {
+  //   client.emit('channels', this.channels)
+  // }
 
 }
 
