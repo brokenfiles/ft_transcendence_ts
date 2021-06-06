@@ -16,31 +16,31 @@
               Create
             </button>
           </form>
-<!--          <channel v-for="(channel, index) in channels" class="my-2" :key="`channel-${index}`" @click="pickChannel(index)" :name="channel"/>-->
+          <channel v-for="(channel, index) in channels" class="my-2" :key="`channel-${index}`" :name="channel.name" @click="changeCurrChannel(channel.name)"/>
         </div>
 
-<!--        <div v-else-if="picked.channel !== null">-->
-<!--          <button class="text-yellow flex flex-wrap items-center focus:outline-none" @click="picked.channel = null">-->
-<!--            <svg class="mx-2 h-5 w-5 transform rotate-90" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">-->
-<!--              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />-->
-<!--            </svg>-->
-<!--            Back to channels-->
-<!--          </button>-->
-<!--          <p class="text-right">{{ picked.channel }}</p>-->
-<!--          <div class="flex flex-col justify-end">-->
-<!--            <form @submit.prevent="sendMessage()" class="flex mt-2">-->
-<!--              <input v-model="models.message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">-->
-<!--              <button type="submit" class="text-cream ml-2 bg-secondary border border-cream p-2 focus:outline-none">-->
-<!--                Send-->
-<!--              </button>-->
-<!--            </form>-->
-<!--          </div>-->
-<!--          <div class="messages">-->
-<!--            <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">-->
-<!--              <p>{{ message }}</p>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--        </div>-->
+        <div v-else-if="curr_channel !== ''">
+          <button class="text-yellow flex flex-wrap items-center focus:outline-none" @click="curr_channel = ''">
+            <svg class="mx-2 h-5 w-5 transform rotate-90" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            Back to channels
+          </button>
+          <p class="text-right">{{ curr_channel }}</p>
+          <div class="flex flex-col justify-end">
+            <form @submit.prevent="sendMessage()" class="flex mt-2">
+              <input v-model="message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">
+              <button type="submit" class="text-cream ml-2 bg-secondary border border-cream p-2 focus:outline-none">
+                Send
+              </button>
+            </form>
+          </div>
+          <div class="messages">
+            <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">
+              <p>{{ message }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -49,11 +49,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import Channel from "~/components/Chat/Channel.vue";
-import {mapGetters} from "vuex";
-// import {Socket} from "socket.io";
 import {Socket} from "vue-socket.io-extended";
 import {Component} from "nuxt-property-decorator";
-import {Context} from "@nuxt/types";
 
 @Component({
   components: {
@@ -69,29 +66,20 @@ export default class Chat extends Vue {
       message: string = ''
       channel: string =  ''
 
-  // sockets: {
-  //
-  //   connect() {
-  //     this.$data.connected = true
-  //     // this.$data.isChatOpen = true
-  //   },
-  //
-  //   msgToClient(message: string) {
-  //     // const audio = new Audio('sounds/message.mp3');
-  //     // audio.play();
-  //     this.$data.messages.push(message)
-  //   },
-  //
-  //   channels(channels: string[]) {
-  //     this.$data.channels = channels
-  //   }
-  // }
 
-  mounted() {
-        if (this.$auth.loggedIn)
-          this.$auth.fetchUser()
+  @Socket('getChannels')
+  getChannel(channels: string[])
+  {
+    this.channels = channels
+    console.log(channels)
+  }
 
-    this.$socket
+  async mounted() {
+    if (this.$auth.loggedIn) {
+      await this.$auth.fetchUser()
+    }
+    this.$socket.client.emit('getChannels', { user_id: (this.$auth.user as any).id })
+
   }
 
     sendMessage() {
@@ -102,25 +90,25 @@ export default class Chat extends Vue {
       if (this.channel.length > 3) {
         this.$socket.client.emit('createChannel', {
           name: this.channel,
-          // user_id: this.$auth.user.id
+          user_id: (this.$auth.user as any).id
         })
-        // this.$axios.$post("chats/channels", {name: this.models.channel})
         this.channel = ''
       }
     }
 
+  changeCurrChannel(channel_name: string)
+  {
+    this.curr_channel = channel_name
+    console.log(channel_name)
+  }
 
     // pickChannel(channelIndex: number) {
     //   this.$socket.client.emit('changedChanel', this.channels[channelIndex])
     //   this.picked.channel = this.channels[channelIndex]
     //   this.messages = []
     // }
-
-  // computed: {
-  //   ...mapGetters(['isAuthenticated', 'loggedInUser'])
-  // }
-
 }
+
 </script>
 
 <style scoped>

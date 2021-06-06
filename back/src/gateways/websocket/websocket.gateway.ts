@@ -70,10 +70,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * @param {ClientInterface} payload
    */
 
-
-
-
-
   // @UseGuards(WsJwtAuthGuard)
   // @UseFilters(new UnauthorizedExceptionFilter())
   // @SubscribeMessage("userOnline")
@@ -93,16 +89,22 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   //
 
 
+  @UseGuards(WsJwtAuthGuard)
+  @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('createChannel')
   createChannelEvent(client: Socket, payload: CreateChannelDto): void {
     this.logger.log(`Client ${client.id} created channel ${payload.name}`)
-    this.chatsService.createChannel(payload)
-    this.server.emit('getChannels', ["coucou", "pute"])
+    // const { sub } = (client.handshake as any).user
+    this.chatsService.createChannel(payload).then((res) => {
+      this.getChannelsEvent(client)
+    })
   }
 
   @SubscribeMessage('getChannels')
   getChannelsEvent(client: Socket): void {
-    this.logger.log(`Client ${client.id} requested the channelszeeeeeeeeeeeeer`);
+    this.chatsService.findAllChannel().then((res) => {
+      this.server.emit('getChannels', res)
+    })
   }
 
 

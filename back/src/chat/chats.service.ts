@@ -33,6 +33,10 @@ export class ChatsService {
         })
     }
 
+    findChannelWhereUserId(client_id: number) : any {
+        console.log(client_id)
+    }
+
     async createChannel(ChannelDto: CreateChannelDto) {
 
         try {
@@ -40,13 +44,11 @@ export class ChatsService {
                 name: ChannelDto.name
             })
 
-            await this.channelRepository.save(newChannel)
+            newChannel.users = []
+
             let user = await this.usersService.findOne(ChannelDto.user_id)
-            let channel = await this.channelRepository.findOne(newChannel.id, {
-                relations: ["users"]
-            })
-            channel.users.push(user)
-            await this.channelRepository.save(channel)
+            newChannel.users.push(user)
+            await this.channelRepository.save(newChannel)
         }
         catch (e)
         {
