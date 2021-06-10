@@ -36,7 +36,6 @@ export class User {
     joinRequest: JoinRequest
 
 
-
     @OneToMany(() => Message, message => message.owner)
     messages: Message[]
 

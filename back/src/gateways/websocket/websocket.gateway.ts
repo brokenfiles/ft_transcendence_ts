@@ -14,6 +14,7 @@ import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFil
 import {ChatsService} from "../../chat/chats.service";
 import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
 import {Channel} from "../../chat/entities/channel.entity";
+import {SendMessageDto} from "../../chat/dto/send-message.dto";
 
 @WebSocketGateway(81,
     {
@@ -69,47 +70,47 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * @param {Socket} client
    * @param {ClientInterface} payload
    */
+  @UseGuards(WsJwtAuthGuard)
+  @UseFilters(new UnauthorizedExceptionFilter())
+  @SubscribeMessage("userOnline")
+  userOnlineEvent(client: Socket, payload: ClientInterface) {
+    const { sub } = (client.handshake as any).user
+    if (sub === payload.userId) {
+      this.websocketService.addClient(client, payload, this.server)
+      this.logger.log(`User with id ${sub} is now online`)
+    }
+  }
+
+  @SubscribeMessage('msgToServer')
+  async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<void> {
+    await this.chatsService.pushMsgInChannel(payload)
+    let messages = await this.chatsService.getMessageFromChannel(payload.channel)
+    this.server.emit('SendMessagesToClient', messages)
+  }
 
 
-
-
-
-  // @UseGuards(WsJwtAuthGuard)
-  // @UseFilters(new UnauthorizedExceptionFilter())
-  // @SubscribeMessage("userOnline")
-  // userOnlineEvent(client: Socket, payload: ClientInterface) {
-  //   const { sub } = (client.handshake as any).user
-  //   if (sub === payload.userId) {
-  //     this.chatService.addClient(client, payload, this.server)
-  //     this.logger.log(`User with id ${sub} is now online`)
-  //   }
-  // }
-  //
-  // @SubscribeMessage('msgToServer')
-  // msgToServerEvent(client: Socket, payload: string): void {
-  //   this.logger.log(`Received message from ${client.id} : ${payload}`)
-  //   this.server.emit('msgToClient', payload)
-  // }
-  //
-
-
+  @UseGuards(WsJwtAuthGuard)
+  @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('createChannel')
   createChannelEvent(client: Socket, payload: CreateChannelDto): void {
-    this.logger.log(`Client ${client.id} created channel ${payload.name}`)
-    this.chatsService.createChannel(payload)
-    this.server.emit('getChannels', ["coucou", "pute"])
+    this.chatsService.createChannel(payload).then((res) => {
+      this.getChannelsEvent(client, {user_id: payload.user_id})
+    })
   }
 
   @SubscribeMessage('getChannels')
-  getChannelsEvent(client: Socket): void {
-    this.logger.log(`Client ${client.id} requested the channelszeeeeeeeeeeeeer`);
+  getChannelsEvent(client: Socket, payload: any): void {
+    console.log(payload)
+    this.chatsService.findAllChannel(payload.user_id).then((res) => {
+      this.server.emit('getChannels', res)
+    })
   }
 
-
-  //
-  // private sendChannels(client: Socket) {
-  //   client.emit('channels', this.channels)
-  // }
-
+  @SubscribeMessage('getMsgs')
+  async getMessagesEvent(client: Socket, channel: string): Promise<void> {
+    console.log("getmsg: channel:" + channel)
+    const messages = await this.chatsService.getMessageFromChannel(channel)
+    this.server.emit('SendMessagesToClient', messages)
+  }
 }
 
