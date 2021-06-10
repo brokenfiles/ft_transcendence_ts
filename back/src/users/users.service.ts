@@ -20,7 +20,7 @@ export class UsersService {
     findAll(): Promise<User[]> {
         return this.usersRepository.find({
             relations: [
-                'guild', 'achievements'
+                'guild', 'achievements', 'channels', 'messages'
             ]
         })
     }

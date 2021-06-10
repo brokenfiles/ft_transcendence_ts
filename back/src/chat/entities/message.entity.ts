@@ -14,7 +14,7 @@ export class Message {
     id: number
 
     @Column()
-    message: string
+    text: string
 
     @CreateDateColumn()
     created_at: Date

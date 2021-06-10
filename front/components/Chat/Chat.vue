@@ -36,7 +36,7 @@
             </form>
           </div>
           <div class="messages">
-            <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">
+            <div v-for="(message, index) in this.messages" :key="`message-${index}`"  class="">
               <p>{{ message }}</p>
             </div>
           </div>
@@ -50,7 +50,7 @@
 import Vue from 'vue'
 import Channel from "~/components/Chat/Channel.vue";
 import {Socket} from "vue-socket.io-extended";
-import {Component} from "nuxt-property-decorator";
+import {Component, Watch} from "nuxt-property-decorator";
 
 @Component({
   components: {
@@ -67,23 +67,36 @@ export default class Chat extends Vue {
       channel: string =  ''
 
 
-  @Socket('getChannels')
-  getChannel(channels: string[])
-  {
-    this.channels = channels
-    console.log(channels)
-  }
-
-  async mounted() {
-    if (this.$auth.loggedIn) {
-      await this.$auth.fetchUser()
+    @Socket('getChannels')
+    getChannel(channels: string[])
+    {
+      this.channels = channels
     }
-    this.$socket.client.emit('getChannels', { user_id: (this.$auth.user as any).id })
 
-  }
+    @Socket('SendMessagesToClient')
+    getMessage(messages: string[])
+    {
+      console.log("messages from channel: ", messages)
+      this.messages = messages
+
+    }
+
+
+
+    async mounted() {
+      if (this.$auth.loggedIn) {
+        await this.$auth.fetchUser()
+        await this.$socket.client.emit('getChannels', { user_id: (this.$auth.user as any).id })
+      }
+    }
 
     sendMessage() {
-      this.$socket.client.emit('msgToServer', this.message)
+      this.$socket.client.emit('msgToServer',
+        {
+          channel: this.curr_channel,
+          message: this.message,
+          user_id: (this.$auth.user as any).id
+        })
     }
 
     createChannel() {
@@ -96,11 +109,18 @@ export default class Chat extends Vue {
       }
     }
 
-  changeCurrChannel(channel_name: string)
-  {
-    this.curr_channel = channel_name
-    console.log(channel_name)
-  }
+    GetMsgsFromChannel(curr_channel: string)
+    {
+      this.$socket.client.emit('getMsgs',
+        curr_channel
+      )
+    }
+
+    changeCurrChannel(channel_name: string)
+    {
+      this.curr_channel = channel_name
+      this.GetMsgsFromChannel(this.curr_channel)
+    }
 
     // pickChannel(channelIndex: number) {
     //   this.$socket.client.emit('changedChanel', this.channels[channelIndex])

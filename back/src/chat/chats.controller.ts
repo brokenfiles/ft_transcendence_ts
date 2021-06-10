@@ -14,7 +14,7 @@ export class ChatsController {
 
     @Get("channels")
     findAllChannels(@Req() req: Request) {
-        return this.chatsService.findAllChannel()
+        // return this.chatsService.findAllChannel()
     }
 
     @Post("channels")
