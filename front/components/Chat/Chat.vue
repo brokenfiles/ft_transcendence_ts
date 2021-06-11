@@ -26,7 +26,8 @@
             </svg>
             Back to channels
           </button>
-          <p class="text-right">{{ curr_channel }}</p>
+          <p class="">{{ curr_channel }}</p>
+          <p @click="invitUser()">Invit User</p>
           <div class="flex flex-col justify-end">
             <form @submit.prevent="sendMessage()" class="flex mt-2">
               <input v-model="message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">
@@ -86,7 +87,7 @@ export default class Chat extends Vue {
     async mounted() {
       if (this.$auth.loggedIn) {
         await this.$auth.fetchUser()
-        await this.$socket.client.emit('getChannels', { user_id: (this.$auth.user as any).id })
+        await this.$socket.client.emit('getChannels')
       }
     }
 
@@ -103,7 +104,6 @@ export default class Chat extends Vue {
       if (this.channel.length > 3) {
         this.$socket.client.emit('createChannel', {
           name: this.channel,
-          user_id: (this.$auth.user as any).id
         })
         this.channel = ''
       }
