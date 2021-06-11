@@ -8,13 +8,15 @@ import {UsersService} from "../users/users.service";
 import {SendMessageDto} from "./dto/send-message.dto";
 import {PrivacyEnum} from "./enums/privacy.enum";
 import {WsException} from "@nestjs/websockets";
+import {WebsocketService} from "../gateways/websocket/websocket.service";
 
 @Injectable()
 export class ChatsService {
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,
                 @InjectRepository(Message) private messageRepository: Repository<Message>,
-                private readonly usersService : UsersService) {}
+                private readonly usersService : UsersService,
+                private readonly websocketService : WebsocketService) {}
 
     findAllMessages() : Promise<Message[]> {
         return this.messageRepository.find({}).catch((err) => {
@@ -27,8 +29,25 @@ export class ChatsService {
     async findAllChannel(user_id: number): Promise<Channel[]> {
 
         let user = await this.usersService.findOne(user_id, ['channels'])
+
+        let publicChannels = await this.channelRepository.find({
+            where: {
+                privacy: PrivacyEnum.PUBLIC,
+            }
+        })
+
+        const channels_id = user.channels.map((c) => c.id)
+
+        for (const channel of publicChannels)
+        {
+            if (!channels_id.includes(channel.id))
+                user.channels.push(channel)
+        }
+
         for (let channel of user.channels)
             delete channel.password
+        // console.log(user.channels)
+
         return user.channels
     }
 
@@ -60,7 +79,7 @@ export class ChatsService {
                     newChannel.users.push(tmp)
                 }
             }
-            await this.channelRepository.save(newChannel)
+            return this.channelRepository.save(newChannel)
         }
         catch (e)
         {
@@ -119,5 +138,14 @@ export class ChatsService {
             }, HttpStatus.BAD_REQUEST)
         }
 
+    }
+
+    async findOneChannel(channel: string) {
+        return this.channelRepository.findOne({
+            relations: ['users'],
+            where: {
+                name: channel
+            }
+        })
     }
 }

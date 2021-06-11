@@ -15,6 +15,7 @@ import {ChatsService} from "../../chat/chats.service";
 import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
 import {Channel} from "../../chat/entities/channel.entity";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
+import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 
 @WebSocketGateway(81,
     {
@@ -87,7 +88,19 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<void> {
     await this.chatsService.pushMsgInChannel(payload)
     let messages = await this.chatsService.getMessageFromChannel(payload.channel)
-    this.server.emit('SendMessagesToClient', messages)
+    const channel = await this.chatsService.findOneChannel(payload.channel)
+    if (channel)
+    {
+
+      let users_id = channel.users.map((u) => u.id)
+      for (const user of users_id) {
+        const index = this.websocketService.onlineClients.indexOf(user)
+        if (index !== -1) {
+          // console.log(this.websocketService.clients[index].userId);
+          this.websocketService.clients[index].socket.emit('SendMessagesToClient', messages)
+        }
+      }
+    }
   }
 
 
@@ -95,9 +108,25 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('createChannel')
   createChannelEvent(client: Socket, payload: CreateChannelDto): void {
-    const { sub } = (client.handshake as any).user
+    const {sub} = (client.handshake as any).user
     this.chatsService.createChannel(payload, sub).then((res) => {
-      this.getChannelsEvent(client)
+
+      if (res.privacy === PrivacyEnum.PUBLIC) {
+        this.chatsService.findAllChannel(sub).then((c) => {
+          this.server.emit('getChannels', c)
+        })
+      }
+      else {
+        let users_id = res.users.map((u) => u.id)
+        for (const user of users_id) {
+          const index = this.websocketService.onlineClients.indexOf(user)
+          if (index !== -1) {
+            this.chatsService.findAllChannel(user).then((channels) => {
+              this.websocketService.clients[index].socket.emit('getChannels', channels)
+            })
+          }
+        }
+      }
     })
   }
 
@@ -107,7 +136,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   getChannelsEvent(client: Socket): void {
     const { sub } = (client.handshake as any).user
     this.chatsService.findAllChannel(sub).then((res) => {
-      this.server.emit('getChannels', res)
+      client.emit('getChannels', res)
     })
   }
 
@@ -116,7 +145,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @SubscribeMessage('getMsgs')
   async getMessagesEvent(client: Socket, channel: string): Promise<void> {
     const messages = await this.chatsService.getMessageFromChannel(channel)
-    this.server.emit('SendMessagesToClient', messages)
+    client.emit('SendMessagesToClient', messages)
   }
 }
 
