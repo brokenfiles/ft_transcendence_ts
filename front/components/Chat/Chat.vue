@@ -15,21 +15,7 @@
 
         <div v-show="curr_channel !== ''">
           <back-button @back="curr_channel = ''">Back to channels</back-button>
-
-          <p class="text-right">{{ curr_channel }}</p>
-          <div class="flex flex-col justify-end">
-            <form @submit.prevent="sendMessage()" class="flex mt-2">
-              <input v-model="message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">
-              <button type="submit" class="text-cream ml-2 bg-secondary border border-cream p-2 focus:outline-none">
-                Send
-              </button>
-            </form>
-          </div>
-          <div class="messages">
-            <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">
-              <p>{{ message }}</p>
-            </div>
-          </div>
+          <channel-tab :curr_channel="curr_channel"/>
         </div>
       </div>
     </div>
@@ -43,16 +29,18 @@ import {Socket} from "vue-socket.io-extended";
 import {Component} from "nuxt-property-decorator";
 import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
 import HomeTab from "~/components/Chat/Tabs/HomeTab.vue";
+import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
 
 @Component({
   components: {
     Channel,
     HomeTab,
-    BackButton
+    BackButton,
+    ChannelTab
   }
 })
 export default class Chat extends Vue {
-  messages: string[] = []
+
   channels: string[] = []
   isChatOpen: boolean = false
   connected: boolean = false
@@ -65,12 +53,6 @@ export default class Chat extends Vue {
     this.channels = channels
   }
 
-  @Socket('SendMessagesToClient')
-  getMessage(messages: string[]) {
-    console.log("messages from channel: ", messages)
-    this.messages = messages
-  }
-
   async mounted() {
     if (this.$auth.loggedIn) {
       await this.$auth.fetchUser()
@@ -78,16 +60,7 @@ export default class Chat extends Vue {
     }
   }
 
-  sendMessage() {
-    this.$socket.client.emit('msgToServer',
-      {
-        channel: this.curr_channel,
-        message: this.message,
-        user_id: (this.$auth.user as any).id
-      })
-  }
-
-  GetMsgsFromChannel(curr_channel: string) {
+  getMessagesFromChannel(curr_channel: string) {
     this.$socket.client.emit('getMsgs',
       curr_channel
     )
@@ -95,7 +68,7 @@ export default class Chat extends Vue {
 
   changeCurrChannel(channel_name: string) {
     this.curr_channel = channel_name
-    this.GetMsgsFromChannel(this.curr_channel)
+    this.getMessagesFromChannel(this.curr_channel)
   }
 
 }

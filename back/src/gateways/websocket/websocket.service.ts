@@ -66,8 +66,4 @@ export class WebsocketService {
         return this._clients
     }
 
-    // async createChannel(channelOptions: any): Promise<Channel> {
-    //     const channel = this.channelRepository.create(channelOptions)
-        // return (this.channelRepository.save(channel))
-    // }
 }

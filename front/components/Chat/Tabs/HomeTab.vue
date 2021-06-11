@@ -6,7 +6,7 @@
     </button>
 
     <div v-if="in_creation">
-      <channel-creation @createdChannel="/* pick the channel */" @close="in_creation = false"/>
+      <channel-creation @createdChannel="in_creation = false" @close="in_creation = false"/>
     </div>
 
     <div v-else-if="channel_category === ''">
@@ -17,7 +17,10 @@
     <div v-else>
       <back-button @back="channel_category = ''">Back to home</back-button>
 <!--      display the channels if there are private or public-->
-      <channel v-for="(channel, index) in channels" class="my-2" :key="`channel-${index}`" :name="channel.name" @click="changeCurrChannel(channel.name)"/>
+      <channel v-for="(channel, index) in channels" class="my-2"
+               :key="`channel-${index}`" :name="channel.name"
+               :privacy="channel.privacy" :channel_category="channel_category.toLowerCase()"
+               @click="changeCurrChannel(channel.name)"/>
     </div>
   </div>
 </template>

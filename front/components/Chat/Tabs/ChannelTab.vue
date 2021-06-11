@@ -1,14 +1,65 @@
 <template>
   <div>
+    <p class="text-right">{{ curr_channel }}</p>
+    <div class="flex flex-col justify-end">
+      <form @submit.prevent="sendMessage()" class="flex mt-2">
+        <input v-model="model_message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">
+        <button type="submit" class="text-cream ml-2 bg-secondary border border-cream p-2 focus:outline-none">
+          Send
+        </button>
+      </form>
+    </div>
+    <div class="messages mt-4">
+      <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">
+        <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import {Component} from 'nuxt-property-decorator'
+import {Component, Prop} from 'nuxt-property-decorator'
+import {Socket} from "vue-socket.io-extended";
+import {MessageInterface} from "~/utils/interfaces/chat/message.interface";
+import ChatMessage from "~/components/Chat/Tabs/Components/ChatMessage.vue";
 
-@Component({})
+@Component({
+  components: {
+    ChatMessage
+  }
+})
 export default class ChannelTab extends Vue {
+
+  /** Models */
+  model_message: string = ''
+
+  /** Variables */
+  messages: MessageInterface[] = []
+
+  /** Properties */
+  @Prop({required: true}) curr_channel!: string
+
+  /** Methods */
+
+  /**
+   * Send a message to the back
+   */
+  sendMessage() {
+    this.$socket.client.emit('msgToServer', {
+        channel: this.curr_channel,
+        message: this.model_message,
+        user_id: (this.$auth.user as any).id
+      })
+    this.model_message = ''
+  }
+
+  /** Socket listeners */
+  @Socket('SendMessagesToClient')
+  getMessage(messages: string[]) {
+    console.log("messages from channel: ", messages)
+    this.messages = messages
+  }
 
 }
 </script>
