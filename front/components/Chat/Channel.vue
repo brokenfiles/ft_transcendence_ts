@@ -24,10 +24,10 @@ export default class Channel extends Vue {
 
   /** Computed */
   get isVisible (): boolean {
-    if (this.channel_category === 'public')
+    if (this.channel_category === 'public' && this.privacy === PrivacyEnum.PUBLIC)
       return true
-    return this.privacy === PrivacyEnum.PRIVATE ||
-      this.privacy === PrivacyEnum.PASSWORD &&
+    return (this.privacy === PrivacyEnum.PRIVATE ||
+      this.privacy === PrivacyEnum.PASSWORD) &&
       this.channel_category === "private";
   }
 

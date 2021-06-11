@@ -1,6 +1,12 @@
 <template>
   <div>
     <p class="text-right">{{ curr_channel }}</p>
+    <hr class="mt-1">
+    <div class="messages my-4">
+      <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">
+        <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
+      </div>
+    </div>
     <div class="flex flex-col justify-end">
       <form @submit.prevent="sendMessage()" class="flex mt-2">
         <input v-model="model_message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">
@@ -8,11 +14,6 @@
           Send
         </button>
       </form>
-    </div>
-    <div class="messages mt-4">
-      <div v-for="(message, index) in messages" :key="`message-${index}`"  class="">
-        <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
-      </div>
     </div>
   </div>
 </template>
@@ -46,12 +47,14 @@ export default class ChannelTab extends Vue {
    * Send a message to the back
    */
   sendMessage() {
-    this.$socket.client.emit('msgToServer', {
-        channel: this.curr_channel,
-        message: this.model_message,
-        user_id: (this.$auth.user as any).id
-      })
-    this.model_message = ''
+    if (this.model_message.length > 0) {
+      this.$socket.client.emit('msgToServer', {
+          channel: this.curr_channel,
+          message: this.model_message,
+          user_id: (this.$auth.user as any).id
+        })
+      this.model_message = ''
+    }
   }
 
   /** Socket listeners */
