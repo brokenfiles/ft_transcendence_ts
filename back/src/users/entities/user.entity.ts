@@ -41,7 +41,8 @@ export class User {
     messages: Message[]
 
     @ManyToMany(() => Channel, channel => channel.users, {
-        cascade: true
+        cascade: true,
+        onDelete: "SET NULL"
     })
     channels: Channel[]
 

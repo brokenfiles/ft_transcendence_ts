@@ -96,8 +96,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @SubscribeMessage('createChannel')
   createChannelEvent(client: Socket, payload: CreateChannelDto): void {
     const { sub } = (client.handshake as any).user
-    payload.user_id = sub
-    this.chatsService.createChannel(payload).then((res) => {
+    this.chatsService.createChannel(payload, sub).then((res) => {
       this.getChannelsEvent(client)
     })
   }
@@ -107,7 +106,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @SubscribeMessage('getChannels')
   getChannelsEvent(client: Socket): void {
     const { sub } = (client.handshake as any).user
-
     this.chatsService.findAllChannel(sub).then((res) => {
       this.server.emit('getChannels', res)
     })
@@ -117,7 +115,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('getMsgs')
   async getMessagesEvent(client: Socket, channel: string): Promise<void> {
-    console.log("getmsg: channel:" + channel)
     const messages = await this.chatsService.getMessageFromChannel(channel)
     this.server.emit('SendMessagesToClient', messages)
   }

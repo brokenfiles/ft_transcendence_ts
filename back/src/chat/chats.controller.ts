@@ -7,19 +7,4 @@ export class ChatsController {
 
     constructor(private readonly chatsService : ChatsService) {}
 
-    @Get("messages")
-    findAllMessages(@Req() req: Request) {
-            return this.chatsService.findAllMessages()
-    }
-
-    @Get("channels")
-    findAllChannels(@Req() req: Request) {
-        // return this.chatsService.findAllChannel()
-    }
-
-    @Post("channels")
-    CreateChannel(@Body() body) {
-        return this.chatsService.createChannel(body.name)
-    }
-
 }

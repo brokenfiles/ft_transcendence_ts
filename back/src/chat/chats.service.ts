@@ -6,6 +6,8 @@ import {Channel} from "./entities/channel.entity";
 import {CreateChannelDto} from "./dto/create-channel.dto";
 import {UsersService} from "../users/users.service";
 import {SendMessageDto} from "./dto/send-message.dto";
+import {PrivacyEnum} from "./enums/privacy.enum";
+import {WsException} from "@nestjs/websockets";
 
 @Injectable()
 export class ChatsService {
@@ -22,80 +24,77 @@ export class ChatsService {
         })
     }
 
-    async findAllChannel(user_id: number): Promise<{ owner_id: number; name: string; id: number }[]> {
+    async findAllChannel(user_id: number): Promise<Channel[]> {
 
         let user = await this.usersService.findOne(user_id, ['channels'])
-
-        return user.channels.map((channel) => {
-            return {
-                id: channel.id,
-                name: channel.name,
-                owner_id: user.id
-            }
-        })
-
-        // return this.channelRepository.find({
-        //     relations: [
-        //         'messages', 'users'
-        //     ],
-        // }).catch((err) => {
-        //     throw new HttpException({
-        //         error: err.message
-        //     }, HttpStatus.BAD_REQUEST)
-        // })
+        for (let channel of user.channels)
+            delete channel.password
+        return user.channels
     }
 
     findChannelWhereUserId(client_id: number) : any {
         console.log(client_id)
     }
 
-    async createChannel(ChannelDto: CreateChannelDto) {
+    async createChannel(ChannelDto: CreateChannelDto, sub: number) {
 
         try {
             let newChannel = await this.channelRepository.create({
-                name: ChannelDto.name
+                name: ChannelDto.name,
+                privacy: ChannelDto.privacy
             })
+
+            if (ChannelDto.privacy === PrivacyEnum.PASSWORD)
+                newChannel.password = ChannelDto.password
 
             newChannel.users = []
 
-            let user = await this.usersService.findOne(ChannelDto.user_id)
+            let user = await this.usersService.findOne(sub)
             newChannel.users.push(user)
+
+            if (ChannelDto.users.length > 0)
+            {
+                for (const user of ChannelDto.users)
+                {
+                    let tmp = await this.usersService.findOne(user)
+                    newChannel.users.push(tmp)
+                }
+            }
             await this.channelRepository.save(newChannel)
         }
         catch (e)
         {
-            throw new HttpException({
+            throw new WsException({
                 error: 'Cant create Channel'
-            }, HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    async getMessageFromChannel(channel_name: string): Promise<string[]>{
-
-        let channel = await this.channelRepository.findOne({
-            relations: ['messages'],
-            where: {
-                name: channel_name
-            }
-        })
-
-        if (channel)
-        {
-            console.log(channel)
-            let messages = channel.messages.map((e) => {
-                return e.text
             })
-            console.log(messages)
-            return messages
         }
-        return null
-
     }
 
+    async getMessageFromChannel(channel_name: string): Promise<Message[]>{
+        try {
+            let channel = await this.channelRepository.findOne({
+                where: {
+                    name: channel_name
+                }
+            })
+            if (channel)
+            {
+                return this.messageRepository.find({
+                        relations: ['owner'],
+                        where: {
+                            channel
+                        }
+                    })
+            }
+        }
+        catch (e) {
+            throw new WsException({
+                error: `Can't get message from channel`
+            })
+        }
+    }
 
     async pushMsgInChannel(sendMessageDto: SendMessageDto) {
-        console.log("sendMessageDto:", sendMessageDto)
-
         try {
             let newMessage = await this.messageRepository.create({
                     text: sendMessageDto.message
@@ -109,9 +108,7 @@ export class ChatsService {
                 }
             })
 
-
             let owner = await this.usersService.findOne(sendMessageDto.user_id, ["messages", "channels"])
-
             newMessage.channel = channel[0]
             newMessage.owner = owner
             await this.messageRepository.save(newMessage)
