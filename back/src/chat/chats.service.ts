@@ -35,19 +35,14 @@ export class ChatsService {
                 privacy: PrivacyEnum.PUBLIC,
             }
         })
-
         const channels_id = user.channels.map((c) => c.id)
-
         for (const channel of publicChannels)
         {
             if (!channels_id.includes(channel.id))
                 user.channels.push(channel)
         }
-
         for (let channel of user.channels)
             delete channel.password
-        // console.log(user.channels)
-
         return user.channels
     }
 

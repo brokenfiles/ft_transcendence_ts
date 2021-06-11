@@ -91,13 +91,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     const channel = await this.chatsService.findOneChannel(payload.channel)
     if (channel)
     {
-
-      let users_id = channel.users.map((u) => u.id)
-      for (const user of users_id) {
-        const index = this.websocketService.onlineClients.indexOf(user)
-        if (index !== -1) {
-          // console.log(this.websocketService.clients[index].userId);
-          this.websocketService.clients[index].socket.emit('SendMessagesToClient', messages)
+      if (channel.privacy === PrivacyEnum.PUBLIC)
+        this.server.emit("SendMessagesToClient", messages)
+      else {
+        let users_id = channel.users.map((u) => u.id)
+        for (const user of users_id) {
+          const index = this.websocketService.onlineClients.indexOf(user)
+          if (index !== -1)
+            this.websocketService.clients[index].socket.emit('SendMessagesToClient', messages)
         }
       }
     }
@@ -110,7 +111,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   createChannelEvent(client: Socket, payload: CreateChannelDto): void {
     const {sub} = (client.handshake as any).user
     this.chatsService.createChannel(payload, sub).then((res) => {
-
       if (res.privacy === PrivacyEnum.PUBLIC) {
         this.chatsService.findAllChannel(sub).then((c) => {
           this.server.emit('getChannels', c)
