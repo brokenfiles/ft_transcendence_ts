@@ -125,7 +125,7 @@ export class UsersService {
      * @param search
      */
     searchUser(search: string): Promise<User[]> {
-        return this.usersRepository.query(`SELECT login, display_name, avatar FROM Users WHERE LOWER(login) LIKE CONCAT('%', $1::text, '%') OR LOWER(display_name) LIKE CONCAT('%', $1::text, '%');`,
+        return this.usersRepository.query(`SELECT id, login, display_name, avatar FROM Users WHERE LOWER(login) LIKE CONCAT('%', $1::text, '%') OR LOWER(display_name) LIKE CONCAT('%', $1::text, '%');`,
             [search.toLowerCase()])
     }
 

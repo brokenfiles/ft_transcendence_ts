@@ -78,7 +78,7 @@ export default class ChannelCreation extends Vue {
       this.$socket.client.emit('createChannel', {
         name: this.model_channel,
         privacy: this.model_privacy,
-        users: this.added_users.length > 0 ? this.added_users : false,
+        users: this.added_users.length > 0 ? this.added_users.map(u => u.id) : false,
         password: this.model_password ? this.model_password : false
       })
       this.$emit('createdChannel', {
