@@ -81,6 +81,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     }
   }
 
+  @UseGuards(WsJwtAuthGuard)
+  @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('msgToServer')
   async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<void> {
     await this.chatsService.pushMsgInChannel(payload)
@@ -93,19 +95,26 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('createChannel')
   createChannelEvent(client: Socket, payload: CreateChannelDto): void {
+    const { sub } = (client.handshake as any).user
+    payload.user_id = sub
     this.chatsService.createChannel(payload).then((res) => {
-      this.getChannelsEvent(client, {user_id: payload.user_id})
+      this.getChannelsEvent(client)
     })
   }
 
+  @UseGuards(WsJwtAuthGuard)
+  @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('getChannels')
-  getChannelsEvent(client: Socket, payload: any): void {
-    console.log(payload)
-    this.chatsService.findAllChannel(payload.user_id).then((res) => {
+  getChannelsEvent(client: Socket): void {
+    const { sub } = (client.handshake as any).user
+
+    this.chatsService.findAllChannel(sub).then((res) => {
       this.server.emit('getChannels', res)
     })
   }
 
+  @UseGuards(WsJwtAuthGuard)
+  @UseFilters(new UnauthorizedExceptionFilter())
   @SubscribeMessage('getMsgs')
   async getMessagesEvent(client: Socket, channel: string): Promise<void> {
     console.log("getmsg: channel:" + channel)
