@@ -29,8 +29,8 @@ import Avatar from "~/components/User/Profile/Avatar.vue";
 })
 export default class GuildRequest extends Vue {
 
-  @Prop({required: true}) requester: UserInterface
-  @Prop({default: false}) canAccept: boolean
+  @Prop({required: true}) requester!: UserInterface
+  @Prop({default: false}) canAccept!: boolean
 
   /**
    * Accept the request

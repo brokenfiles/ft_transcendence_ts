@@ -18,7 +18,6 @@ import {Component} from 'nuxt-property-decorator'
 import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
 import GuildRequest from "~/components/Guild/Requests/GuildRequest.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
-import {User} from "../../../../back/src/users/entities/user.entity";
 
 @Component({
   middleware: ['auth', 'hasGuild'],
@@ -28,14 +27,15 @@ import {User} from "../../../../back/src/users/entities/user.entity";
 })
 export default class GuildRequests extends Vue {
 
-  guild: GuildInterface = null
+  guild?: GuildInterface
 
   async fetch() {
     await this.fetchGuild()
   }
 
   async fetchGuild() {
-    this.guild = await this.$axios.$get(`guilds/${this.$auth.user.guild.id}`)
+    if (this.$auth.user && this.$auth.user.guild)
+      this.guild = await this.$axios.$get(`guilds/${this.$auth.user.guild.id}`)
   }
 
   acceptRequest(requester: UserInterface) {
@@ -67,12 +67,12 @@ export default class GuildRequests extends Vue {
   }
 
   redirectIfNoPendingRequest() {
-    if (this.guild.pending_users.length === 0)
+    if (this.guild?.pending_users.length === 0)
       this.$router.push(`/guilds/${this.guild.anagram}`)
   }
 
   get userCanInteract() {
-    return this.guild.owner.id === this.$auth.user.id
+    return this.guild?.owner.id === this.$auth.user.id
   }
 
 }
