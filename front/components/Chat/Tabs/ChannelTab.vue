@@ -56,8 +56,7 @@ export default class ChannelTab extends Vue {
 
   /** Socket listeners */
   @Socket('SendMessagesToClient')
-  getMessage(messages: string[]) {
-    console.log("messages from channel: ", messages)
+  getMessage(messages: MessageInterface[]) {
     this.messages = messages
   }
 
