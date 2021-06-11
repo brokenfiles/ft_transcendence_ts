@@ -6,6 +6,7 @@ import {CreateGuildDto} from "./dto/create-guild.dto";
 import {UpdateGuildDto} from "./dto/update-guild.dto";
 import {UsersService} from "../users/users.service";
 import {JoinGuildDto} from "./dto/join-guild.dto";
+import {User} from "../users/entities/user.entity";
 
 @Injectable()
 export class GuildsService {
@@ -27,7 +28,7 @@ export class GuildsService {
     findOne(id: number) : Promise<Guild> {
         return this.guildRepository.findOne(id, {
             relations: [
-                'users', 'owner'
+                'users', 'owner', 'pending_users'
             ]
         }).catch((err) => {
             throw new HttpException({
@@ -70,7 +71,7 @@ export class GuildsService {
     findByAnagram(anagram) {
         return this.guildRepository.findOneOrFail({
             where: {anagram},
-            relations: ['users', 'owner']
+            relations: ['users', 'owner', 'pending_users']
         }).catch(() => {
             throw new HttpException({
                 message: [
@@ -117,8 +118,92 @@ export class GuildsService {
         if (guild.open) {
             guild.users.push(user)
         } else {
-            // create a guild request
+            if (guild.pending_users) {
+                if (!guild.pending_users.map(u => u.id).includes(user.id))
+                    guild.pending_users.push(user)
+            }
+            else
+                guild.pending_users = [user]
         }
+        return this.guildRepository.save(guild)
+    }
+
+    async cancelRequest(sub: number): Promise<User> {
+        return this.usersService.cancelGuildRequest(sub)
+    }
+
+    async editRequest(sub: number, requester: User, accept: boolean) {
+        const acceptor = await this.usersService.findOne(sub)
+        if (!acceptor.guild)
+            throw new HttpException({
+                message: [
+                    `You don't have a guild`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        let acceptorGuild = await this.findOne(acceptor.guild.id)
+        if (acceptor.id !== acceptorGuild.owner.id)
+            throw new HttpException({
+                message: [
+                    `You can't accept this user`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        requester = await this.usersService.findOne(requester.id)
+        if (!requester.guild_request || requester.guild_request.id !== acceptorGuild.id)
+            throw new HttpException({
+                message: [
+                    `This user does not have a request for this guild`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        if (requester.guild)
+            throw new HttpException({
+                message: [
+                    `This user has already a guild`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+
+        if (accept) {
+            // if the user has accepted the request
+            acceptorGuild.users.push(requester)
+        }
+        const index = acceptorGuild.pending_users.map(u => u.id).indexOf(requester.id)
+        acceptorGuild.pending_users.splice(index, 1)
+        return await this.guildRepository.save(acceptorGuild)
+    }
+
+    /**
+     * Kick a user from a guild
+     * @param {number} sub
+     * @param {User} user
+     */
+    async kickUser(sub: number, user: User) {
+        if (sub === user.id)
+            throw new HttpException({
+                message: [
+                    `You can't kick yourself`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        const kicker = await this.usersService.findOne(sub)
+        if (!kicker || !kicker.guild)
+            throw new HttpException({
+                message: [
+                    `This user or this guild does not exist`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        let guild = await this.findOne(kicker.guild.id)
+        if (!guild)
+            throw new HttpException({
+                message: [
+                    `The user does not have a guild`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        const idx = guild.users.map(u => u.id).indexOf(user.id)
+        if (idx === -1)
+            throw new HttpException({
+                message: [
+                    `This user is not in this guild`
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        guild.users.splice(idx, 1)
         return this.guildRepository.save(guild)
     }
 }

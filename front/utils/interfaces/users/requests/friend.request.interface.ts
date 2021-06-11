@@ -1,4 +1,4 @@
-import {UserInterface} from "~/utils/interfaces/users/user.interface";
+import {UserInterface} from "../user.interface";
 
 export interface FriendRequestInterface {
 

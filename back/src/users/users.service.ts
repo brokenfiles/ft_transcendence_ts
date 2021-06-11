@@ -6,6 +6,7 @@ import {Repository} from "typeorm";
 import {User} from "./entities/user.entity";
 import {UpdateMeDto} from "./dto/update-me.dto";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
+import {Guild} from "../guilds/entities/guild.entity";
 
 @Injectable()
 export class UsersService {
@@ -40,7 +41,7 @@ export class UsersService {
         );
         let user = await this.usersRepository.findOneOrFail(id, {
             relations: [
-                'guild', 'achievements', ...relations
+                'guild', 'achievements', 'guild_request', ...relations
             ]
         }).catch((err) => {
             throw new HttpException({
@@ -126,5 +127,17 @@ export class UsersService {
     searchUser(search: string): Promise<User[]> {
         return this.usersRepository.query(`SELECT login, display_name, avatar FROM Users WHERE LOWER(login) LIKE CONCAT('%', $1::text, '%') OR LOWER(display_name) LIKE CONCAT('%', $1::text, '%');`,
             [search.toLowerCase()])
+    }
+
+    async cancelGuildRequest(sub: number): Promise<User> {
+        let user = await this.findOne(sub)
+        if (!user)
+            throw new HttpException({
+                message: [
+                    'User does not exist'
+                ]
+            }, HttpStatus.BAD_REQUEST)
+        user.guild_request = null
+        return this.usersRepository.save(user)
     }
 }

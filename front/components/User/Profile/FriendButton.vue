@@ -8,7 +8,7 @@
       Request sent
       <span class="text-xxs block">(wait the answer)</span>
     </div>
-    <div v-else-if="friendState === 2">
+    <div v-else-if="friendState === 2" class="flex">
       Accept request
       <span class="text-xxs block">(click to accept)</span>
     </div>

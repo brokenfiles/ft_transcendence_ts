@@ -1,4 +1,5 @@
-import {AchievementInterface} from "~/utils/interfaces/users/achievements/achievement.interface";
+import {AchievementInterface} from "./achievements/achievement.interface";
+import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
 
 export interface UserInterface {
 
@@ -13,7 +14,8 @@ export interface UserInterface {
   banned: string
   ban_reason: string
   guildId?: number
-  guild?: any
+  guild?: GuildInterface
+  guild_request?: GuildInterface
   friends?: UserInterface[]
   achievements?: AchievementInterface[]
 

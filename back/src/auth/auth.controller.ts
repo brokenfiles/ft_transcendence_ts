@@ -18,11 +18,15 @@ import {LoginDto} from "./dto/login.dto";
 import {RefreshDto} from "./dto/refresh.dto";
 import {CreateUserDto} from "../users/dto/create-user.dto";
 import {JwtAuthGuard} from "./jwt-auth.guard";
+import {WebsocketService} from "../gateways/websocket/websocket.service";
 
 @Controller("/auth/42")
 export class AuthController {
 
-    constructor(private readonly authService: AuthService, private readonly jwtService: JwtService, private readonly usersService: UsersService) {}
+    constructor(private readonly authService: AuthService,
+                private readonly jwtService: JwtService,
+                private readonly websocketService: WebsocketService,
+                private readonly usersService: UsersService) {}
 
     private logger: Logger = new Logger('AuthController')
 

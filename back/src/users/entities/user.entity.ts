@@ -10,7 +10,6 @@ import {Channel} from "../../chat/entities/channel.entity";
 import {Message} from "../../chat/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
 import {Role} from "../../auth/roles/enums/role.enum";
-import {JoinRequest} from "../../guilds/entities/join-request.entity";
 
 @Entity("users")
 export class User {
@@ -32,9 +31,11 @@ export class User {
     @JoinColumn()
     guild: Guild
 
-    @OneToOne(type => JoinRequest, joinRequest => joinRequest.requester)
-    joinRequest: JoinRequest
-
+    @ManyToOne(type => Guild, {
+        onDelete: "SET NULL"
+    })
+    @JoinColumn()
+    guild_request: Guild
 
     @OneToMany(() => Message, message => message.owner)
     messages: Message[]
@@ -43,8 +44,6 @@ export class User {
         cascade: true
     })
     channels: Channel[]
-
-
 
     @ManyToMany(() => Achievement, achievement => achievement.users, {
         cascade: true

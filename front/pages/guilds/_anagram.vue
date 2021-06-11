@@ -5,7 +5,17 @@
         <h1 class="text-4xl font-semibold flex-1">{{ guild.name }} [{{ guild.anagram }}]</h1>
         <div>
           <div v-if="$auth.loggedIn" class="inline-block">
-            <button v-if="$auth.user.guild === null"
+            <nuxt-link v-if="$auth.user.guild && $auth.user.guild.id === guild.id && guild.pending_users && guild.pending_users.length > 0"
+                       class="inline-block bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
+                       :to="`/guilds/mine/requests`">
+              <span>Pending requests ({{guild.pending_users.length}})</span>
+            </nuxt-link>
+            <button v-if="$auth.user.guild_request && $auth.user.guild_request.id === guild.id"
+                    class="bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
+                    @click="cancelGuildRequest">
+              <span>Cancel request</span>
+            </button>
+            <button v-else-if="$auth.user.guild === null"
                     class="bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
                     @click="requestOrJoin">
               <span v-if="guild.open">Join the guild</span>
@@ -89,18 +99,20 @@
           </div>
           <div class="px-1">
             <div class="max-h-80 overflow-y-auto" v-if="tab === 'members'">
-              <nuxt-link class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
-                         v-for="(user, index) in guild.users" :key="`user-guild-${index}`"
-                         :to="`/users/${user.login}`">
+              <div class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
+                         v-for="(user, index) in guild.users" :key="`user-guild-${index}`">
                 <avatar class="h-12 w-12" :image-url="user.avatar"/>
-                <p class="ml-2 flex-1">
+                <nuxt-link :to="`/users/${user.login}`" class="ml-2 flex-1">
                   {{ user.display_name }} <br/>
                   <span class="text-sm font-semibold">
                     {{ user.login }}
                   </span>
-                </p>
+                </nuxt-link>
                 <p>{{ user.points }} points</p>
-              </nuxt-link>
+                <div v-if="guild.owner.id === $auth.user.id && user.id !== guild.owner.id" class="ml-4">
+                  <button @click.stop="kickUserFromGuild(user)">❌</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -167,9 +179,41 @@ export default class SingleGuild extends Vue {
         id: this.guild?.id
       }
     }).then((result) => {
-      this.$toast.success(`You joined the guild ${this.guild?.name}`)
+      if (this.guild?.open)
+        this.$toast.success(`You joined the guild ${this.guild?.name}`)
+      else
+        this.$toast.success(`You requested to join ${this.guild?.name}`)
       this.$auth.fetchUser()
       this.guild = result.data
+    }).catch((err) => {
+      this.$toast.error(err.response.data.message[0])
+    })
+  }
+
+  cancelGuildRequest() {
+    this.$axios.delete(`guilds/request`)
+      .then(() => {
+        this.$toast.success(`You guild request has been cancelled`)
+        this.$auth.fetchUser()
+      }).catch((err) => {
+        this.$toast.error(err.response.data.message[0])
+    })
+  }
+
+  /**
+   * Removes a user
+   * @param user
+   */
+  kickUserFromGuild(user: UserInterface) {
+    this.$axios.delete(`guilds/mine/user`, {
+      data: {
+        user: {
+          id: user.id
+        }
+      }
+    }).then(() => {
+      this.$toast.success(`This user has been kicked`)
+      this.guild?.users.splice(this.guild?.users.indexOf(user), 1)
     }).catch((err) => {
       this.$toast.error(err.response.data.message[0])
     })
@@ -183,6 +227,10 @@ export default class SingleGuild extends Vue {
 
   get guildUsers(): UserInterface[] | undefined {
     return this.guild?.users.sort()
+  }
+
+  get guildUsersId(): number[] | undefined {
+    return this.guildUsers?.map(u => u.id)
   }
 
 }

@@ -38,6 +38,9 @@ export class Guild {
     @OneToMany(type => User, user => user.guild)
     users: User[]
 
+    @OneToMany(type => User, user => user.guild_request)
+    pending_users: User[]
+
     @OneToOne(type => User)
     @JoinColumn()
     owner: User

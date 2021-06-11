@@ -29,12 +29,12 @@
       "@types/node",
       "@nuxtjs/axios",
       "@nuxtjs/auth-next",
-      "@nuxtjs/toast",
+      "@nuxtjs/toast"
     ]
   },
   "exclude": [
     "node_modules",
     ".nuxt",
     "dist"
-  ]
+  ],
 }

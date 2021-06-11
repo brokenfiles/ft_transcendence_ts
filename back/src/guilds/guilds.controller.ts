@@ -20,6 +20,8 @@ import {Role} from "../auth/roles/enums/role.enum";
 import {RolesGuard} from "../auth/roles/roles.guard";
 import {Request} from "express";
 import {JoinGuildDto} from "./dto/join-guild.dto";
+import {AcceptUserDto} from "./dto/accept-user.dto";
+import {KickUserDto} from "./dto/kick-user.dto";
 
 @Controller('guilds')
 export class GuildsController {
@@ -54,6 +56,30 @@ export class GuildsController {
     @UseGuards(JwtAuthGuard)
     leaveGuild(@Req() request) {
         return this.guildService.leave(request.user.sub)
+    }
+
+    @Post("mine/accept")
+    @UseGuards(JwtAuthGuard)
+    acceptRequest(@Req() request, @Body() acceptUser: AcceptUserDto) {
+        return this.guildService.editRequest(request.user.sub, acceptUser.requester, true)
+    }
+
+    @Post("mine/deny")
+    @UseGuards(JwtAuthGuard)
+    denyRequest(@Req() request, @Body() acceptUser: AcceptUserDto) {
+        return this.guildService.editRequest(request.user.sub, acceptUser.requester, false)
+    }
+
+    @Delete("mine/user")
+    @UseGuards(JwtAuthGuard)
+    kickUser(@Req() request, @Body() kickUser: KickUserDto) {
+        return this.guildService.kickUser(request.user.sub, kickUser.user)
+    }
+
+    @Delete('request')
+    @UseGuards(JwtAuthGuard)
+    cancelGuildRequest(@Req() request) {
+        return this.guildService.cancelRequest(request.user.sub)
     }
 
     @Post("join")

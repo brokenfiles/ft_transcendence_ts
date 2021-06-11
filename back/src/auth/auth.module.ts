@@ -7,6 +7,7 @@ import {JwtModule} from "@nestjs/jwt";
 import {jwtConstants} from "./constants"
 import {JwtStrategy} from "./jwt.strategy";
 import {WsJwtStrategy} from "./ws-jwt.strategy";
+import {WebsocketModule} from "../gateways/websocket/websocket.module";
 
 @Module({
     imports: [
@@ -18,10 +19,11 @@ import {WsJwtStrategy} from "./ws-jwt.strategy";
                 expiresIn: jwtConstants.expiresIn
             },
         }),
+        WebsocketModule,
         HttpModule,
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtModule, JwtStrategy, WsJwtStrategy]
+    providers: [AuthService, JwtModule, JwtStrategy, WsJwtStrategy],
 })
 export class AuthModule {
 }

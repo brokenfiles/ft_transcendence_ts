@@ -48,6 +48,9 @@
               <nuxt-link to="/friends" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 Friends
               </nuxt-link>
+              <nuxt-link v-if="this.loggedInUser.guild" :to="`/guilds/${this.loggedInUser.guild.anagram}`" class="dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
+                My guild
+              </nuxt-link>
               <button @click="logout" class="md:hidden block dropdown-item block hover:bg-gray-800 pl-10 pr-4 py-2">
                 Logout
               </button>
