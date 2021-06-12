@@ -49,7 +49,7 @@ export default class Login extends Vue {
       this.$toast.success(`Logged in as ${(this.$auth.user as any).login}`)
     }).catch((error) => {
       console.log(error)
-      this.$toast.error(`Error when trying to login to 42`)
+      this.$toast.error(error.response.data.error)
       this.$router.push('/')
     })
   }

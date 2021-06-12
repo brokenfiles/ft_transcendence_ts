@@ -30,21 +30,22 @@ export default class AdminButton extends Vue {
   /** Methods */
   banishUser(verdict: Verdict) {
     this.$axios.patch(`/users/${this.user.id}`, {
-      // put the date here
+      banned: verdict.until,
+      ban_reason: verdict.reason
     }).then(() => {
-        // it works!
+        this.$toast.success('user has been successfully banished')
       }).catch((err) => {
-        // display the error with toast !
+        this.$toast.error(err.response.data.message[0])
     })
   }
 
   blockUser(verdict: Verdict) {
     this.$axios.patch(`/users/${this.user.id}`, {
-      // put the date here
+      blocked: verdict.until
     }).then(() => {
-      // it works!
+      this.$toast.success('user has been successfully blocked')
     }).catch((err) => {
-      // display the error with toast !
+      this.$toast.error(err.response.data.message[0])
     })
   }
 

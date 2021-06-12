@@ -19,6 +19,7 @@ import {RefreshDto} from "./dto/refresh.dto";
 import {CreateUserDto} from "../users/dto/create-user.dto";
 import {JwtAuthGuard} from "./jwt-auth.guard";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
+import * as moment from 'moment';
 
 @Controller("/auth/42")
 export class AuthController {
@@ -76,6 +77,12 @@ export class AuthController {
 
             user = await this.usersService.create(dto)
         }
+        if (new Date(user.banned) > new Date()) {
+            const formattedDate = moment.duration( moment(new Date(user.banned)).diff(moment()) ).asDays().toFixed(0)
+            throw new HttpException({
+                error: `You are banned ${formattedDate} for the following reason: ${user.ban_reason}`
+            }, HttpStatus.UNAUTHORIZED)
+        }
         const payload = {
             username: user.display_name,
             sub: user.id,
@@ -112,6 +119,12 @@ export class AuthController {
                 .set_login(guest_user)
 
             user = await this.usersService.create(dto)
+        }
+        if (new Date(user.banned) > new Date()) {
+            const formattedDate = moment.duration( moment(new Date(user.banned)).diff(moment()) ).asDays().toFixed(0)
+            throw new HttpException({
+                error: `You are banned ${formattedDate} days for the following reason: ${user.ban_reason}`
+            }, HttpStatus.UNAUTHORIZED)
         }
         const payload = {
             username: user.display_name,
