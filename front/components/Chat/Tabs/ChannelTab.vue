@@ -7,7 +7,7 @@
         <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
       </div>
     </div>
-    <div class="flex flex-col justify-end">
+    <div class="flex flex-col justify-end mb-4">
       <form @submit.prevent="sendMessage()" class="flex mt-2">
         <input v-model="model_message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream" type="text" placeholder="Send message">
         <button type="submit" class="text-cream ml-2 bg-secondary border border-cream p-2 focus:outline-none">
