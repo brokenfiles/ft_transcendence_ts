@@ -2,7 +2,7 @@ import {
     Column,
     Entity,
     JoinColumn, JoinTable, ManyToMany,
-    ManyToOne, OneToMany, OneToOne,
+    ManyToOne, OneToMany,
     PrimaryGeneratedColumn
 } from "typeorm";
 import {Guild} from "../../guilds/entities/guild.entity";
@@ -76,6 +76,9 @@ export class User {
 
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     banned: Date
+
+    @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
+    blocked: Date
 
     @Column({default: null})
     ban_reason: string

@@ -1,14 +1,21 @@
 <template>
   <div>
-    <admin-timed-actions>banish</admin-timed-actions>
+    <admin-timed-actions :has_reason="true" @verdictApplied="banishUser" colors="bg-red-200 text-red-800">banish</admin-timed-actions>
+    <admin-timed-actions :has_reason="false" @verdictApplied="blockUser" colors="bg-blue-200 text-blue-800">block</admin-timed-actions>
   </div>
 </template>
 
 <script lang="ts">
 
 import Vue from 'vue'
-import {Component} from 'nuxt-property-decorator'
+import {Component, Prop} from 'nuxt-property-decorator'
 import AdminTimedActions from "~/components/User/Admin/AdminTimedActions.vue";
+import {UserInterface} from "~/utils/interfaces/users/user.interface";
+
+interface Verdict {
+  until: Date,
+  reason: string
+}
 
 @Component({
   components: {
@@ -16,6 +23,30 @@ import AdminTimedActions from "~/components/User/Admin/AdminTimedActions.vue";
   }
 })
 export default class AdminButton extends Vue {
+
+  /** Properties */
+  @Prop({required: true}) user!: UserInterface
+
+  /** Methods */
+  banishUser(verdict: Verdict) {
+    this.$axios.patch(`/users/${this.user.id}`, {
+      // put the date here
+    }).then(() => {
+        // it works!
+      }).catch((err) => {
+        // display the error with toast !
+    })
+  }
+
+  blockUser(verdict: Verdict) {
+    this.$axios.patch(`/users/${this.user.id}`, {
+      // put the date here
+    }).then(() => {
+      // it works!
+    }).catch((err) => {
+      // display the error with toast !
+    })
+  }
 
 }
 

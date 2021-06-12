@@ -19,7 +19,7 @@
       <friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
                      class="mt-2 text-sm block md:absolute top-0 right-0"
                      :friend-state="friendState"/>
-      <admin-button v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0"/>
+      <admin-button :user="user" v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0"/>
       <level-bar class="my-4" :points="user.points"/>
       <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
         <!--statistics-->
