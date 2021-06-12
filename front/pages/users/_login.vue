@@ -19,6 +19,7 @@
       <friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
                      class="mt-2 text-sm block md:absolute top-0 right-0"
                      :friend-state="friendState"/>
+      <admin-button v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0"/>
       <level-bar class="my-4" :points="user.points"/>
       <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
         <!--statistics-->
@@ -51,6 +52,8 @@ import {FriendState} from "~/utils/enums/friend-state.enum";
 import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
 import {Socket} from "vue-socket.io-extended";
 import {Context} from "@nuxt/types";
+import AdminButton from "~/components/User/Admin/AdminButton.vue";
+import {Role} from "~/utils/enums/role.enum";
 
 const onlineClients = namespace('onlineClients')
 
@@ -63,6 +66,7 @@ const onlineClients = namespace('onlineClients')
     Statistic,
     EditableField,
     FriendButton,
+    AdminButton,
   },
 })
 export default class Account extends Vue {
@@ -191,6 +195,13 @@ export default class Account extends Vue {
     if (this.friendRequests.filter(req => req.requested.id === this.user.id).length > 0)
       return FriendState.PENDING_REQUESTER
     return FriendState.NOT_FRIEND
+  }
+
+  /**
+   * Is not User
+   */
+  get isNotUser(): boolean {
+    return (this.$auth.user && this.$auth.user.role !== Role.User)
   }
 
   /**

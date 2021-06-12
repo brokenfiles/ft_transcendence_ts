@@ -28,6 +28,10 @@ export default {
       src: '~/plugins/timeago.js',
       mode: 'client'
     },
+    {
+      src: '~/plugins/datepicker.js',
+      mode: 'client'
+    },
   ],
 
 
