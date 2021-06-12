@@ -14,8 +14,7 @@
         </div>
 
         <div v-show="curr_channel !== ''">
-          <back-button @back="curr_channel = ''">Back to channels</back-button>
-          <channel-tab :curr_channel="curr_channel"/>
+          <channel-tab @back="curr_channel = ''" :curr_channel="curr_channel"/>
         </div>
       </div>
     </div>
@@ -27,7 +26,6 @@ import Vue from 'vue'
 import Channel from "~/components/Chat/Channel.vue";
 import {Socket} from "vue-socket.io-extended";
 import {Component} from "nuxt-property-decorator";
-import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
 import HomeTab from "~/components/Chat/Tabs/HomeTab.vue";
 import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
 
@@ -35,18 +33,15 @@ import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
   components: {
     Channel,
     HomeTab,
-    BackButton,
     ChannelTab
   }
 })
 export default class Chat extends Vue {
 
+  /** Variables */
   channels: string[] = []
   isChatOpen: boolean = false
-  connected: boolean = false
   curr_channel: string = ""
-  message: string = ''
-  channel: string = ''
 
   @Socket('getChannels')
   getChannel(channels: string[]) {

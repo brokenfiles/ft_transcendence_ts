@@ -18,6 +18,7 @@ import {Component} from 'nuxt-property-decorator'
 import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
 import GuildRequest from "~/components/Guild/Requests/GuildRequest.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
+import {Context} from "@nuxt/types";
 
 @Component({
   middleware: ['auth', 'hasGuild'],
@@ -29,8 +30,17 @@ export default class GuildRequests extends Vue {
 
   guild?: GuildInterface
 
-  async fetch() {
-    await this.fetchGuild()
+  async asyncData({app, error}: Context) {
+    if (app.$auth.user && app.$auth.user.guild) {
+      const guild = await app.$axios.$get(`guilds/${app.$auth.user.guild.id}`)
+        .catch(() => {
+          error({
+            statusCode: 404,
+            message: 'This guild does not exist'
+          })
+        })
+      return {guild}
+    }
   }
 
   async fetchGuild() {

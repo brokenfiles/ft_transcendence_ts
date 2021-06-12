@@ -1,5 +1,6 @@
 <template>
   <div>
+    <back-button @back="goBack">Back to channels</back-button>
     <p class="text-right">{{ curr_channel }}</p>
     <hr class="mt-1">
     <div class="messages my-4">
@@ -24,10 +25,12 @@ import {Component, Prop} from 'nuxt-property-decorator'
 import {Socket} from "vue-socket.io-extended";
 import {MessageInterface} from "~/utils/interfaces/chat/message.interface";
 import ChatMessage from "~/components/Chat/Tabs/Components/ChatMessage.vue";
+import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
 
 @Component({
   components: {
-    ChatMessage
+    ChatMessage,
+    BackButton
   }
 })
 export default class ChannelTab extends Vue {
@@ -55,6 +58,11 @@ export default class ChannelTab extends Vue {
         })
       this.model_message = ''
     }
+  }
+
+  goBack() {
+    this.messages = []
+    this.$emit('back')
   }
 
   /** Socket listeners */
