@@ -93,6 +93,9 @@ export class ChatsService {
                         relations: ['owner'],
                         where: {
                             channel
+                        },
+                        order: {
+                            created_at: "ASC"
                         }
                     })
             }
@@ -121,7 +124,7 @@ export class ChatsService {
             let owner = await this.usersService.findOne(sendMessageDto.user_id, ["messages", "channels"])
             newMessage.channel = channel[0]
             newMessage.owner = owner
-            await this.messageRepository.save(newMessage)
+            return this.messageRepository.save(newMessage)
 
         } catch (e) {
             throw new HttpException({
