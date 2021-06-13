@@ -53,8 +53,7 @@ export class ChatsService {
 
     async isUserInChannel(user_id: number, channel: Channel) : Promise<boolean>
     {
-        const user = await this.usersService.findOne(user_id)
-        return channel.users.includes(user);
+        return channel.users.map(u => u.id).includes(user_id);
     }
 
     async createChannel(ChannelDto: CreateChannelDto, sub: number) {

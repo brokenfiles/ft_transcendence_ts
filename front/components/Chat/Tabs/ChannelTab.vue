@@ -79,8 +79,13 @@ export default class ChannelTab extends Vue {
 
   /** Socket listeners */
   @Socket('SendMessagesToClient')
-  getMessage(messages: MessageInterface[]) {
-    this.messages = messages
+  getMessage(messages: MessageInterface[] | null) {
+    if (messages !== null) {
+      this.messages = messages
+    } else {
+      this.$toast.error(`The password is wrong`)
+      this.goBack()
+    }
   }
 
   @Socket('SendLastMessagesToClient')

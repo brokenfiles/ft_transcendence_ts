@@ -6,8 +6,6 @@ import {
 } from "typeorm";
 import {User} from "../../users/entities/user.entity";
 import {Message} from "./message.entity";
-import {IsNotEmpty} from "class-validator";
-import {PrivacyEnum} from "../enums/privacy.enum";
 
 @Entity("channel")
 export class Channel {

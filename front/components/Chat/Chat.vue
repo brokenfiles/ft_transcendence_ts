@@ -59,7 +59,8 @@ export default class Chat extends Vue {
   changeCurrChannel(channel: ChannelInterface) {
     this.curr_channel = channel
     this.$socket.client.emit('channelChanged', {
-      channel_id: channel.id
+      channel_id: channel.id,
+      password: channel.password
     })
   }
 

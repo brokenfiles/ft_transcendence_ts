@@ -11,5 +11,6 @@ export interface ChannelInterface {
   users: UserInterface[]
   privacy: PrivacyEnum
   messages: any[]
+  password?: string
 
 }

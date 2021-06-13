@@ -20,7 +20,7 @@
       <channel v-for="(channel, index) in channels" class="my-2"
                :channel="channel" :key="`channel-${index}`"
                :channel_category="channel_category.toLowerCase()"
-               @click="changeCurrChannel(channel)"/>
+               @changedChannel="changeCurrChannel"/>
     </div>
   </div>
 </template>
@@ -35,6 +35,7 @@ import Avatar from "~/components/User/Profile/Avatar.vue";
 import ChannelCategory from "~/components/Chat/Tabs/Components/ChannelCategory.vue";
 import ChannelCreation from "~/components/Chat/Tabs/Components/ChannelCreation.vue";
 import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
+import {PrivacyEnum} from "~/utils/enums/privacy.enum";
 
 @Component({
   components: {

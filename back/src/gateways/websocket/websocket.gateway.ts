@@ -163,12 +163,16 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         let messages = []
         this.websocketService.changeCurrentChannel(client, payload)
-        this.chatsService.findOneChannel(payload.channel_id).then(async (channel) => {
+        const channel = await this.chatsService.findOneChannel(payload.channel_id)
+        if (channel) {
             if ((channel.privacy === PrivacyEnum.PUBLIC) ||
                 (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel)) ||
-                (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password))
+                (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password)) {
                 messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
-        })
+            } else {
+                messages = null
+            }
+        }
         client.emit('SendMessagesToClient', messages)
     }
 }
