@@ -18,8 +18,7 @@
       <back-button @back="channel_category = ''">Back to home</back-button>
 <!--      display the channels if there are private or public-->
       <channel v-for="(channel, index) in channels" class="my-2"
-               :key="`channel-${index}`" :name="channel.name"
-               :id="channel.id" :privacy="channel.privacy"
+               :channel="channel" :key="`channel-${index}`"
                :channel_category="channel_category.toLowerCase()"
                @click="changeCurrChannel(channel)"/>
     </div>
