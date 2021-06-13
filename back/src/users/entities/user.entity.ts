@@ -52,7 +52,7 @@ export class User {
     @ManyToMany(() => Channel, channel => channel.banned_users)
     banned_channels: Channel[]
 
-    @ManyToMany(() => Channel, channel => channel.administrator)
+    @ManyToMany(() => Channel, channel => channel.administrators)
     channels_admin: Channel[]
 
     @ManyToMany(() => Achievement, achievement => achievement.users, {

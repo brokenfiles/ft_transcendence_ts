@@ -28,13 +28,15 @@ export class ChatsService {
 
     async findAllChannel(user_id: number): Promise<Channel[]> {
 
-        let user = await this.usersService.findOne(user_id, ['channels'])
+        let user = await this.usersService.findOne(user_id,
+            ['channels', 'channels.banned_users', 'channels.administrators', 'channels.users'])
 
         let publicChannels = await this.channelRepository.find({
+            relations: ['banned_users', 'administrators', 'users'],
             where: [
                 {privacy: PrivacyEnum.PUBLIC},
                 {privacy: PrivacyEnum.PASSWORD}
-            ]
+            ],
 
         })
         const channels_id = user.channels.map((c) => c.id)
@@ -71,12 +73,12 @@ export class ChatsService {
 
             newChannel.users = []
             newChannel.banned_users = []
-            newChannel.administrator = []
+            newChannel.administrators = []
 
             let user = await this.usersService.findOne(sub)
             newChannel.owner = user
             newChannel.users.push(user)
-            newChannel.administrator.push(user)
+            newChannel.administrators.push(user)
 
 
             if (ChannelDto.users.length > 0)
@@ -149,7 +151,7 @@ export class ChatsService {
 
     async findOneChannel(id: number) {
         return this.channelRepository.findOne({
-            relations: ['users', 'administrator', 'banned_users'],
+            relations: ['users', 'administrators', 'banned_users'],
             where: {
                 id
             }
@@ -164,7 +166,7 @@ export class ChatsService {
 
             if (user && curr_channel) {
                 if (user.channels_admin.map((channel) => channel.id).includes(curr_channel.id)) {
-                    curr_channel.administrator.push(user)
+                    curr_channel.administrators.push(user)
                 }
             }
         }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="curr_channel">
-      <back-button @back="goBack">Back to channels</back-button><p></p>
+      <back-button @back="goBack">Back to channels</back-button>
       <p class="text-right">
         <span class="text-gray-500 text-sm">
           Created
@@ -11,9 +11,9 @@
         </span>
         {{ curr_channel.name }}
       </p>
-		<p @click="SetUserAdmin">
-			make user admin
-		</p>
+      <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="block focus:outline-none mt-1 text-cream">
+        <font-awesome-icon class="mr-1" :icon="['fas', 'user-shield']"/> Admin dashboard
+      </button>
       <hr class="mt-1">
       <div class="messages my-4">
         <div v-for="(message, index) in messages" :key="`message-${index}`" class="">
@@ -74,18 +74,22 @@ export default class ChannelTab extends Vue {
       this.model_message = ''
     }
   }
-
-  SetUserAdmin()
-  {
-  	this.$socket.client.emit('setUserAdmin', {
-  		promoted_user_id: 2,
-		channel_id: 24
-	})
-  }
+  //
+  // SetUserAdmin()
+  // {
+  // 	this.$socket.client.emit('setUserAdmin', {
+  // 		promoted_user_id: 2,
+	// 	channel_id: 24
+	// })
+  // }
 
   goBack() {
     this.messages = []
     this.$emit('back')
+  }
+
+  get isChannelAdmin(): boolean {
+    return (this.$auth.user && this.curr_channel.administrators.map(u => u.id).includes(this.$auth.user.id))
   }
 
   /** Socket listeners */

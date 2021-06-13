@@ -44,7 +44,7 @@ export class Channel {
 
     @ManyToMany(() => User, user => user.channels_admin)
     @JoinTable()
-    administrator: User[]
+    administrators: User[]
 
     @OneToMany(type => Message, message => message.channel)
     messages: Message[]

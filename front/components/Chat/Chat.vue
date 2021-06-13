@@ -18,8 +18,12 @@
           <home-tab @channelChanged="changeCurrChannel" :channels="channels"/>
         </div>
 
-        <div v-show="curr_channel !== null">
-          <channel-tab @back="closedChannel" :curr_channel="curr_channel"/>
+        <div v-show="curr_channel !== null && admin_mode === false">
+          <channel-tab @back="closedChannel" @adminPanelOpened="admin_mode = true" :curr_channel="curr_channel"/>
+        </div>
+
+        <div v-show="admin_mode === true">
+          <admin-tab @back="admin_mode = false" :current_channel="curr_channel"/>
         </div>
       </div>
     </div>
@@ -34,12 +38,14 @@ import {Component} from "nuxt-property-decorator";
 import HomeTab from "~/components/Chat/Tabs/HomeTab.vue";
 import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
 import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
+import AdminTab from "~/components/Chat/Tabs/AdminTab.vue";
 
 @Component({
   components: {
     Channel,
     HomeTab,
-    ChannelTab
+    ChannelTab,
+    AdminTab
   }
 })
 export default class Chat extends Vue {
@@ -47,6 +53,7 @@ export default class Chat extends Vue {
   /** Variables */
   channels: ChannelInterface[] = []
   curr_channel: any = null
+  admin_mode: boolean = false
   isChatOpen: boolean = false
 
   @Socket('getChannels')
@@ -82,8 +89,6 @@ export default class Chat extends Vue {
     if (refs.chatBody) {
       let element = refs.chatBody as HTMLElement
       this.$nextTick(() => {
-        console.log(`element.scrollTop: ${element.scrollTop + element.offsetHeight}`)
-        console.log(`element.scrollHeight: ${element.scrollHeight}\n`)
         const scrollTop = element.scrollTop + element.offsetHeight
         if (scrollTop + 200 >= element.scrollHeight || firstTime) {
           element.scrollTop = element.scrollHeight
