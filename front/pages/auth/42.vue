@@ -13,6 +13,7 @@ import Vue from 'vue'
 import {mapGetters} from "vuex";
 
 export default Vue.extend({
+  name: 'auth42',
   mounted() {
     const code = this.$route.query.code
     if (code !== '') {

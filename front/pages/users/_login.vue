@@ -205,6 +205,8 @@ export default class Account extends Vue {
    * Is not User
    */
   get isNotUser(): boolean {
+    if (this.$auth.user && this.$auth.user.id === this.user.id)
+      return false
     return (this.$auth.user && this.$auth.user.role !== Role.User)
   }
 
