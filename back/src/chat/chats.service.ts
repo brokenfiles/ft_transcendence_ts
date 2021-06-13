@@ -9,6 +9,8 @@ import {SendMessageDto} from "./dto/send-message.dto";
 import {PrivacyEnum} from "./enums/privacy.enum";
 import {WsException} from "@nestjs/websockets";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
+import {ChangeChannelPropertyInterface} from "../gateways/websocket/interfaces/change-channel-property.interface";
+import {User} from "../users/entities/user.entity";
 
 @Injectable()
 export class ChatsService {
@@ -37,8 +39,8 @@ export class ChatsService {
                 {privacy: PrivacyEnum.PUBLIC},
                 {privacy: PrivacyEnum.PASSWORD}
             ],
-
         })
+
         const channels_id = user.channels.map((c) => c.id)
         for (const channel of publicChannels)
         {
@@ -142,9 +144,9 @@ export class ChatsService {
             return this.messageRepository.save(newMessage)
 
         } catch (e) {
-            throw new HttpException({
-                error: 'Cant push message in channel'
-            }, HttpStatus.BAD_REQUEST)
+            throw new WsException({
+                error: `Can't push message in channel`
+            })
         }
 
     }
@@ -158,14 +160,14 @@ export class ChatsService {
         })
     }
 
-    async setUserChannelAdministrator(sub: number, promoted_user_id: number, channel_id: number) {
+    async setUserChannelAdministrator(sub: number, promoted_user_id: number, channel_id: number, state: string) {
         try {
 
             const user = await this.usersService.findOne(promoted_user_id, ['channels_admin'])
             const curr_channel = await this.findOneChannel(channel_id)
 
             if (user && curr_channel) {
-                if (user.channels_admin.map((channel) => channel.id).includes(curr_channel.id)) {
+                if (this.isUserAdministrator(user, curr_channel)) {
                     curr_channel.administrators.push(user)
                 }
             }
@@ -176,6 +178,51 @@ export class ChatsService {
                 error: `Can't set user administrator`
             })
         }
+
+    }
+
+    isUserAdministrator(user: User, channel: Channel): boolean {
+        return user.channels_admin.map((channel) => channel.id).includes(channel.id)
+    }
+
+    async changeChannelProperties(sub: any, payload: ChangeChannelPropertyInterface) {
+
+        const curr_channel = await this.findOneChannel(payload.channel_id)
+        const user = await this.usersService.findOne(sub)
+        if (curr_channel && this.isUserAdministrator(user, curr_channel)) {
+
+            const current_privacy = curr_channel.privacy
+
+            if (curr_channel.privacy !== payload.privacy)
+                curr_channel.privacy = payload.privacy
+
+
+            if (curr_channel.privacy === PrivacyEnum.PUBLIC)
+                curr_channel.users = [user]
+
+
+            if (curr_channel.privacy === PrivacyEnum.PASSWORD && payload.privacy === PrivacyEnum.PASSWORD)
+                curr_channel.password = PrivacyEnum.PASSWORD
+
+            //si il faut ajouté des users dans le channel privé
+            if (curr_channel.privacy === PrivacyEnum.PRIVATE && current_privacy === PrivacyEnum.PRIVATE &&
+                    payload._private_users.length > 0) {
+                const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
+                for (let u of users_to_add)
+                    curr_channel.users.push(u)
+            }
+
+            //si il faut set le channel à private (et donc ajouter des users)
+            if (curr_channel.privacy === PrivacyEnum.PRIVATE && current_privacy !== PrivacyEnum.PRIVATE) {
+                curr_channel.users = [user]
+                const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
+                for (let u of users_to_add)
+                    curr_channel.users.push(user)
+            }
+
+            await this.channelRepository.save(curr_channel)
+        }
+
 
     }
 }

@@ -18,6 +18,7 @@ import {SendMessageDto} from "../../chat/dto/send-message.dto";
 import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {SetUserAdminInterface} from "./interfaces/set-user-admin.interface";
+import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 
 
 
@@ -38,30 +39,16 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     private logger: Logger = new Logger('ChatGateway')
 
-    // private channels: string[] = []
 
-    /**
-     * Hook when the gateway server is initiated
-     * @param {Server} server
-     */
     afterInit(server: Server) {
         this.logger.log('Gateway server initiated');
     }
 
-    /**
-     * Hook when a client is connecting to the server
-     * @param {Socket} client
-     * @param {any[]} args
-     */
     handleConnection(client: Socket, ...args: any[]) {
         this.logger.log(`Client ${client.id} connected`);
         this.websocketService.sendOnlineClientsToClient(client)
     }
 
-    /**
-     * Hook when a client disconnect from the server
-     * @param {Socket} client
-     */
     handleDisconnect(client: Socket) {
         let sub
         this.logger.log(`Client ${client.id} disconnected`);
@@ -70,13 +57,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         }
     }
 
-    /**
-     * Event userOnline
-     * This event is triggered when the user is connected
-     * It is used to prevent the server that the user is now online
-     * @param {Socket} client
-     * @param {ClientInterface} payload
-     */
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage("userOnline")
@@ -94,11 +74,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<void> {
         const message = await this.chatsService.pushMsgInChannel(payload)
         const channel = await this.chatsService.findOneChannel(payload.channel_id)
-        if (channel) {
+        const {sub} = (client.handshake as any).user
+
+        let user_validate = channel.users.filter((user) => user.id === sub)
+
+        if (channel && message) {
             let users_id = []
             if (channel.privacy === PrivacyEnum.PUBLIC || channel.privacy === PrivacyEnum.PASSWORD)
                 users_id = this.websocketService.clients.filter((u) => u.channelId === channel.id).map((u) => u.userId)
-            else
+            else if (user_validate.length > 0)
                 users_id = channel.users.map((u) => u.id)
 
             const users_in_channel = this.websocketService.clients.filter((u) => users_id.includes(u.userId))
@@ -116,10 +100,16 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         this.chatsService.createChannel(payload, sub).then((res) => {
 
-            if (res.privacy === PrivacyEnum.PUBLIC) {
-                this.chatsService.findAllChannel(sub).then((c) => {
-                    this.server.emit('getChannels', c)
-                })
+            if (res.privacy === PrivacyEnum.PUBLIC || res.privacy === PrivacyEnum.PASSWORD) {
+                for (let u of this.websocketService.onlineClients)
+                {
+                    const i = this.websocketService.onlineClients.indexOf(u)
+                    if (i !== -1) {
+                        this.chatsService.findAllChannel(u).then((channels) => {
+                            this.websocketService.clients[i].socket.emit('getChannels', channels)
+                        })
+                    }
+                }
             } else {
                 let users_id = res.users.map((u) => u.id)
                 for (const user of users_id) {
@@ -164,16 +154,23 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         client.emit('SendMessagesToClient', messages)
     }
 
-
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('setUserAdmin')
     async getMessagesEvent(client: Socket, payload: SetUserAdminInterface): Promise<void> {
         const {sub} = (client.handshake as any).user
-        await this.chatsService.setUserChannelAdministrator(sub, payload.promoted_user_id, payload.channel_id)
-
+        if (!payload.state || !payload.channel_id || !payload.promoted_user_id)
+            return null
+        await this.chatsService.setUserChannelAdministrator(sub, payload.promoted_user_id, payload.channel_id, payload.state)
     }
 
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('changeChannelProperty')
+    async changeChannelProperty(client: Socket, payload: ChangeChannelPropertyInterface): Promise<void> {
+        const {sub} = (client.handshake as any).user
+        await this.chatsService.changeChannelProperties(sub, payload)
+    }
 }
 
 

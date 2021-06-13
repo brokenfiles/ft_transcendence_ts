@@ -72,6 +72,17 @@ export class UsersService {
             })
     }
 
+    async findUsersByIds(users_id: number[]): Promise<User[]>
+    {
+        let users = await this.usersRepository.find({
+            relations: ['channels', 'channels_admin', 'banned_channels', 'channels_owned']
+        })
+
+        const all_users = users.filter((u) => users_id.includes(u.id))
+
+        return (all_users)
+    }
+
     async remove(id: number): Promise<User> {
         const user = await this.findOne(id)
         return this.usersRepository.remove(user)
