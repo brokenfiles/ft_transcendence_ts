@@ -17,6 +17,8 @@ import {Channel} from "../../chat/entities/channel.entity";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
 import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
+import {SetUserAdminInterface} from "./interfaces/set-user-admin.interface";
+
 
 
 @WebSocketGateway(81,
@@ -142,14 +144,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         })
     }
 
-    // @UseGuards(WsJwtAuthGuard)
-    // @UseFilters(new UnauthorizedExceptionFilter())
-    // @SubscribeMessage('getMsgs')
-    // async getMessagesEvent(client: Socket, channel: string): Promise<void> {
-    //   const messages = await this.chatsService.getMessageFromChannel(channel)
-    //   client.emit('SendMessagesToClient', messages)
-    // }
-
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('channelChanged')
@@ -169,6 +163,17 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         }
         client.emit('SendMessagesToClient', messages)
     }
+
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('setUserAdmin')
+    async getMessagesEvent(client: Socket, payload: SetUserAdminInterface): Promise<void> {
+        const {sub} = (client.handshake as any).user
+        await this.chatsService.setUserChannelAdministrator(sub, payload.promoted_user_id, payload.channel_id)
+
+    }
+
 }
 
 

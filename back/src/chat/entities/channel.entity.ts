@@ -38,6 +38,14 @@ export class Channel {
     @JoinTable()
     users: User[]
 
+    @ManyToMany(() => User, user => user.banned_channels)
+    @JoinTable()
+    banned_users: User[]
+
+    @ManyToMany(() => User, user => user.channels_admin)
+    @JoinTable()
+    administrator: User[]
+
     @OneToMany(type => Message, message => message.channel)
     messages: Message[]
 

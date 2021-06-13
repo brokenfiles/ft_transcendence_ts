@@ -49,6 +49,12 @@ export class User {
     })
     channels: Channel[]
 
+    @ManyToMany(() => Channel, channel => channel.banned_users)
+    banned_channels: Channel[]
+
+    @ManyToMany(() => Channel, channel => channel.administrator)
+    channels_admin: Channel[]
+
     @ManyToMany(() => Achievement, achievement => achievement.users, {
         cascade: true
     })

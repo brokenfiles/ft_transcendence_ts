@@ -70,10 +70,13 @@ export class ChatsService {
                 newChannel.password = ChannelDto.password
 
             newChannel.users = []
+            newChannel.banned_users = []
+            newChannel.administrator = []
 
             let user = await this.usersService.findOne(sub)
             newChannel.owner = user
             newChannel.users.push(user)
+            newChannel.administrator.push(user)
 
 
             if (ChannelDto.users.length > 0)
@@ -146,10 +149,31 @@ export class ChatsService {
 
     async findOneChannel(id: number) {
         return this.channelRepository.findOne({
-            relations: ['users'],
+            relations: ['users', 'administrator', 'banned_users'],
             where: {
                 id
             }
         })
+    }
+
+    async setUserChannelAdministrator(sub: number, promoted_user_id: number, channel_id: number) {
+        try {
+
+            const user = await this.usersService.findOne(promoted_user_id, ['channels_admin'])
+            const curr_channel = await this.findOneChannel(channel_id)
+
+            if (user && curr_channel) {
+                if (user.channels_admin.map((channel) => channel.id).includes(curr_channel.id)) {
+                    curr_channel.administrator.push(user)
+                }
+            }
+        }
+        catch (e)
+        {
+            throw new WsException({
+                error: `Can't set user administrator`
+            })
+        }
+
     }
 }
