@@ -160,9 +160,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('channelChanged')
     async changeChannel(client: Socket, payload: ChangeChannelInterface): Promise<void> {
+        const {sub} = (client.handshake as any).user
+        let messages = []
         this.websocketService.changeCurrentChannel(client, payload)
-        // console.log(payload.channel_id)
-        const messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
+        this.chatsService.findOneChannel(payload.channel_id).then(async (channel) => {
+            if ((channel.privacy === PrivacyEnum.PUBLIC) ||
+                (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel)) ||
+                (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password))
+                messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
+        })
         client.emit('SendMessagesToClient', messages)
     }
 }

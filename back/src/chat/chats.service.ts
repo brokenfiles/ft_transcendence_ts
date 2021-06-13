@@ -50,6 +50,13 @@ export class ChatsService {
         console.log(client_id)
     }
 
+
+    async isUserInChannel(user_id: number, channel: Channel) : Promise<boolean>
+    {
+        const user = await this.usersService.findOne(user_id)
+        return channel.users.includes(user);
+    }
+
     async createChannel(ChannelDto: CreateChannelDto, sub: number) {
 
         try {
