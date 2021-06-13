@@ -75,6 +75,11 @@ export default class ChannelTab extends Vue {
     this.messages = messages
   }
 
+  @Socket('SendLastMessagesToClient')
+  addMessage(message: MessageInterface) {
+    this.messages.push(message)
+  }
+
 }
 </script>
 
