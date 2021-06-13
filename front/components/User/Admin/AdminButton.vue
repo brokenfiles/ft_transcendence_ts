@@ -37,8 +37,11 @@ export default class AdminButton extends Vue {
       banned: verdict.until,
       ban_reason: verdict.reason
     }).then(() => {
+      if (verdict.until < new Date)
+        this.$toast.success('user has been successfully unbanned')
+      else
         this.$toast.success('user has been successfully banished')
-        this.$emit('adminActionPerformed')
+      this.$emit('adminActionPerformed')
     }).catch((err) => {
       this.$toast.error(err.response.data.message[0])
     })
@@ -48,7 +51,10 @@ export default class AdminButton extends Vue {
     this.$axios.patch(`/users/${this.user.id}`, {
       blocked: verdict.until
     }).then(() => {
-      this.$toast.success('user has been successfully blocked')
+      if (verdict.until < new Date)
+        this.$toast.success('user has been successfully unblocked')
+      else
+        this.$toast.success('user has been successfully blocked')
       this.$emit('adminActionPerformed')
     }).catch((err) => {
       this.$toast.error(err.response.data.message[0])
