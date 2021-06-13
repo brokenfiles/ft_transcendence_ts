@@ -70,7 +70,7 @@ export class UsersController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Administrator)
+  @Roles(Role.Administrator, Role.Moderator)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }

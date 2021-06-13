@@ -80,7 +80,7 @@ export class AuthController {
         if (new Date(user.banned) > new Date()) {
             const formattedDate = moment.duration( moment(new Date(user.banned)).diff(moment()) ).asDays().toFixed(0)
             throw new HttpException({
-                error: `You are banned ${formattedDate} for the following reason: ${user.ban_reason}`
+                error: `You are banned ${formattedDate} days for the following reason: ${user.ban_reason}`
             }, HttpStatus.UNAUTHORIZED)
         }
         const payload = {
