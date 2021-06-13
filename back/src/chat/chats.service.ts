@@ -64,7 +64,9 @@ export class ChatsService {
             newChannel.users = []
 
             let user = await this.usersService.findOne(sub)
+            newChannel.owner = user
             newChannel.users.push(user)
+
 
             if (ChannelDto.users.length > 0)
             {

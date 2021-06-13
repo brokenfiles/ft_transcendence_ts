@@ -119,6 +119,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     createChannelEvent(client: Socket, payload: CreateChannelDto): void {
         const {sub} = (client.handshake as any).user
         this.chatsService.createChannel(payload, sub).then((res) => {
+
             if (res.privacy === PrivacyEnum.PUBLIC) {
                 this.chatsService.findAllChannel(sub).then((c) => {
                     this.server.emit('getChannels', c)

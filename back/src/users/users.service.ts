@@ -41,7 +41,7 @@ export class UsersService {
         );
         let user = await this.usersRepository.findOneOrFail(id, {
             relations: [
-                'guild', 'achievements', 'guild_request', ...relations
+                'guild', 'achievements', 'guild_request', 'channels_owned', ...relations
             ]
         }).catch((err) => {
             throw new HttpException({

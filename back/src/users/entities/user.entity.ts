@@ -40,6 +40,9 @@ export class User {
     @OneToMany(() => Message, message => message.owner)
     messages: Message[]
 
+    @OneToMany(() => Channel, channel => channel.owner)
+    channels_owned: Channel[]
+
     @ManyToMany(() => Channel, channel => channel.users, {
         cascade: true,
         onDelete: "SET NULL"
