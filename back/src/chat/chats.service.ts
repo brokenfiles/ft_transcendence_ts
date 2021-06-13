@@ -31,9 +31,11 @@ export class ChatsService {
         let user = await this.usersService.findOne(user_id, ['channels'])
 
         let publicChannels = await this.channelRepository.find({
-            where: {
-                privacy: PrivacyEnum.PUBLIC,
-            }
+            where: [
+                {privacy: PrivacyEnum.PUBLIC},
+                {privacy: PrivacyEnum.PASSWORD}
+            ]
+
         })
         const channels_id = user.channels.map((c) => c.id)
         for (const channel of publicChannels)

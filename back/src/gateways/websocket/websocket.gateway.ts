@@ -94,16 +94,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const channel = await this.chatsService.findOneChannel(payload.channel_id)
         if (channel) {
             let users_id = []
-            if (channel.privacy === PrivacyEnum.PUBLIC)
+            if (channel.privacy === PrivacyEnum.PUBLIC || channel.privacy === PrivacyEnum.PASSWORD)
                 users_id = this.websocketService.clients.filter((u) => u.channelId === channel.id).map((u) => u.userId)
             else
                 users_id = channel.users.map((u) => u.id)
-
-            for (const user of users_id)
-            {
-                console.log(user)
-            }
-
 
             const users_in_channel = this.websocketService.clients.filter((u) => users_id.includes(u.userId))
             for (const user of users_in_channel) {
