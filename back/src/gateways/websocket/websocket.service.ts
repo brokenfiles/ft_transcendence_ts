@@ -6,6 +6,7 @@ import {ClientInterface} from "./interfaces/client.interface";
 import {NotifyOptions} from "./interfaces/notification/notify.options.interface";
 import {Channel} from "../../chat/entities/channel.entity";
 import {Message} from "../../chat/entities/message.entity";
+import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 
 @Injectable()
 export class WebsocketService {
@@ -41,6 +42,7 @@ export class WebsocketService {
     public addClient(client: Socket, payload: ClientInterface, server: Server) {
         payload.id = client.id
         payload.socket = client
+        payload.channelId = -1
         if (this._clients.filter(client => client.userId == payload.userId).length == 0) {
             this._clients.push(payload)
             this.broadcastOnlineClients(server)
@@ -66,4 +68,19 @@ export class WebsocketService {
         return this._clients
     }
 
+    findClientFromSocket(client: Socket) : ClientInterface | undefined
+    {
+        for (const c of this._clients)
+        {
+            if (c.socket === client)
+                return c
+        }
+        return undefined
+    }
+
+    changeCurrentChannel(client: Socket, payload: ChangeChannelInterface) {
+        const c = this.findClientFromSocket(client)
+        if (c)
+            c.channelId = payload.channel_id
+    }
 }

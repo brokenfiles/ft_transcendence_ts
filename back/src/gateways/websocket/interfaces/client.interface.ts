@@ -8,4 +8,6 @@ export interface ClientInterface {
 
     userId: number
 
+    channelId: number
+
 }

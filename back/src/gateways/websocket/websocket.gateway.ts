@@ -16,6 +16,9 @@ import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
 import {Channel} from "../../chat/entities/channel.entity";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
 import {PrivacyEnum} from "../../chat/enums/privacy.enum";
+import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
+
+
 
 @WebSocketGateway(81,
     {
@@ -87,8 +90,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @SubscribeMessage('msgToServer')
   async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<void> {
     await this.chatsService.pushMsgInChannel(payload)
-    let messages = await this.chatsService.getMessageFromChannel(payload.channel)
-    const channel = await this.chatsService.findOneChannel(payload.channel)
+    let messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
+    const channel = await this.chatsService.findOneChannel(payload.channel_id)
     if (channel)
     {
       if (channel.privacy === PrivacyEnum.PUBLIC)
@@ -140,12 +143,23 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     })
   }
 
-  @UseGuards(WsJwtAuthGuard)
-  @UseFilters(new UnauthorizedExceptionFilter())
-  @SubscribeMessage('getMsgs')
-  async getMessagesEvent(client: Socket, channel: string): Promise<void> {
-    const messages = await this.chatsService.getMessageFromChannel(channel)
-    client.emit('SendMessagesToClient', messages)
-  }
+  // @UseGuards(WsJwtAuthGuard)
+  // @UseFilters(new UnauthorizedExceptionFilter())
+  // @SubscribeMessage('getMsgs')
+  // async getMessagesEvent(client: Socket, channel: string): Promise<void> {
+  //   const messages = await this.chatsService.getMessageFromChannel(channel)
+  //   client.emit('SendMessagesToClient', messages)
+  // }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('channelChanged')
+    async changeChannel(client: Socket, payload: ChangeChannelInterface): Promise<void> {
+        this.websocketService.changeCurrentChannel(client, payload)
+        const messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
+        client.emit('SendMessagesToClient', messages)
+    }
 }
+
+
 

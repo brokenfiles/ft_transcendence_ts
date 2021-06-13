@@ -84,13 +84,9 @@ export class ChatsService {
         }
     }
 
-    async getMessageFromChannel(channel_name: string): Promise<Message[]>{
+    async getMessageFromChannel(id: number): Promise<Message[]>{
         try {
-            let channel = await this.channelRepository.findOne({
-                where: {
-                    name: channel_name
-                }
-            })
+            const channel = await this.channelRepository.findOne(id)
             if (channel)
             {
                 return this.messageRepository.find({
@@ -118,7 +114,7 @@ export class ChatsService {
             let channel = await this.channelRepository.find({
                 relations: ['messages'],
                 where: {
-                    name: sendMessageDto.channel
+                    id: sendMessageDto.channel_id
                 }
             })
 
@@ -135,11 +131,11 @@ export class ChatsService {
 
     }
 
-    async findOneChannel(channel: string) {
+    async findOneChannel(id: number) {
         return this.channelRepository.findOne({
             relations: ['users'],
             where: {
-                name: channel
+                id
             }
         })
     }
