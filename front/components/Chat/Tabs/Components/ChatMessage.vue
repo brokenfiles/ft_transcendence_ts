@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex flex-wrap items-center"
+    <nuxt-link :to="`/users/${message.owner.login}`" class="block flex flex-wrap items-center"
          :class="{'text-right': authenticatedId === message.owner.id}"
          v-if="!previous_message || previous_message.owner.id !== message.owner.id">
       <avatar class="z-50 h-8 w-8"
@@ -16,7 +16,7 @@
           </client-only>
         </span>
       </p>
-    </div>
+    </nuxt-link>
     <div class="w-full text-md leading-5"
         :class="{'pl-10': authenticatedId !== message.owner.id,
                   'pr-10 text-right': authenticatedId === message.owner.id}">

@@ -1,13 +1,18 @@
 <template>
-  <div class="w-full md:w-auto fixed bottom-0 right-0 bg-red-500 md:mr-10 bg-primary text-cream z-40" :class="{'closed': !isChatOpen, 'open': isChatOpen}" id="chat-rooms" v-if="this.$auth.loggedIn">
-    <div class="flex py-2 px-4 md:px-32 items-center cursor-pointer w-full" @click="isChatOpen = !isChatOpen" id="chat-header">
+  <div class="w-full md:w-auto fixed bottom-0 right-0 bg-red-500 md:mr-10 bg-primary text-cream z-40"
+       :class="{'closed': !isChatOpen, 'open': isChatOpen}" id="chat-rooms" v-if="this.$auth.loggedIn">
+    <div class="flex py-2 px-4 md:px-32 items-center cursor-pointer w-full" @click="isChatOpen = !isChatOpen"
+         id="chat-header">
       <h2 class="text-white flex-1 font-semibold">Chat</h2>
-      <svg id="chatroom-icon" class="mx-2 h-5 w-5 transition duration-150 ease-in-out" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+      <svg id="chatroom-icon" class="mx-2 h-5 w-5 transition duration-150 ease-in-out"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clip-rule="evenodd"/>
       </svg>
     </div>
     <div class="overflow-y-hidden chat-body">
-      <div class="overflow-y-auto px-4 chat-body">
+      <div class="overflow-y-auto px-4 chat-body" ref="chatBody">
 
         <div v-show="curr_channel === null">
           <home-tab @channelChanged="changeCurrChannel" :channels="channels"/>
@@ -53,6 +58,7 @@ export default class Chat extends Vue {
     if (this.$auth.loggedIn) {
       await this.$auth.fetchUser()
       await this.$socket.client.emit('getChannels')
+      this.$root.$on('receivedMessage', this.scrollToBottom)
     }
   }
 
@@ -69,6 +75,21 @@ export default class Chat extends Vue {
     this.$socket.client.emit('channelChanged', {
       channel_id: -1
     })
+  }
+
+  scrollToBottom(firstTime: boolean = false): void {
+    const refs = (this.$refs as any)
+    if (refs.chatBody) {
+      let element = refs.chatBody as HTMLElement
+      this.$nextTick(() => {
+        console.log(`element.scrollTop: ${element.scrollTop + element.offsetHeight}`)
+        console.log(`element.scrollHeight: ${element.scrollHeight}\n`)
+        const scrollTop = element.scrollTop + element.offsetHeight
+        if (scrollTop + 200 >= element.scrollHeight || firstTime) {
+          element.scrollTop = element.scrollHeight
+        }
+      })
+    }
   }
 
 }

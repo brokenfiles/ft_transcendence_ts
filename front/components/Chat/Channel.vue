@@ -1,6 +1,8 @@
 <template>
   <div @click="changeChannel(true)" tabindex="0" v-show="isVisible">
-    <div v-if="connection_step === 0" class="w-full border-2 border-cream text-cream p-2 flex flex-wrap cursor-pointer">
+    <div v-if="connection_step === 0" class="w-full border-2 border-cream text-cream p-2 flex flex-wrap cursor-pointer items-center">
+      <font-awesome-icon v-if="channel.privacy === 'password'"
+                         class="mr-2 text-xs" :icon="['fas', 'lock']"/>
       <p class="flex-1">
         {{ channel.name }}
         <span class="text-gray-500 text-sm"> #{{channel.uuid.substr(0, 4)}}</span>

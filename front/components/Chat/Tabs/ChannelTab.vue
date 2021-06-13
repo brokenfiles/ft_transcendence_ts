@@ -82,6 +82,7 @@ export default class ChannelTab extends Vue {
   getMessage(messages: MessageInterface[] | null) {
     if (messages !== null) {
       this.messages = messages
+      this.$root.$emit('receivedMessage', true)
     } else {
       this.$toast.error(`The password is wrong`)
       this.goBack()
@@ -91,6 +92,7 @@ export default class ChannelTab extends Vue {
   @Socket('SendLastMessagesToClient')
   addMessage(message: MessageInterface) {
     this.messages.push(message)
+    this.$root.$emit('receivedMessage')
   }
 
 }
