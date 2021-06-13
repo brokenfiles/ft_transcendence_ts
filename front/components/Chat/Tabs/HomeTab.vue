@@ -19,8 +19,9 @@
 <!--      display the channels if there are private or public-->
       <channel v-for="(channel, index) in channels" class="my-2"
                :key="`channel-${index}`" :name="channel.name"
-               :privacy="channel.privacy" :channel_category="channel_category.toLowerCase()"
-               @click="changeCurrChannel(channel.name)"/>
+               :id="channel.id" :privacy="channel.privacy"
+               :channel_category="channel_category.toLowerCase()"
+               @click="changeCurrChannel(channel)"/>
     </div>
   </div>
 </template>
@@ -58,8 +59,8 @@ export default class HomeTab extends Vue {
     this.channel_category = categoryName
   }
 
-  changeCurrChannel(channel_name: string) {
-    this.$emit('channelChanged', channel_name)
+  changeCurrChannel(channel: ChannelInterface) {
+    this.$emit('channelChanged', channel)
   }
 
 }

@@ -9,12 +9,12 @@
     <div class="overflow-y-hidden chat-body">
       <div class="overflow-y-auto px-4 chat-body">
 
-        <div v-show="curr_channel === ''">
+        <div v-show="curr_channel === null">
           <home-tab @channelChanged="changeCurrChannel" :channels="channels"/>
         </div>
 
-        <div v-show="curr_channel !== ''">
-          <channel-tab @back="curr_channel = ''" :curr_channel="curr_channel"/>
+        <div v-show="curr_channel !== null">
+          <channel-tab @back="closedChannel" :curr_channel="curr_channel"/>
         </div>
       </div>
     </div>
@@ -28,6 +28,7 @@ import {Socket} from "vue-socket.io-extended";
 import {Component} from "nuxt-property-decorator";
 import HomeTab from "~/components/Chat/Tabs/HomeTab.vue";
 import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
+import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
 
 @Component({
   components: {
@@ -39,12 +40,12 @@ import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
 export default class Chat extends Vue {
 
   /** Variables */
-  channels: string[] = []
+  channels: ChannelInterface[] = []
+  curr_channel: any = null
   isChatOpen: boolean = false
-  curr_channel: string = ""
 
   @Socket('getChannels')
-  getChannel(channels: string[]) {
+  getChannel(channels: ChannelInterface[]) {
     this.channels = channels
   }
 
@@ -55,15 +56,18 @@ export default class Chat extends Vue {
     }
   }
 
-  getMessagesFromChannel(curr_channel: string) {
-    this.$socket.client.emit('getMsgs',
-      curr_channel
-    )
+  changeCurrChannel(channel: ChannelInterface) {
+    this.curr_channel = channel
+    this.$socket.client.emit('channelChanged', {
+      channel_id: channel.id
+    })
   }
 
-  changeCurrChannel(channel_name: string) {
-    this.curr_channel = channel_name
-    this.getMessagesFromChannel(this.curr_channel)
+  closedChannel(): void {
+    this.curr_channel = null
+    this.$socket.client.emit('channelChanged', {
+      channel_id: -1
+    })
   }
 
 }

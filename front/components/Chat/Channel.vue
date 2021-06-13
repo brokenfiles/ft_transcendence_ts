@@ -19,6 +19,7 @@ export default class Channel extends Vue {
 
   /** Properties */
   @Prop({required: true}) name!: string
+  @Prop({required: true}) id!: number
   @Prop({required: true}) privacy!: PrivacyEnum
   @Prop({required: true}) channel_category!: string
 
