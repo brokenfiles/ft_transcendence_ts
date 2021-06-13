@@ -4,6 +4,7 @@ import {PrivacyEnum} from "~/utils/enums/privacy.enum";
 export interface ChannelInterface {
 
   id: number
+  uuid: string
   name: string
   created_at: Date
   updated_at: Date

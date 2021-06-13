@@ -1,7 +1,7 @@
 import {
     Column,
     CreateDateColumn,
-    Entity, JoinTable, ManyToMany, OneToMany,
+    Entity, Generated, JoinTable, ManyToMany, OneToMany,
     PrimaryGeneratedColumn, UpdateDateColumn
 } from "typeorm";
 import {User} from "../../users/entities/user.entity";
@@ -14,6 +14,10 @@ export class Channel {
 
     @PrimaryGeneratedColumn()
     id: number
+
+    @Column()
+    @Generated("uuid")
+    uuid: string
 
     @Column()
     name: string
