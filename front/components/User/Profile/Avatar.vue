@@ -1,5 +1,5 @@
 <template>
-  <div class="relative rounded-full bg-cover" :style="{backgroundImage: `url(${imageUrl})`}">
+  <div class="relative rounded-full bg-center bg-cover" :style="{backgroundImage: `url(${imageUrl})`}">
     <slot></slot>
   </div>
 </template>

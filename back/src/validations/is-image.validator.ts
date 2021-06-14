@@ -17,7 +17,7 @@ export function IsImage() {
                 validate(value: any) {
                     const regx = /(?:\.([^.]+))?$/
                     const ext = regx.exec(value)[1]
-                    return ext && config.authorizedImageFormats.includes(ext);
+                    return ext && config.authorizedImageFormats.includes(ext.toLowerCase());
                 },
             },
         });

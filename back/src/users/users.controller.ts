@@ -9,18 +9,18 @@ import {
   HttpStatus,
   UseGuards,
   Req,
-  ParseIntPipe, HttpException
+  ParseIntPipe, HttpException, UseInterceptors, UploadedFile
 } from '@nestjs/common';
-import {Request} from 'express';
+import {Request, Express} from 'express';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {GuildsService} from "../guilds/guilds.service";
 import {Roles} from "../auth/roles/roles.decorator";
 import {Role} from "../auth/roles/enums/role.enum";
 import {RolesGuard} from "../auth/roles/roles.guard";
 import {JwtAuthGuard} from "../auth/jwt-auth.guard";
 import {UpdateMeDto} from "./dto/update-me.dto";
-import {IsInt} from "class-validator";
+import config from "../../configuration/config";
+import {FileInterceptor} from "@nestjs/platform-express";
 
 @Controller('users')
 export class UsersController {
@@ -66,6 +66,13 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   updateMe(@Req() request, @Body() updateMeDto: UpdateMeDto) {
     return this.usersService.update(+request.user.sub, updateMeDto)
+  }
+
+  @Post('me/avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  updateMyAvatar(@Req() request, @UploadedFile() file: Express.Multer.File) {
+
   }
 
   @Patch(':id')

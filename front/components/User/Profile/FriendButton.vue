@@ -8,7 +8,7 @@
       Request sent
       <span class="text-xxs block">(wait the answer)</span>
     </div>
-    <div v-else-if="friendState === 2" class="flex">
+    <div v-else-if="friendState === 2">
       Accept request
       <span class="text-xxs block">(click to accept)</span>
     </div>
@@ -32,13 +32,16 @@ import {FriendState} from "~/utils/enums/friend-state.enum";
 })
 export default class FriendButton extends Vue {
 
+  /** Properties */
   @Prop({required: true}) friendState!: FriendState
 
+  /** Methods */
   updateStatus() {
     if (this.friendState !== FriendState.PENDING_REQUESTER)
       this.$emit('update', this.friendState)
   }
 
+  /** Computed */
   get classes() {
     if (this.friendState === FriendState.FRIEND) {
       return "bg-friend-200 text-friend-500"

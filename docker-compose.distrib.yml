@@ -15,8 +15,6 @@ services:
       FORTYTWO_OAUTH_UID: 9579ba21d5e3c7f60d648235ee834440791768c01c27bb6063addd5044e3accc
       FORTYTWO_OAUTH_SECRET: 02b1bdb90613c0e669129fca48f8a6f1eed40a3a45c6ec5490b090352c11ff69
       JWT_SECRET: "SALUTLESAMIGO"
-      CLOUDINARY_API_KEY: <cloudinary api key>
-      CLOUDINARY_API_SECRET: <cloudinary api secret>
     command: "yarn start:dev"
     depends_on:
       - db

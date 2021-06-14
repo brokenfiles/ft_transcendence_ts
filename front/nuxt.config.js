@@ -143,6 +143,10 @@ export default {
     }
   },
 
+  env: {
+    baseUrl: process.env.BASE_URL || 'localhost:4000'
+  },
+
   axios: {
     baseURL: process.env.SSR_BACKEND_BASE_URL,
     browserBaseURL: process.env.BASE_URL

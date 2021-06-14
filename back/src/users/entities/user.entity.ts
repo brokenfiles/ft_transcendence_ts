@@ -10,6 +10,7 @@ import {Channel} from "../../chat/entities/channel.entity";
 import {Message} from "../../chat/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
 import {Role} from "../../auth/roles/enums/role.enum";
+import {Picture} from "../../cdn/entites/picture.entity";
 
 @Entity("users")
 export class User {
@@ -36,6 +37,9 @@ export class User {
     })
     @JoinColumn()
     guild_request: Guild
+
+    @OneToMany(type => Picture, p => p.user)
+    pictures: Picture[]
 
     @OneToMany(() => Message, message => message.owner)
     messages: Message[]
