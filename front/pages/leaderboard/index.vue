@@ -22,7 +22,7 @@
     <div class="w-2/3 mx-auto pb-8">
       <div class="px-1">
         <div v-if="tab === 'users'">
-          <div class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
+          <div :class="getUserBG(user.id)" class="block flex items-center text-primary px-4 py-2 mb-2"
                v-for="(user, index) in users" :key="`user-guild-${index}`">
             <leaderboard-rank :rank-number="index + 1" class="w-8 h-8 mr-4"/>
             <avatar class="h-12 w-12" :image-url="user.avatar"/>
@@ -33,6 +33,21 @@
                     </span>
             </nuxt-link>
             <p>{{ user.points }} points</p>
+          </div>
+        </div>
+        <div v-if="tab === 'guilds'">
+          <div :class="getGuildBG(guild.id)" class="block flex items-center text-primary px-4 py-2 mb-2"
+               v-for="(guild, index) in guilds" :key="`user-guild-${index}`">
+            <leaderboard-rank :rank-number="index + 1" class="w-8 h-8 mr-4"/>
+            <span class="font-semibold">[{{ guild.anagram }}]</span>
+            <nuxt-link :to="`/guilds/${guild.anagram}`" class="ml-2 flex-1 font-light">
+              {{ guild.name }} <br/>
+            </nuxt-link>
+            <div class="mr-14">
+              <span class="mr-2">members:</span>
+              <span class="font-light">{{ guild.users.length }}/50</span>
+            </div>
+            <p>{{ guild.war_points }} points</p>
           </div>
         </div>
       </div>
@@ -46,6 +61,8 @@ import {Component} from 'nuxt-property-decorator'
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import Avatar from "~/components/User/Profile/Avatar.vue";
 import LeaderboardRank from "~/components/Leaderboard/LeaderboardRank.vue";
+import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
+import {User} from "../../../back/src/users/entities/user.entity";
 
 @Component({
   components: {
@@ -58,16 +75,29 @@ export default class Leaderboard extends Vue {
   /** Variables */
   tab: string = 'users'
   users: UserInterface[] = []
+  guilds: GuildInterface[] = []
 
   /** Methods */
-
   async fetch() {
     this.users = await this.$axios.$get('/users?order=desc')
+    this.guilds = await this.$axios.$get('/guilds?order=desc')
   }
 
   getClasses(tab: string): string[] {
     if (this.tab === tab)
       return ['bg-yellow shadow-tabSelected']
+    return ['bg-cream']
+  }
+
+  getUserBG(userID: number): string[] {
+    if (this.$auth.user && this.$auth.user.id === userID)
+      return ['bg-green-200']
+    return ['bg-cream']
+  }
+
+  getGuildBG(guildID: number): string[] {
+    if (this.$auth.user && this.$auth.user.guild.id === guildID)
+      return ['bg-green-200']
     return ['bg-cream']
   }
 }
