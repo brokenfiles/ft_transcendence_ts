@@ -2,7 +2,7 @@ import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
 import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
+import {In, Repository} from "typeorm";
 import {User} from "./entities/user.entity";
 import {UpdateMeDto} from "./dto/update-me.dto";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
@@ -53,7 +53,7 @@ export class UsersService {
         );
         let user = await this.usersRepository.findOneOrFail(id, {
             relations: [
-                'guild', 'achievements', 'guild_request', 'channels_owned', ...relations
+                'guild', 'achievements', 'guild_request', 'channels_owned', 'channels_admin', ...relations
             ]
         }).catch((err) => {
             throw new HttpException({
@@ -87,12 +87,15 @@ export class UsersService {
     async findUsersByIds(users_id: number[]): Promise<User[]>
     {
         let users = await this.usersRepository.find({
-            relations: ['channels', 'channels_admin', 'banned_channels', 'channels_owned']
+            relations: ['channels', 'channels_admin', 'banned_channels', 'channels_owned'],
+            where: {
+                id: In(users_id)
+            }
         })
 
-        const all_users = users.filter((u) => users_id.includes(u.id))
+        // const all_users = users.filter((u) => users_id.includes(u.id))
 
-        return (all_users)
+        return (users)
     }
 
     async remove(id: number): Promise<User> {
