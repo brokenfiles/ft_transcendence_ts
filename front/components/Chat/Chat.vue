@@ -22,8 +22,8 @@
           <channel-tab @back="closedChannel" @adminPanelOpened="admin_mode = true" :curr_channel="curr_channel"/>
         </div>
 
-        <div v-show="admin_mode === true">
-          <admin-tab @back="admin_mode = false" :current_channel="curr_channel"/>
+        <div v-if="admin_mode === true && curr_channel">
+          <admin-tab @channelSaved="channelSaved" @back="admin_mode = false" :current_channel="curr_channel"/>
         </div>
       </div>
     </div>
@@ -67,6 +67,11 @@ export default class Chat extends Vue {
       await this.$socket.client.emit('getChannels')
       this.$root.$on('receivedMessage', this.scrollToBottom)
     }
+  }
+
+  channelSaved(channel: ChannelInterface) {
+    this.admin_mode = false
+    this.curr_channel = channel
   }
 
   changeCurrChannel(channel: ChannelInterface) {

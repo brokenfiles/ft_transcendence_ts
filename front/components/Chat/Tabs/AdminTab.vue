@@ -1,24 +1,24 @@
 <template>
   <div>
-    <div v-if="current_channel">
+    <div v-if="channel">
       <back-button class="mb-2" @back="$emit('back')">Back to the channel</back-button>
-      <select v-model="current_channel.privacy"
+      <select v-model="channel.privacy"
               class="block w-full focus:outline-none p-2 mb-2 bg-secondary border border-cream appearance-none">
         <option value="" disabled>Channel privacy</option>
         <option value="private">Private</option>
         <option value="password">Private with password</option>
         <option value="public">Public</option>
       </select>
-      <div v-if="current_channel.privacy === 'password'">
-        <input v-model="current_channel.password" class="block w-full focus:outline-none p-2 mb-2 bg-secondary border border-cream"
+      <div v-if="channel.privacy === 'password'">
+        <input v-model="channel.password" class="block w-full focus:outline-none p-2 mb-2 bg-secondary border border-cream"
                type="password" placeholder="Channel password">
       </div>
-      <div v-if="current_channel.privacy === 'private'">
+      <div v-if="channel.privacy === 'private'">
         <p class="mb-2">Members in your channel</p>
-        <user-picker @pickedUser="addUser" :added-users="current_channel.users" class="mb-2"/>
+        <user-picker @pickedUser="addUser" :added-users="channel.users" class="mb-2"/>
         <div class="mb-2">
           <div class="block w-full p-2 flex flex-wrap items-center focus:outline-none mb-0.5"
-               v-for="(user, index) in current_channel.users" :key="`added-user-${index}`">
+               v-for="(user, index) in channel.users" :key="`added-user-${index}`">
             <avatar class="w-10 h-10" :image-url="user.avatar"/>
             <span class="ml-2 block flex-1">
               {{ user.display_name }} <br/>
@@ -50,7 +50,6 @@ import Vue from 'vue'
 import {Component, Prop} from 'nuxt-property-decorator'
 import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
 import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
-import {PrivacyEnum} from "~/utils/enums/privacy.enum";
 import UserPicker from "~/components/Core/UserPicker.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import Avatar from "~/components/User/Profile/Avatar.vue";
@@ -71,10 +70,7 @@ export default class AdminTab extends Vue {
   list_expanded: boolean = false
 
   /** Models */
-  // model_privacy: string = ''
-  // model_password: string = ''
-
-  // added_users: UserInterface[] = []
+  channel: ChannelInterface = {...this.current_channel}
 
   /** Hooks */
   mounted () {
@@ -96,7 +92,14 @@ export default class AdminTab extends Vue {
   }
 
   saveChannel(): void {
-
+    this.$socket.client.emit('changeChannelProperty', {
+      channel_id: this.channel.id,
+      privacy: this.channel.privacy,
+      password: this.channel.password,
+      _private_users: this.channel.users.map(u => u.id)
+    })
+    this.$toast.success(`Saving the channel`)
+    this.$emit('channelSaved', this.channel)
   }
 
 }
