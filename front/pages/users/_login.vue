@@ -3,7 +3,7 @@
     <div class="flex flex-col items-center w-full mt-12" v-if="user">
       <avatar class="h-24 w-24" :image-url="user.avatar">
         <user-online-icon class="absolute h-7 w-7 top-0 right-0" :is-online="isOnline"/>
-        <image-uploader @imageUploaded="changeAvatar" class="absolute top-0 left-0"/>
+        <image-uploader v-if="this.$auth.loggedIn && this.$auth.user.id === user.id" @imageUploaded="changeAvatar" class="absolute top-0 left-0"/>
       </avatar>
       <h1 class="font-semibold mt-2 text-2xl">
         <nuxt-link class="text-yellow" :to="`/guilds/${guild.anagram}`" v-if="guild">[{{guild.anagram}}]</nuxt-link>
