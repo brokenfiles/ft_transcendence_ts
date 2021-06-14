@@ -1,5 +1,5 @@
 <template>
-  <div :style="{backgroundColor: color}" class="rounded-md p-1">
+  <div :style="{backgroundColor: color}" class="rounded-md p-1 text-center">
     <span class="font-semibold text-primary">{{ rankNumber }}</span>
   </div>
 </template>
@@ -16,11 +16,11 @@ export default class LeaderboardRank extends Vue {
 
   /** Methods */
   get color(): string {
-    if (rankNumber === 1)
+    if (this.rankNumber === 1)
       return 'rgb(255, 218, 24)'
-    else if (rankNumber === 2)
+    else if (this.rankNumber === 2)
       return 'rgb(196, 196, 196)'
-    else if (rankNumber === 3)
+    else if (this.rankNumber === 3)
         return 'rgb(191, 119, 52)'
     else
       return 'rgba(0, 0, 0, 0)'

@@ -33,7 +33,8 @@ export class UsersService {
             ],
             order: {
                 points: "DESC"
-            }
+            },
+            take: 15
         })
     }
 

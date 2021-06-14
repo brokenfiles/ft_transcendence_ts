@@ -19,12 +19,12 @@
         </button>
       </div>
     </div>
-    <div class="w-2/3 mx-auto">
+    <div class="w-2/3 mx-auto pb-8">
       <div class="px-1">
-        <div class="max-h-80 overflow-y-auto" v-if="tab === 'users'">
+        <div v-if="tab === 'users'">
           <div class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
                v-for="(user, index) in users" :key="`user-guild-${index}`">
-            <leaderboard-rank :rank-number="index + 1" class="w-8 h-8"/>
+            <leaderboard-rank :rank-number="index + 1" class="w-8 h-8 mr-4"/>
             <avatar class="h-12 w-12" :image-url="user.avatar"/>
             <nuxt-link :to="`/users/${user.login}`" class="ml-2 flex-1">
               {{ user.display_name }} <br/>
