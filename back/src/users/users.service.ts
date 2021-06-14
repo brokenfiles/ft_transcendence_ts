@@ -26,6 +26,17 @@ export class UsersService {
         })
     }
 
+    findAllOrderedByPoints(): Promise<User[]> {
+        return this.usersRepository.find({
+            relations: [
+                'guild'
+            ],
+            order: {
+                points: "DESC"
+            }
+        })
+    }
+
     async findOne(id: number, relations: string[] = []): Promise<User> {
         const friends = await this.usersRepository.query(
             `SELECT *

@@ -44,6 +44,9 @@ export class UsersController {
         }, HttpStatus.BAD_REQUEST)
       return user
     }
+    if (req.query.order) {
+      return this.usersService.findAllOrderedByPoints()
+    }
     return this.usersService.findAll();
   }
 

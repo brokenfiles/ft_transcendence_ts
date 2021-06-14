@@ -47,7 +47,7 @@
           </div>
           <div class="item-content pr-8 pl-4 font-semibold">
             <div class="item-link my-2 text-xl" @click="extended = false">
-              <nuxt-link to="#">Leaderboard</nuxt-link>
+              <nuxt-link to="/leaderboard">Leaderboard</nuxt-link>
             </div>
           </div>
         </div>
