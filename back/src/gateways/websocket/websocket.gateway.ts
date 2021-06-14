@@ -169,7 +169,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @SubscribeMessage('changeChannelProperty')
     async changeChannelProperty(client: Socket, payload: ChangeChannelPropertyInterface): Promise<void> {
         const {sub} = (client.handshake as any).user
-        await this.chatsService.changeChannelProperties(sub, payload)
+        await this.chatsService.changeChannelProperties(client, sub, payload)
     }
 }
 
