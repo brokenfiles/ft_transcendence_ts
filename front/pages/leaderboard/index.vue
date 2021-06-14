@@ -62,7 +62,6 @@ import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import Avatar from "~/components/User/Profile/Avatar.vue";
 import LeaderboardRank from "~/components/Leaderboard/LeaderboardRank.vue";
 import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
-import {User} from "../../../back/src/users/entities/user.entity";
 
 @Component({
   components: {
@@ -96,7 +95,7 @@ export default class Leaderboard extends Vue {
   }
 
   getGuildBG(guildID: number): string[] {
-    if (this.$auth.user && this.$auth.user.guild.id === guildID)
+    if (this.$auth.user && this.$auth.user.guild && this.$auth.user.guild.id === guildID)
       return ['bg-green-200']
     return ['bg-cream']
   }
