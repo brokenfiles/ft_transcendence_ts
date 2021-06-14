@@ -38,6 +38,9 @@ export class GuildsController {
     findAll(@Req() req: Request) {
         if (req.query.anagram)
             return this.guildService.findByAnagram(req.query.anagram)
+        if (req.query.order) {
+            return this.guildService.findAllOrderedByPoints()
+        }
         return this.guildService.findAll()
     }
 

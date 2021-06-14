@@ -25,6 +25,18 @@ export class GuildsService {
         })
     }
 
+    findAllOrderedByPoints(): Promise<Guild[]> {
+        return this.guildRepository.find({
+            relations: [
+                'users'
+            ],
+            order: {
+                points: "DESC"
+            },
+            take: 15
+        })
+    }
+
     findOne(id: number) : Promise<Guild> {
         return this.guildRepository.findOne(id, {
             relations: [
