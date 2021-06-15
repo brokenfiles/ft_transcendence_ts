@@ -52,7 +52,7 @@ export class GuildsController {
     @Patch("mine")
     @UseGuards(JwtAuthGuard)
     updateMine(@Req() request, @Body() updateGuild: UpdateGuildDto) {
-
+        return this.guildService.updateMine(request.user.sub, updateGuild)
     }
 
     @Post("mine/leave")

@@ -6,17 +6,19 @@
           {{ guild.name }} [{{ guild.anagram }}]
           <editable-field tag="div" classes="block text-lg font-light"
                           :editable="this.guild.id === guild.id"
-                          :value="guild.description" @stopEditing="saveGuildDescription" v-if="this.$auth.user.id === this.guild.owner.id"/>
+                          :value="guild.description" @stopEditing="saveGuildDescription"
+                          v-if="this.$auth.user.id === this.guild.owner.id"/>
           <span class="block text-lg font-light" v-else>
             {{ guild.description }}
           </span>
         </h1>
         <div>
           <div v-if="$auth.loggedIn" class="inline-block">
-            <nuxt-link v-if="$auth.user.guild && $auth.user.guild.id === guild.id && guild.pending_users && guild.pending_users.length > 0"
-                       class="inline-block bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
-                       :to="`/guilds/mine/requests`">
-              <span>Pending requests ({{guild.pending_users.length}})</span>
+            <nuxt-link
+              v-if="$auth.user.guild && $auth.user.guild.id === guild.id && guild.pending_users && guild.pending_users.length > 0"
+              class="inline-block bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
+              :to="`/guilds/mine/requests`">
+              <span>Pending requests ({{ guild.pending_users.length }})</span>
             </nuxt-link>
             <button v-if="$auth.user.guild_request && $auth.user.guild_request.id === guild.id"
                     class="bg-yellow text-primary py-2 px-4 rounded-md mr-2 focus:outline-none"
@@ -68,7 +70,7 @@
             </div>
             <div class="bg-gray-300 flex px-4 py-2">
               <p class="flex-1 font-semibold">Members</p>
-              <p>{{ guild.users.length }} / {{guild.max_users}}</p>
+              <p>{{ guild.users.length }} / {{ guild.max_users }}</p>
             </div>
             <div class="bg-cream flex px-4 py-2">
               <p class="flex-1 font-semibold">Owner</p>
@@ -82,7 +84,8 @@
             <div class="bg-gray-300 flex px-4 py-2">
               <p class="flex-1 font-semibold">Guild state</p>
               <client-only v-if="this.$auth.user && this.$auth.user.id === this.guild.owner.id">
-                <toggle-button v-model="isGuildOpen" :labels="{checked: 'open', unchecked: 'closed'}" @change="saveGuildState"/>
+                <toggle-button v-model="isGuildOpen" :labels="{checked: 'open', unchecked: 'closed'}"
+                               @change="saveGuildState" :width="70" />
               </client-only>
               <p v-else>{{ this.guild.open ? 'Open' : 'Closed' }}</p>
             </div>
@@ -111,7 +114,7 @@
           <div class="px-1">
             <div class="max-h-80 overflow-y-auto" v-if="tab === 'members'">
               <div class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
-                         v-for="(user, index) in guild.users" :key="`user-guild-${index}`">
+                   v-for="(user, index) in guild.users" :key="`user-guild-${index}`">
                 <avatar class="h-12 w-12" :image-url="user.avatar"/>
                 <nuxt-link :to="`/users/${user.login}`" class="ml-2 flex-1">
                   {{ user.display_name }} <br/>
@@ -174,7 +177,7 @@ export default class SingleGuild extends Vue {
           message: 'This guild does not exist'
         })
       })
-    return {guild}
+    return {guild, isGuildOpen: guild.open}
   }
 
   leaveOrDestroyGuild() {
@@ -220,7 +223,7 @@ export default class SingleGuild extends Vue {
         this.$toast.success(`You guild request has been cancelled`)
         this.$auth.fetchUser()
       }).catch((err) => {
-        this.$toast.error(err.response.data.message[0])
+      this.$toast.error(err.response.data.message[0])
     })
   }
 
@@ -250,12 +253,13 @@ export default class SingleGuild extends Vue {
    * @param user
    */
   promoteUserMasterOfGuild(user: UserInterface) {
-    if (confirm(`Are you sure ? You won't be ${this.guild.name}\'s master after this actions.`)) {
-      this.$axios.patch(`guilds/${this.guild?.id}`, {
+    if (confirm(`Are you sure ? You won't be ${this.guild?.name}\'s master after this actions.`)) {
+      this.$axios.patch(`guilds/mine`, {
         owner: user
       }).then(() => {
         this.$toast.success(`This user has been promoted as new Master of ${this.guild?.name}`)
-        this.guild?.owner = user
+        if (this.guild)
+          this.guild.owner = user
       }).catch((err) => {
         this.$toast.error(err.response.data.message[0])
       })
@@ -268,7 +272,7 @@ export default class SingleGuild extends Vue {
    * @param {String} newDescription
    */
   saveGuildDescription(newDescription: string) {
-    this.$axios.patch(`/guilds/${this.guild?.id}`, {
+    this.$axios.patch(`guilds/mine`, {
       description: newDescription
     }).then(() => {
       this.$toast.success('Guild description successfully changed')
@@ -280,10 +284,9 @@ export default class SingleGuild extends Vue {
   /**
    * Event when the user saves the guild state
    * Send a request to backend to change the state
-   * @param {String} newState
    */
   saveGuildState() {
-    this.$axios.patch(`/guilds/${this.guild?.id}`, {
+    this.$axios.patch(`/guilds/mine`, {
       open: this.isGuildOpen
     }).then(() => {
       this.$toast.success(`Guild is now ${this.isGuildOpen ? 'open' : 'closed'}`)

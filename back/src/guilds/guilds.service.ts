@@ -222,4 +222,20 @@ export class GuildsService {
         guild.users.splice(idx, 1)
         return this.guildRepository.save(guild)
     }
+
+    async updateMine(sub: number, updateGuild: UpdateGuildDto): Promise<Guild> {
+        const user = await this.usersService.findOne(sub)
+        if (!user.guild)
+            throw new HttpException({
+                message: [`You don't have a guild`]
+            }, HttpStatus.BAD_REQUEST)
+        let guild = await this.findOne(user.guild.id)
+        Object.assign(guild, updateGuild)
+        return this.guildRepository.save(guild)
+            .catch((err) => {
+                throw new HttpException({
+                    error: err.message
+                }, HttpStatus.BAD_REQUEST)
+            })
+    }
 }
