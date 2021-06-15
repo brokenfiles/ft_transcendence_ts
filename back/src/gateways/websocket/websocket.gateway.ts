@@ -136,7 +136,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('channelChanged')
-    async changeChannel(client: Socket, payload: ChangeChannelInterface): Promise<void> {
+    async changeChannel(client: Socket, payload: ChangeChannelInterface): Promise<any> {
         const {sub} = (client.handshake as any).user
         let messages = []
         this.websocketService.changeCurrentChannel(client, payload)
@@ -147,10 +147,13 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password)) {
                 messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
             } else {
-                messages = null
+                return {
+                    error: "Invalid password"
+                }
             }
         }
-        client.emit('SendMessagesToClient', messages)
+        return { message: messages }
+        // client.emit('SendMessagesToClient', messages)
     }
 
     // @UseGuards(WsJwtAuthGuard)
