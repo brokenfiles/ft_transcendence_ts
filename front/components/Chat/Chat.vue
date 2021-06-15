@@ -90,6 +90,9 @@ export default class Chat extends Vue {
           this.curr_channel = channel
           this.messages = data.messages
           this.scrollToBottom(true)
+          if (channel.password && process.client) {
+            localStorage.setItem(`channel-password-${channel.id}`, channel.password)
+          }
         }
       }
     })
