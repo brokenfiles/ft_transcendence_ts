@@ -2,13 +2,15 @@ import {HttpService, Injectable} from '@nestjs/common';
 import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
 import {JwtService} from "@nestjs/jwt";
+import {WebsocketService} from "../gateways/websocket/websocket.service";
 
 @Injectable()
 export class AuthService {
 
     constructor(private usersService : UsersService,
                 private readonly jwtService: JwtService,
-                private readonly httpService: HttpService
+                private readonly httpService: HttpService,
+                private readonly websocketService: WebsocketService
     ) {}
 
     async findUserFromLogin(login: string): Promise<User | null> {
@@ -34,7 +36,7 @@ export class AuthService {
     async refreshToken(refreshToken: string): Promise<any | null> {
         const payload = await this.validateToken(refreshToken)
         if (payload) {
-            return await this.generateToken({
+            return this.generateToken({
                 username: payload.username,
                 sub: payload.sub,
                 role: payload.role

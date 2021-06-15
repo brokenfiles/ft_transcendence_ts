@@ -78,6 +78,16 @@ export class WebsocketService {
         return undefined
     }
 
+    public findClientFromUserId(userId: number) : ClientInterface | undefined
+    {
+        for (const c of this._clients)
+        {
+            if (c.userId === userId)
+                return c
+        }
+        return undefined
+    }
+
     changeCurrentChannel(client: Socket, payload: ChangeChannelInterface) {
         const c = this.findClientFromSocket(client)
         if (c)
