@@ -26,9 +26,11 @@
                 {{ user.login }}
               </span>
             </span>
-          <toggle-button @change="updateAdmin(user)"
+          <client-only>
+            <toggle-button @change="updateAdmin(user)"
                          :value="admin_ids.includes(user.id)"
                          :labels="{checked: 'Admin', unchecked: 'User'}"/>
+          </client-only>
           <button @click="banUser(user)" class="focus:outline-none p-1 text-red-800 text-center">🔨</button>
           <button @click="removeUser(user)" class="focus:outline-none p-1 text-red-800 text-center">❌</button>
         </div>
