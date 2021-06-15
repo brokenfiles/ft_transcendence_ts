@@ -34,8 +34,8 @@
             <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/guilds/create">Create a guild</nuxt-link>
             </div>
-            <div class="item-link my-2 text-xl" @click="extended = false">
-              <nuxt-link to="/">Join a guild</nuxt-link>
+            <div class="item-link my-2 text-xl" @click="extended = false" v-if="this.$auth.user && this.$auth.user.guild">
+              <nuxt-link :to="`/guilds/${this.$auth.user.guild.anagram}`">My guild</nuxt-link>
             </div>
           </div>
         </div>
