@@ -19,7 +19,8 @@
         </div>
 
         <div v-show="curr_channel !== null && admin_mode === false">
-          <channel-tab @back="closedChannel" @adminPanelOpened="admin_mode = true" :curr_channel="curr_channel"/>
+          <channel-tab @back="closedChannel" @adminPanelOpened="admin_mode = true"
+                       :messages="messages" :curr_channel="curr_channel"/>
         </div>
 
         <div v-if="admin_mode === true && curr_channel">
@@ -39,6 +40,7 @@ import HomeTab from "~/components/Chat/Tabs/HomeTab.vue";
 import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
 import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
 import AdminTab from "~/components/Chat/Tabs/AdminTab.vue";
+import {MessageInterface} from "~/utils/interfaces/chat/message.interface";
 
 @Component({
   components: {
@@ -52,6 +54,7 @@ export default class Chat extends Vue {
 
   /** Variables */
   channels: ChannelInterface[] = []
+  messages: MessageInterface[] = []
   curr_channel: any = null
   admin_mode: boolean = false
   isChatOpen: boolean = false
@@ -69,16 +72,26 @@ export default class Chat extends Vue {
     }
   }
 
-  channelSaved(channel: ChannelInterface) {
-    this.admin_mode = false
+  channelSaved(channel: ChannelInterface, stopAdmin: boolean = true) {
+    if (stopAdmin)
+      this.admin_mode = false
     this.curr_channel = channel
   }
 
   changeCurrChannel(channel: ChannelInterface) {
-    this.curr_channel = channel
     this.$socket.client.emit('channelChanged', {
       channel_id: channel.id,
       password: channel.password
+    }, (data: any) => {
+      if (data.error) {
+        this.$toast.error(data.error)
+      } else {
+        if (data.messages) {
+          this.curr_channel = channel
+          this.messages = data.messages
+          this.scrollToBottom(true)
+        }
+      }
     })
   }
 
@@ -86,6 +99,8 @@ export default class Chat extends Vue {
     this.curr_channel = null
     this.$socket.client.emit('channelChanged', {
       channel_id: -1
+    }, () => {
+      this.messages = []
     })
   }
 
@@ -100,6 +115,12 @@ export default class Chat extends Vue {
         }
       })
     }
+  }
+
+  @Socket('SendLastMessagesToClient')
+  addMessage(message: MessageInterface) {
+    this.messages.push(message)
+    this.scrollToBottom()
   }
 
 }

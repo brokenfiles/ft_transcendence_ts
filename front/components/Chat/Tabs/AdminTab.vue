@@ -37,7 +37,7 @@
           </client-only>
           <button @click="toggleUserBan(user)" v-if="user.id !== channel.owner.id"
                   class="focus:outline-none p-1 text-red-800 text-center">
-            <span v-if="channel.banned_users.includes(user)">🕊</span>
+            <span v-if="channel.banned_users.map(u => u.id).includes(user.id)">🕊</span>
             <span v-else>🔨</span>
           </button>
           <button @click="removeUser(user)" v-if="user.id !== channel.owner.id"
@@ -62,6 +62,10 @@ import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
 import UserPicker from "~/components/Core/UserPicker.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import Avatar from "~/components/User/Profile/Avatar.vue";
+
+interface ToggleBanInterface {
+  banned: boolean
+}
 
 @Component({
   components: {
@@ -107,11 +111,20 @@ export default class AdminTab extends Vue {
     }
     if (confirmed) {
       this.$socket.client.emit('toggleBanUserFromChannel', {
-		  toggle_ban_user_id: user.id,
-		  channel_id: this.channel.id
+        toggle_ban_user_id: user.id,
+        channel_id: this.channel.id
+      }, (data: ToggleBanInterface) => {
+        if (!data.banned) {
+          const index = this.channel.banned_users.map(u => u.id).indexOf(user.id)
+          if (index !== -1)
+            this.channel.banned_users.splice(index, 1)
+          this.$toast.success(`Unbanned user ${user.display_name}`)
+        } else {
+          this.channel.banned_users.push(user)
+          this.$toast.success(`Banned user ${user.display_name}`)
+        }
+        this.$emit('channelSaved', this.channel, false)
       })
-      this.$toast.success(`Toggled ban user ${user.display_name}`)
-      this.$emit('channelSaved', this.channel)
     }
   }
 

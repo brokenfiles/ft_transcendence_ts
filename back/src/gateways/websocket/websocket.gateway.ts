@@ -152,7 +152,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 }
             }
         }
-        return { message: messages }
+        return { messages }
         // client.emit('SendMessagesToClient', messages)
     }
 

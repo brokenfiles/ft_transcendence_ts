@@ -43,6 +43,7 @@ import {MessageInterface} from "~/utils/interfaces/chat/message.interface";
 import ChatMessage from "~/components/Chat/Tabs/Components/ChatMessage.vue";
 import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
 import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
+import {Message} from "postcss";
 
 @Component({
   components: {
@@ -55,11 +56,9 @@ export default class ChannelTab extends Vue {
   /** Models */
   model_message: string = ''
 
-  /** Variables */
-  messages: MessageInterface[] = []
-
   /** Properties */
   @Prop({required: true}) curr_channel!: ChannelInterface
+  @Prop({required: true}) messages!: MessageInterface[]
 
   /** Methods */
 
@@ -76,40 +75,13 @@ export default class ChannelTab extends Vue {
       this.model_message = ''
     }
   }
-  //
-  // SetUserAdmin()
-  // {
-  // 	this.$socket.client.emit('setUserAdmin', {
-  // 		promoted_user_id: 2,
-	// 	channel_id: 24
-	// })
-  // }
 
   goBack() {
-    this.messages = []
     this.$emit('back')
   }
 
   get isChannelAdmin(): boolean {
     return (this.$auth.user && this.curr_channel.administrators.map(u => u.id).includes(this.$auth.user.id))
-  }
-
-  /** Socket listeners */
-  @Socket('SendMessagesToClient')
-  getMessage(messages: MessageInterface[] | null) {
-    if (messages !== null) {
-      this.messages = messages
-      this.$root.$emit('receivedMessage', true)
-    } else {
-      this.$toast.error(`The password is wrong`)
-      this.goBack()
-    }
-  }
-
-  @Socket('SendLastMessagesToClient')
-  addMessage(message: MessageInterface) {
-    this.messages.push(message)
-    this.$root.$emit('receivedMessage')
   }
 
 }
