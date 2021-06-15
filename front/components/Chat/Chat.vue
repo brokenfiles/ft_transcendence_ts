@@ -41,6 +41,12 @@ import ChannelTab from "~/components/Chat/Tabs/ChannelTab.vue";
 import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
 import AdminTab from "~/components/Chat/Tabs/AdminTab.vue";
 import {MessageInterface} from "~/utils/interfaces/chat/message.interface";
+import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
+
+interface NotificationOptions {
+  message: string
+  type: string
+}
 
 @Component({
   components: {
@@ -124,6 +130,15 @@ export default class Chat extends Vue {
   addMessage(message: MessageInterface) {
     this.messages.push(message)
     this.scrollToBottom()
+  }
+
+  @Socket("goBackToHome")
+  goBackToHomeEvent(notify: NotificationOptions) {
+    this.$toast.show(notify.message, {
+      type: notify.type
+    })
+    this.curr_channel = null
+    this.admin_mode = false
   }
 
 }
