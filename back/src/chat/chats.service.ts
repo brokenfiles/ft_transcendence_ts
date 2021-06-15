@@ -180,6 +180,16 @@ export class ChatsService {
         return channel.banned_users.map((u) => u.id).includes(user_id);
     }
 
+    emitClientToHome(user_id: User, channel: Channel, message: string) {
+        const i = this.websocketService.onlineClients.indexOf(user_id.id)
+        if (i !== -1 && this.websocketService.clients[i].channelId === channel.id) {
+            this.websocketService.clients[i].socket.emit("goBackToHome", {
+                message,
+                type: "error"
+            })
+        }
+    }
+
     async setUsersChannelAdministrator(sub: number, user: User, promoted_user_id: number[], channel: Channel) {
         try {
 
@@ -217,6 +227,7 @@ export class ChatsService {
 
                 if (user_to_ban) {
                     curr_channel.banned_users.push(user_to_ban)
+                    await this.emitClientToHome(user_to_ban, curr_channel, "You've been banned from this channel")
                     state = true
                 }
             }
