@@ -12,6 +12,7 @@ import {WebsocketService} from "../gateways/websocket/websocket.service";
 import {ChangeChannelPropertyInterface} from "../gateways/websocket/interfaces/change-channel-property.interface";
 import {User} from "../users/entities/user.entity";
 import {Socket} from "socket.io";
+import {BanUsersFromChannelInterface} from "../gateways/websocket/interfaces/ban-users-from-channel.interface";
 
 @Injectable()
 export class ChatsService {
@@ -174,34 +175,46 @@ export class ChatsService {
         }
     }
 
-    async setUserChannelAdministrator(sub: number, promoted_user_id: number, channel_id: number, state: string) {
-        // try {
-        //
-        //     const user = await this.usersService.findOne(promoted_user_id, ['channels_admin'])
-        //     const curr_channel = await this.findOneChannel(channel_id)
-        //
-        //     if (user && curr_channel) {
-        //         if (this.isUserAdministrator(user, curr_channel)) {
-        //             curr_channel.administrators.push(user)
-        //         }
-        //     }
-        // }
-        // catch (e)
-        // {
-        //     throw new WsException({
-        //         error: `Can't set user administrator`
-        //     })
-        // }
-
-    }
-
     isUserAdministrator(user: User, channel: Channel): boolean {
         return user.channels_admin.map((channel) => channel.id).includes(channel.id)
     }
 
-    async changeChannelProperties(client: Socket, sub: any, payload: ChangeChannelPropertyInterface) {
 
-        console.log(payload)
+    async setUsersChannelAdministrator(sub: number, user: User, promoted_user_id: number[], channel: Channel) {
+        try {
+
+            const users = await this.usersService.findUsersByIds(promoted_user_id)
+            if (!users && !channel)
+                throw new WsException(`invalid users or channel`)
+            channel.administrators = [user]
+            for (const user of users) {
+                if (this.isUserAdministrator(user, channel)) {
+                    channel.administrators.push(user)
+                    await this.channelRepository.save(channel)
+                }
+            }
+        }
+        catch (e)
+        {
+            throw new WsException({
+                error: `Can't set user administrator`
+            })
+        }
+    }
+
+    async banUserFromChannel(sub: number, payload: BanUsersFromChannelInterface) {
+        let curr_channel = await this.findOneChannel(payload.channel_id)
+        const users_to_ban = await this.usersService.findUsersByIds(payload.users_id)
+
+        for (const user of users_to_ban) {
+
+            if (!curr_channel.banned_users.map((u) => u.id).includes(user.id))
+                curr_channel.banned_users.push(user)
+        }
+    }
+
+    async changeChannelProperties(client: Socket, sub: number, payload: ChangeChannelPropertyInterface) {
+
         let curr_channel = await this.findOneChannel(payload.channel_id)
         const user = await this.usersService.findOne(sub)
         if (curr_channel && user && this.isUserAdministrator(user, curr_channel)) {
@@ -228,14 +241,8 @@ export class ChatsService {
                         curr_channel.users.push(u)
                 }
             }
-
-            // //si il faut set le channel à private (et donc ajouter des users)
-            // if (curr_channel.privacy === PrivacyEnum.PRIVATE && current_privacy !== PrivacyEnum.PRIVATE) {
-            //     curr_channel.users = [user]
-            //     const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
-            //     for (let u of users_to_add)
-            //         curr_channel.users.push(user)
-            // }
+            if (payload.promoted_users_id !== undefined)
+                await this.setUsersChannelAdministrator(sub, user, payload.promoted_users_id, curr_channel)
 
             curr_channel =  await this.channelRepository.save(curr_channel)
 

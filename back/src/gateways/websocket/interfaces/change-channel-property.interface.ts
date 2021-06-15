@@ -7,4 +7,7 @@ export interface ChangeChannelPropertyInterface
     password: string
 
     _private_users: number[]
+
+    promoted_users_id: number[]
+
 }

@@ -1,6 +1,6 @@
 export interface SetUserAdminInterface {
 
-    promoted_user_id: number
+    promoted_users_id: number[]
 
     channel_id: number
 

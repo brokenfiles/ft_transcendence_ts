@@ -19,6 +19,7 @@ import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {SetUserAdminInterface} from "./interfaces/set-user-admin.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
+import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
 
 
 
@@ -154,15 +155,24 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         client.emit('SendMessagesToClient', messages)
     }
 
+    // @UseGuards(WsJwtAuthGuard)
+    // @UseFilters(new UnauthorizedExceptionFilter())
+    // @SubscribeMessage('setUsersAdmin')
+    // async getMessagesEvent(client: Socket, payload: SetUserAdminInterface): Promise<void> {
+    //     const {sub} = (client.handshake as any).user
+    //     if (!payload.channel_id || !payload.promoted_users_id)
+    //         return null
+    //     await this.chatsService.setUsersChannelAdministrator(sub, payload.promoted_users_id, payload.channel_id, payload.state)
+    // }
+
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('setUserAdmin')
-    async getMessagesEvent(client: Socket, payload: SetUserAdminInterface): Promise<void> {
+    @SubscribeMessage('banUserFromChannel')
+    async banUserFromChannel(client: Socket, payload: BanUsersFromChannelInterface) {
         const {sub} = (client.handshake as any).user
-        if (!payload.state || !payload.channel_id || !payload.promoted_user_id)
-            return null
-        await this.chatsService.setUserChannelAdministrator(sub, payload.promoted_user_id, payload.channel_id, payload.state)
+        await this.chatsService.banUserFromChannel(sub, payload)
     }
+
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
