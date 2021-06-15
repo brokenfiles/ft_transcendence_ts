@@ -73,12 +73,7 @@ export default class AdminTab extends Vue {
   admin_ids: number[] = [...this.current_channel.administrators.map(u => u.id)]
 
   /** Hooks */
-  mounted() {
-    // if (this.current_channel) {
-    //   this.model_privacy = this.current_channel.privacy
-    //   this.added_users = this.current_channel.users
-    // }
-  }
+  mounted() {}
 
   /** Methods */
   addUser(user: UserInterface) {
@@ -105,6 +100,7 @@ export default class AdminTab extends Vue {
         _private_users: this.channel.users.map(u => u.id)
       })
       this.$toast.success(`Saving the channel`)
+      this.channel.administrators = this.channel.users.filter(u => this.admin_ids.includes(u.id))
       this.$emit('channelSaved', this.channel)
     }
   }
