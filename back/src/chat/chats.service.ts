@@ -184,12 +184,14 @@ export class ChatsService {
         try {
 
             const users = await this.usersService.findUsersByIds(promoted_user_id)
+            console.log(users)
             if (!users && !channel)
                 throw new WsException(`invalid users or channel`)
             channel.administrators = [user]
-            for (const user of users) {
-                if (this.isUserAdministrator(user, channel)) {
-                    channel.administrators.push(user)
+            if (this.isUserAdministrator(user, channel)) {
+                for (const u of users) {
+
+                    channel.administrators.push(u)
                     await this.channelRepository.save(channel)
                 }
             }
@@ -233,7 +235,6 @@ export class ChatsService {
             //si il faut ajouté des users dans le channel privé
             if (curr_channel.privacy === PrivacyEnum.PRIVATE && current_privacy === PrivacyEnum.PRIVATE)
                 curr_channel.users = [user]
-            console.log(curr_channel.users)
 
             if (payload._private_users.length) {
                     const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
@@ -241,8 +242,10 @@ export class ChatsService {
                         curr_channel.users.push(u)
                 }
             }
-            if (payload.promoted_users_id !== undefined)
+            if (payload.promoted_users_id) {
+                console.log(payload.promoted_users_id)
                 await this.setUsersChannelAdministrator(sub, user, payload.promoted_users_id, curr_channel)
+            }
 
             curr_channel =  await this.channelRepository.save(curr_channel)
 
