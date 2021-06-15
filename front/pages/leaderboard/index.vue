@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h1 class="text-5xl mt-8 font-semibold flex-1 text-center text-yellow mb-4">Leaderboard</h1>
+    <h1 class="text-5xl mt-8 font-semibold flex-1 text-center text-cream mb-4">Leaderboard</h1>
     <div class="flex w-full justify-center">
-      <div class="w-1/3 py-2 px-1">
+      <div class="w-1/2 md:w-1/3 py-2 px-1">
         <button
           @click="tab = 'users'"
           :class="getClasses('users')"
@@ -10,7 +10,7 @@
           Users
         </button>
       </div>
-      <div class="w-1/3 py-2 px-1">
+      <div class="w-1/2 md:w-1/3 py-2 px-1">
         <button
           @click="tab = 'guilds'"
           :class="getClasses('guilds')"
@@ -19,7 +19,7 @@
         </button>
       </div>
     </div>
-    <div class="w-2/3 mx-auto pb-8">
+    <div class="w-full md:w-2/3 mx-auto pb-8">
       <div class="px-1">
         <div v-if="tab === 'users'">
           <div :class="getUserBG(user.id)" class="block flex items-center text-primary px-4 py-2 mb-2"
@@ -43,9 +43,9 @@
             <nuxt-link :to="`/guilds/${guild.anagram}`" class="ml-2 flex-1 font-light">
               {{ guild.name }} <br/>
             </nuxt-link>
-            <div class="mr-14">
-              <span class="mr-2">members:</span>
-              <span class="font-light">{{ guild.users.length }}/50</span>
+            <div class="mx-2 md:ml-0 md:mr-14">
+              <span class="mr-2 hidden md:block">members :</span>
+              <span class="font-light text-center block">{{ guild.users.length }}/{{guild.max_users}}</span>
             </div>
             <p>{{ guild.war_points }} points</p>
           </div>

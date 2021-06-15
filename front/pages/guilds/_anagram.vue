@@ -60,7 +60,7 @@
             </div>
             <div class="bg-gray-300 flex px-4 py-2">
               <p class="flex-1 font-semibold">Members</p>
-              <p>{{ guild.users.length }}</p>
+              <p>{{ guild.users.length }} / {{guild.max_users}}</p>
             </div>
             <div class="bg-cream flex px-4 py-2">
               <p class="flex-1 font-semibold">Owner</p>
@@ -156,21 +156,23 @@ export default class SingleGuild extends Vue {
   }
 
   leaveOrDestroyGuild() {
-    this.$axios.post('guilds/mine/leave')
-      .then((result) => {
-        if ((this.$auth.user as any).id === this.guild?.owner.id) {
-          this.$toast.success(`You destroyed your guild`)
-        } else {
-          this.$toast.success(`You left your guild`)
-        }
-        this.guild = result.data
-        this.$auth.fetchUser()
-        if (this.guild?.owner.id === (this.$auth.user as any).id)
-          this.$router.push('/')
-        // this.$auth.user.guild = null
-      }).catch((error) => {
+    if (confirm(`Are you sure ?`)) {
+      this.$axios.post('guilds/mine/leave')
+        .then((result) => {
+          if ((this.$auth.user as any).id === this.guild?.owner.id) {
+            this.$toast.success(`You destroyed your guild`)
+          } else {
+            this.$toast.success(`You left your guild`)
+          }
+          this.guild = result.data
+          this.$auth.fetchUser()
+          if (this.guild?.owner.id === (this.$auth.user as any).id)
+            this.$router.push('/')
+          // this.$auth.user.guild = null
+        }).catch((error) => {
         this.$toast.error(error.response.data.message[0])
-    })
+      })
+    }
   }
 
   requestOrJoin() {
@@ -205,18 +207,20 @@ export default class SingleGuild extends Vue {
    * @param user
    */
   kickUserFromGuild(user: UserInterface) {
-    this.$axios.delete(`guilds/mine/user`, {
-      data: {
-        user: {
-          id: user.id
+    if (confirm(`Are you sure ?`)) {
+      this.$axios.delete(`guilds/mine/user`, {
+        data: {
+          user: {
+            id: user.id
+          }
         }
-      }
-    }).then(() => {
-      this.$toast.success(`This user has been kicked`)
-      this.guild?.users.splice(this.guild?.users.indexOf(user), 1)
-    }).catch((err) => {
-      this.$toast.error(err.response.data.message[0])
-    })
+      }).then(() => {
+        this.$toast.success(`This user has been kicked`)
+        this.guild?.users.splice(this.guild?.users.indexOf(user), 1)
+      }).catch((err) => {
+        this.$toast.error(err.response.data.message[0])
+      })
+    }
   }
 
   getClasses(tab: string): string[] {

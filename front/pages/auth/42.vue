@@ -28,11 +28,15 @@ export default Vue.extend({
         this.$root.$emit('beforeWsConnect')
         this.$socket.client.connect()
         this.$toast.success(`Logged in as ${this.loggedInUser.login}`)
+        this.$router.replace('/')
       }).catch((error) => {
         console.log(error)
         this.$toast.error(error.response.data.error)
-        this.$router.push('/')
+        this.$router.replace('/')
       })
+    } else {
+      this.$toast.error(`No code provided by 42`)
+      this.$router.push('/login')
     }
   },
 

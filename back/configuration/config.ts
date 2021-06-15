@@ -8,6 +8,11 @@ const config = {
             moderator: 10,
             administrator: 100,
         }
+    },
+    guilds: {
+        limits: {
+            users: 50
+        }
     }
 }
 

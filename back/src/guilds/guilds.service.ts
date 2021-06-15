@@ -120,6 +120,10 @@ export class GuildsService {
     async joinOrRequestGuild(sub: number, joinGuild: JoinGuildDto) {
         let user = await this.usersService.findOne(sub)
         let guild = await this.findOne(joinGuild.guild.id)
+        if (guild.users.length >= guild.max_users)
+            throw new HttpException({
+                message: ['The guild is full']
+            }, HttpStatus.BAD_REQUEST)
         const ids = guild.users.map(u => u.id)
         if (ids.includes(user.id))
             throw new HttpException({

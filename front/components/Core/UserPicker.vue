@@ -64,7 +64,7 @@ export default class UserPicker extends Vue {
   }
 
   unFocus() {
-    setTimeout(() => this.focusBar = false, 100)
+    setTimeout(() => this.focusBar = false, 150)
   }
 
   /**
