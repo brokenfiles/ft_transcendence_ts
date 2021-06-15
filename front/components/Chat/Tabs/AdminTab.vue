@@ -35,8 +35,10 @@
               :value="admin_ids.includes(user.id)"
               :labels="{checked: 'Admin', unchecked: 'User'}"/>
           </client-only>
-          <button @click="banUser(user)" v-if="user.id !== channel.owner.id"
-                  class="focus:outline-none p-1 text-red-800 text-center">🔨
+          <button @click="toggleUserBan(user)" v-if="user.id !== channel.owner.id"
+                  class="focus:outline-none p-1 text-red-800 text-center">
+            <span v-if="channel.banned_users.includes(user)">🕊</span>
+            <span v-else>🔨</span>
           </button>
           <button @click="removeUser(user)" v-if="user.id !== channel.owner.id"
                   class="focus:outline-none p-1 text-red-800 text-center">❌
@@ -81,8 +83,7 @@ export default class AdminTab extends Vue {
   admin_ids: number[] = [...this.current_channel.administrators.map(u => u.id)]
 
   /** Hooks */
-  mounted() {
-  }
+  mounted() {}
 
   /** Methods */
   addUser(user: UserInterface) {
@@ -95,8 +96,22 @@ export default class AdminTab extends Vue {
       this.current_channel.users.splice(idx, 1)
   }
 
-  banUser(user: UserInterface): void {
-
+  toggleUserBan(user: UserInterface): void {
+    let confirmed = false
+    if (this.channel.banned_users.includes(user)) {
+      // unban
+      confirmed = confirm(`Are you sure you want to unban ${user.display_name} from the channel ?`)
+    } else {
+      // ban
+      confirmed = confirm(`Are you sure you want to ban ${user.display_name} from the channel ?`)
+    }
+    if (confirmed) {
+      this.$socket.client.emit('toggleBanUserFromChannel', {
+        user_id: user.id
+      })
+      this.$toast.success(`Toggled ban user ${user.display_name}`)
+      this.$emit('channelSaved', this.channel)
+    }
   }
 
   saveChannel(): void {
