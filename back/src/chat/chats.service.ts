@@ -33,7 +33,7 @@ export class ChatsService {
     async findAllChannel(user_id: number): Promise<Channel[]> {
 
         let user = await this.usersService.findOne(user_id,
-            ['channels', 'channels.banned_users', 'channels.administrators', 'channels.users'])
+            ['channels', 'channels.banned_users', 'channels.administrators', 'channels.users', 'channels.owner'])
 
         let publicChannels = await this.channelRepository.find({
             relations: ['banned_users', 'administrators', 'users', 'owner'],
