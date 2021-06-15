@@ -3,7 +3,7 @@
     <Navigation />
     <Sidebar @toggle="toggleSidebar"/>
     <client-only>
-      <chat v-if="this.$auth.loggedIn"/>
+      <chat v-if="canViewChat"/>
     </client-only>
     <div class="application bg-ftgray min-h-screen text-cream w-screen">
       <div class="md:w-11/12 md:mx-auto mx-4">
@@ -74,6 +74,13 @@ export default class Default extends Vue {
       }
     }
     return ''
+  }
+
+  /** Computed */
+  get canViewChat() {
+    if (process.client)
+      return (this.$auth.loggedIn && this.$socket && this.$socket.connected)
+    return false
   }
 
   @onlineClients.Getter
