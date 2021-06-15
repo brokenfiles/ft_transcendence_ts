@@ -91,6 +91,8 @@ export default class Chat extends Vue {
     }, (data: any) => {
       if (data.error) {
         this.$toast.error(data.error)
+        if (process.client && localStorage.getItem(`channel-password-${channel.id}`))
+          localStorage.removeItem(`channel-password-${channel.id}`)
       } else {
         if (data.messages) {
           this.curr_channel = channel
