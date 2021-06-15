@@ -113,8 +113,28 @@
           </div>
           <div class="px-1">
             <div class="max-h-80 overflow-y-auto" v-if="tab === 'members'">
+              <div class="block flex items-center bg-cream text-primary px-4 py-2 mb-2">
+                <avatar class="h-12 w-12" :image-url="guild.owner.avatar">
+                  <div class="absolute -top-2 text-center right-0">
+                    <p class="text-2xl">👑</p>
+                  </div>
+                </avatar>
+                <nuxt-link :to="`/users/${guild.owner.login}`" class="ml-2 flex-1">
+                  {{ guild.owner.display_name }} <br/>
+                  <span class="text-sm font-semibold">
+                    {{ guild.owner.login }}
+                  </span>
+                </nuxt-link>
+                <p>{{ guild.owner.points }} points</p>
+                <div v-if="guild.owner.id === $auth.user.id && guild.owner.id !== guild.owner.id" class="ml-4">
+                  <button @click.stop="promoteUserMasterOfGuild(guild.owner)">👑</button>
+                </div>
+                <div v-if="guild.owner.id === $auth.user.id && guild.owner.id !== guild.owner.id" class="ml-2">
+                  <button @click.stop="kickUserFromGuild(guild.owner)">❌</button>
+                </div>
+              </div>
               <div class="block flex items-center bg-cream text-primary px-4 py-2 mb-2"
-                   v-for="(user, index) in guild.users" :key="`user-guild-${index}`">
+                   v-for="(user, index) in guild.users" :key="`user-guild-${index}`" v-if="user && guild && user.id !== guild.owner.id">
                 <avatar class="h-12 w-12" :image-url="user.avatar"/>
                 <nuxt-link :to="`/users/${user.login}`" class="ml-2 flex-1">
                   {{ user.display_name }} <br/>
@@ -122,7 +142,6 @@
                     {{ user.login }}
                   </span>
                 </nuxt-link>
-                <p class="font-light flex-1" v-if="guild.owner.id === user.id">Master</p>
                 <p>{{ user.points }} points</p>
                 <div v-if="guild.owner.id === $auth.user.id && user.id !== guild.owner.id" class="ml-4">
                   <button @click.stop="promoteUserMasterOfGuild(user)">👑</button>
