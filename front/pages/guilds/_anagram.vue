@@ -6,7 +6,10 @@
           {{ guild.name }} [{{ guild.anagram }}]
           <editable-field tag="div" classes="block text-lg font-light"
                           :editable="this.guild.id === guild.id"
-                          :value="guild.description" @stopEditing="saveGuildDescription"/>
+                          :value="guild.description" @stopEditing="saveGuildDescription" v-if="this.$auth.user.id === this.guild.owner.id"/>
+          <span class="block text-lg font-light" v-else>
+            {{ guild.description }}
+          </span>
         </h1>
         <div>
           <div v-if="$auth.loggedIn" class="inline-block">
@@ -78,7 +81,10 @@
             </div>
             <div class="bg-gray-300 flex px-4 py-2">
               <p class="flex-1 font-semibold">Guild state</p>
-              <p>{{ guild.open ? 'Open' : 'Closed' }}</p>
+              <client-only v-if="this.$auth.user && this.$auth.user.id === this.guild.owner.id">
+                <toggle-button v-model="isGuildOpen" :labels="{checked: 'open', unchecked: 'closed'}" @change="saveGuildState"/>
+              </client-only>
+              <p v-else>{{ this.guild.open ? 'Open' : 'Closed' }}</p>
             </div>
           </div>
         </div>
@@ -95,10 +101,10 @@
             </div>
             <div class="w-1/2 py-2 px-1">
               <button
-                @click="tab = 'wars'"
-                :class="getClasses('wars')"
+                @click="tab = 'battles'"
+                :class="getClasses('battles')"
                 class="block focus:outline-none w-full text-primary text-center py-4 rounded-tl-lg rounded-tr-lg">
-                Wars
+                Battles
               </button>
             </div>
           </div>
@@ -113,8 +119,12 @@
                     {{ user.login }}
                   </span>
                 </nuxt-link>
+                <p class="font-light flex-1" v-if="guild.owner.id === user.id">Master</p>
                 <p>{{ user.points }} points</p>
                 <div v-if="guild.owner.id === $auth.user.id && user.id !== guild.owner.id" class="ml-4">
+                  <button @click.stop="promoteUserMasterOfGuild(user)">👑</button>
+                </div>
+                <div v-if="guild.owner.id === $auth.user.id && user.id !== guild.owner.id" class="ml-2">
                   <button @click.stop="kickUserFromGuild(user)">❌</button>
                 </div>
               </div>
@@ -142,6 +152,9 @@ import EditableField from "~/components/Core/Editable/EditableField.vue";
   }
 })
 export default class SingleGuild extends Vue {
+
+  /** Models */
+  isGuildOpen: boolean = false
 
   /** Variables */
   guild?: GuildInterface
@@ -233,6 +246,23 @@ export default class SingleGuild extends Vue {
   }
 
   /**
+   * Promotes a user
+   * @param user
+   */
+  promoteUserMasterOfGuild(user: UserInterface) {
+    if (confirm(`Are you sure ? You won't be ${this.guild.name}\'s master after this actions.`)) {
+      this.$axios.patch(`guilds/${this.guild?.id}`, {
+        owner: user
+      }).then(() => {
+        this.$toast.success(`This user has been promoted as new Master of ${this.guild?.name}`)
+        this.guild?.owner = user
+      }).catch((err) => {
+        this.$toast.error(err.response.data.message[0])
+      })
+    }
+  }
+
+  /**
    * Event when the user saves the guild description
    * Send a request to backend to change the description
    * @param {String} newDescription
@@ -242,6 +272,21 @@ export default class SingleGuild extends Vue {
       description: newDescription
     }).then(() => {
       this.$toast.success('Guild description successfully changed')
+    }).catch((error) => {
+      this.$toast.error(`${error.response.data.message[0]}`)
+    })
+  }
+
+  /**
+   * Event when the user saves the guild state
+   * Send a request to backend to change the state
+   * @param {String} newState
+   */
+  saveGuildState() {
+    this.$axios.patch(`/guilds/${this.guild?.id}`, {
+      open: this.isGuildOpen
+    }).then(() => {
+      this.$toast.success(`Guild is now ${this.isGuildOpen ? 'open' : 'closed'}`)
     }).catch((error) => {
       this.$toast.error(`${error.response.data.message[0]}`)
     })
