@@ -54,11 +54,6 @@ export class ChatsService {
         return user.channels
     }
 
-    findChannelWhereUserId(client_id: number) : any {
-        console.log(client_id)
-    }
-
-
     async isUserInChannel(user_id: number, channel: Channel) : Promise<boolean>
     {
         return channel.users.map(u => u.id).includes(user_id);
@@ -164,6 +159,7 @@ export class ChatsService {
 
     async emitAllChannelForUserConcernedByChannelChanged(channel: Channel) : Promise<void>
     {
+        //optimisation: envoyez seulement au user qui ont été enlever/ajouté/mis admin/etc
         for (const user_id of this.websocketService.onlineClients)
         {
             const i = this.websocketService.onlineClients.indexOf(user_id)
@@ -184,7 +180,6 @@ export class ChatsService {
         try {
 
             const users = await this.usersService.findUsersByIds(promoted_user_id)
-            console.log(users)
             if (!users && !channel)
                 throw new WsException(`invalid users or channel`)
             channel.administrators = [user]
@@ -206,13 +201,18 @@ export class ChatsService {
 
     async banUserFromChannel(sub: number, payload: BanUsersFromChannelInterface) {
         let curr_channel = await this.findOneChannel(payload.channel_id)
-        const users_to_ban = await this.usersService.findUsersByIds(payload.users_id)
+        const current_admin_user = await this.usersService.findOne(sub)
+        const user_to_ban = await this.usersService.findUsersByIds(payload.banned_users_id)
 
-        for (const user of users_to_ban) {
+        curr_channel.banned_users = []
+        if (this.isUserAdministrator(current_admin_user, curr_channel))
+            for (const u of user_to_ban) {
 
-            if (!curr_channel.banned_users.map((u) => u.id).includes(user.id))
-                curr_channel.banned_users.push(user)
-        }
+                if (!curr_channel.banned_users.map((u) => u.id).includes(current_admin_user.id) &&
+                    this.isUserAdministrator(current_admin_user, curr_channel))
+                    curr_channel.banned_users.push(user_to_ban)
+            }
+    }
     }
 
     async changeChannelProperties(client: Socket, sub: number, payload: ChangeChannelPropertyInterface) {
@@ -243,7 +243,6 @@ export class ChatsService {
                 }
             }
             if (payload.promoted_users_id) {
-                console.log(payload.promoted_users_id)
                 await this.setUsersChannelAdministrator(sub, user, payload.promoted_users_id, curr_channel)
             }
 
