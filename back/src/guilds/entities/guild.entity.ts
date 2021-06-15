@@ -21,6 +21,11 @@ export class Guild {
     name: string
 
     @Column({
+        nullable: true
+    })
+    description: string
+
+    @Column({
         default: null,
         unique: true
     })

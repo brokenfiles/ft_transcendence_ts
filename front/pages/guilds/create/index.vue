@@ -14,6 +14,11 @@
           <input id="guild_anagram" class="ml-auto w-1/3 bg-cream text-primary py-2 px-4 focus:outline-none" minlength="3" maxlength="5" v-model="guild_anagram" type="text">
         </div>
         <div class="flex flex-wrap items-center w-full mt-2">
+          <label for="guild_anagram">Guild description</label>
+          <textarea id="guild_description" class="ml-auto w-1/3 bg-cream text-primary py-2 px-4 focus:outline-none" v-model="guild_description">
+          </textarea>
+        </div>
+        <div class="flex flex-wrap items-center w-full mt-2">
           <label for="guild_open">Is guild open ?</label>
           <input id="guild_open" class="ml-auto w-1/3 bg-cream text-primary p-2 focus:outline-none" v-model="guild_open" type="checkbox">
         </div>
@@ -34,12 +39,14 @@ export default class CreateGuild extends Vue {
 
   guild_name: string = ''
   guild_anagram: string = ''
+  guild_description: string = ''
   guild_open: boolean = false
 
   createGuild () {
     this.$axios.post('guilds', {
       name: this.guild_name,
       anagram: this.guild_anagram,
+      description: this.guild_description,
       open: this.guild_open
     }).then(() => {
       this.$toast.success(`Guild ${this.guild_name} created`)
