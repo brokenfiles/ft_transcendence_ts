@@ -142,6 +142,9 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         this.websocketService.changeCurrentChannel(client, payload)
         const channel = await this.chatsService.findOneChannel(payload.channel_id)
         if (channel) {
+
+            if (this.chatsService.isUserBannedFromChannel(sub, channel))
+                return { error: "You're banned from this channel" }
             if ((channel.privacy === PrivacyEnum.PUBLIC) ||
                 (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel)) ||
                 (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password)) {
@@ -152,7 +155,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 }
             }
         }
-        return { messages }
+        return { message: messages }
         // client.emit('SendMessagesToClient', messages)
     }
 
