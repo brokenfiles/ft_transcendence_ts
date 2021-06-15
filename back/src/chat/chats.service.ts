@@ -202,22 +202,25 @@ export class ChatsService {
     async banUserFromChannel(sub: number, payload: BanUsersFromChannelInterface): Promise<Boolean>{
         let curr_channel = await this.findOneChannel(payload.channel_id)
         const current_admin_user = await this.usersService.findOne(sub)
-
+        let state
         if (curr_channel && this.isUserAdministrator(current_admin_user, curr_channel)) {
 
             if (curr_channel.banned_users.map((u) => u.id).includes(payload.toggle_ban_user_id)) {
                 curr_channel.banned_users = curr_channel.banned_users.filter((u) => u.id != payload.toggle_ban_user_id)
+                state = false
             } else {
                 const user_to_ban = await this.usersService.findOne(payload.toggle_ban_user_id)
 
-                if (user_to_ban)
+                if (user_to_ban) {
                     curr_channel.banned_users.push(user_to_ban)
+                    state = true
+                }
             }
             await this.channelRepository.save(curr_channel)
             await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel)
-            return true
+            return state
         }
-        return false
+        // return false
     }
 
     async changeChannelProperties(client: Socket, sub: number, payload: ChangeChannelPropertyInterface) {
