@@ -32,6 +32,9 @@ export default {
       src: '~/plugins/datepicker.js',
       mode: 'client'
     },
+    {
+      src: '~/plugins/toggle-button.js',
+    },
   ],
 
 

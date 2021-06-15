@@ -10,31 +10,25 @@
         <option value="public">Public</option>
       </select>
       <div v-if="channel.privacy === 'password'">
-        <input v-model="channel.password" class="block w-full focus:outline-none p-2 mb-2 bg-secondary border border-cream"
+        <input v-model="channel.password"
+               class="block w-full focus:outline-none p-2 mb-2 bg-secondary border border-cream"
                type="password" placeholder="Channel password">
       </div>
-      <div v-if="channel.privacy === 'private'">
-        <p class="mb-2">Members in your channel</p>
-        <user-picker @pickedUser="addUser" :added-users="channel.users" class="mb-2"/>
-        <div class="mb-2">
-          <div class="block w-full p-2 flex flex-wrap items-center focus:outline-none mb-0.5"
-               v-for="(user, index) in channel.users" :key="`added-user-${index}`">
-            <avatar class="w-10 h-10" :image-url="user.avatar"/>
-            <span class="ml-2 block flex-1">
+      <p class="mb-2">Members in your channel</p>
+      <user-picker @pickedUser="addUser" :added-users="channel.users" class="mb-2"/>
+      <div class="mb-2">
+        <div class="block w-full p-2 flex flex-wrap items-center focus:outline-none mb-0.5"
+             v-for="(user, index) in channelUsers" :key="`added-user-${index}`">
+          <avatar class="w-10 h-10" :image-url="user.avatar"/>
+          <span class="ml-2 block flex-1">
               {{ user.display_name }} <br/>
               <span class="text-sm font-semibold text-left block">
                 {{ user.login }}
               </span>
             </span>
-            <button @click="removeUser(user)" class="focus:outline-none p-2 bg-red-200 text-red-800">Remove</button>
-          </div>
+          <toggle-button v-model="admin"/>
+          <button @click="removeUser(user)" class="focus:outline-none p-2 text-red-800 text-center">❌</button>
         </div>
-      </div>
-      <button @click="list_expanded = !list_expanded" class="block w-full focus:outline-none p-2 mb-2 bg-secondary border border-cream">
-        {{!list_expanded ? 'Expand' : 'Retract'}} user list
-      </button>
-      <div v-if="list_expanded">
-<!--        display list of users-->
       </div>
       <button class="w-full pr-1 focus:outline-none" @click="saveChannel">
           <span class="block text-cream bg-secondary border border-cream p-2">
@@ -66,6 +60,7 @@ export default class AdminTab extends Vue {
   /** Properties */
   @Prop({required: true}) current_channel!: ChannelInterface
 
+  admin: boolean = false
   /** Variables */
   list_expanded: boolean = false
 
@@ -73,7 +68,7 @@ export default class AdminTab extends Vue {
   channel: ChannelInterface = {...this.current_channel}
 
   /** Hooks */
-  mounted () {
+  mounted() {
     // if (this.current_channel) {
     //   this.model_privacy = this.current_channel.privacy
     //   this.added_users = this.current_channel.users
@@ -100,6 +95,14 @@ export default class AdminTab extends Vue {
     })
     this.$toast.success(`Saving the channel`)
     this.$emit('channelSaved', this.channel)
+  }
+
+  /** Computed */
+  get channelUsers(): UserInterface[] {
+    if (this.$auth.user) {
+      return this.channel.users.filter(u => u.id !== this.$auth.user.id)
+    }
+    return []
   }
 
 }
