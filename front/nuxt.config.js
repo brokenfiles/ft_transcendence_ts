@@ -34,6 +34,7 @@ export default {
     },
     {
       src: '~/plugins/toggle-button.js',
+      mode: 'client'
     },
   ],
 

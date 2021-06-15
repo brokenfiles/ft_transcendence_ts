@@ -26,7 +26,7 @@
                 {{ user.login }}
               </span>
             </span>
-          <toggle-button v-model="admin"/>
+          <toggle-button v-model="admin" :labels="{checked: 'Admin', unchecked: 'User'}"/>
           <button @click="removeUser(user)" class="focus:outline-none p-2 text-red-800 text-center">❌</button>
         </div>
       </div>
