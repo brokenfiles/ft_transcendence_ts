@@ -36,7 +36,7 @@ export class ChatsService {
             ['channels', 'channels.banned_users', 'channels.administrators', 'channels.users'])
 
         let publicChannels = await this.channelRepository.find({
-            relations: ['banned_users', 'administrators', 'users'],
+            relations: ['banned_users', 'administrators', 'users', 'owner'],
             where: [
                 {privacy: PrivacyEnum.PUBLIC},
                 {privacy: PrivacyEnum.PASSWORD}
@@ -155,7 +155,7 @@ export class ChatsService {
 
     async findOneChannel(id: number) {
         return this.channelRepository.findOne({
-            relations: ['users', 'administrators', 'banned_users'],
+            relations: ['users', 'administrators', 'banned_users', 'owner'],
             where: {
                 id
             }
