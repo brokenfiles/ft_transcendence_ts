@@ -63,7 +63,6 @@ export default class Default extends Vue {
    * Returns the token without the bearer
    */
   getRefreshTokenWithoutBearer(): string {
-    console.log(this.$auth.strategy)
     const bearerToken = (this.$auth.strategy as any).refreshToken.get()
     if (bearerToken.length > 0) {
       const tokenParts = bearerToken.split(' ')
