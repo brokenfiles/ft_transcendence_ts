@@ -58,13 +58,15 @@ export default class Channel extends Vue {
 
   /** Methods */
   changeChannel(click: boolean) {
+    const local_password = process.client ? localStorage.getItem(`channel-password-${this.channel.id}`) : null
     if (this.connection_step === ChannelConnectionStep.PASSWORD && click)
       return
-    if (this.channel.privacy === PrivacyEnum.PASSWORD && this.connection_step === ChannelConnectionStep.DEFAULT) {
+    if (this.channel.privacy === PrivacyEnum.PASSWORD && this.connection_step === ChannelConnectionStep.DEFAULT
+        && !local_password) {
         this.connection_step = ChannelConnectionStep.PASSWORD
     } else {
       this.connection_step = ChannelConnectionStep.DEFAULT
-      this.channel.password = this.model_password
+      this.channel.password = !local_password ? this.model_password : local_password
       this.model_password = ''
       this.$emit('changedChannel', this.channel)
     }
