@@ -2,7 +2,12 @@
   <div>
     <div class="mt-8 px-4" v-if="guild">
       <div class="flex flex-wrap space-y-4 w-full items-center">
-        <h1 class="text-4xl font-semibold flex-1">{{ guild.name }} [{{ guild.anagram }}]</h1>
+        <h1 class="text-4xl font-semibold flex-1">
+          {{ guild.name }} [{{ guild.anagram }}]
+          <editable-field tag="div" classes="block text-lg font-light"
+                          :editable="this.guild.id === guild.id"
+                          :value="guild.description" @stopEditing="saveGuildDescription"/>
+        </h1>
         <div>
           <div v-if="$auth.loggedIn" class="inline-block">
             <nuxt-link v-if="$auth.user.guild && $auth.user.guild.id === guild.id && guild.pending_users && guild.pending_users.length > 0"
@@ -128,17 +133,21 @@ import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
 import {Context} from "@nuxt/types";
 import Avatar from "~/components/User/Profile/Avatar.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
+import EditableField from "~/components/User/Profile/Editable/EditableField.vue";
 
 @Component({
   components: {
-    Avatar
+    Avatar,
+    EditableField
   }
 })
 export default class SingleGuild extends Vue {
 
+  /** Variables */
   guild?: GuildInterface
   tab: string = 'members'
 
+  /** Methods */
   validate({params}: Context) {
     const anagram = params.anagram
     return (anagram !== 'mine' && anagram !== 'create' && anagram.length >= 3 && anagram.length <= 5)
@@ -221,6 +230,21 @@ export default class SingleGuild extends Vue {
         this.$toast.error(err.response.data.message[0])
       })
     }
+  }
+
+  /**
+   * Event when the user saves the guild description
+   * Send a request to backend to change the description
+   * @param {String} newDescription
+   */
+  saveGuildDescription(newDescription: string) {
+    this.$axios.patch(`/guilds/${this.guild?.id}`, {
+      description: newDescription
+    }).then(() => {
+      this.$toast.success('Guild description successfully changed')
+    }).catch((error) => {
+      this.$toast.error(`${error.response.data.message[0]}`)
+    })
   }
 
   getClasses(tab: string): string[] {

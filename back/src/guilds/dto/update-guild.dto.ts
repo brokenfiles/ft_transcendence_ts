@@ -17,4 +17,7 @@ export class UpdateGuildDto {
     @IsOptional()
     readonly open: boolean
 
+    @IsOptional()
+    readonly description: string
+
 }

@@ -7,6 +7,10 @@ export class CreateGuildDto {
     @Length(3, 16)
     readonly name: string
 
+    @IsOptional()
+    @Length(10, 80)
+    readonly description: string
+
     @Length(3, 5)
     readonly anagram: string
 

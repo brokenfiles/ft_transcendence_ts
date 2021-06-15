@@ -3,6 +3,7 @@ import {UserInterface} from "../users/user.interface";
 export interface GuildInterface {
 
   id: number
+  description: string
   name: string
   anagram: string
   points: number
