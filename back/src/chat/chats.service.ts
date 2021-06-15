@@ -19,10 +19,11 @@ export class ChatsService {
 
     constructor(@InjectRepository(Channel) private channelRepository: Repository<Channel>,
                 @InjectRepository(Message) private messageRepository: Repository<Message>,
-                private readonly usersService : UsersService,
-                private readonly websocketService : WebsocketService) {}
+                private readonly usersService: UsersService,
+                private readonly websocketService: WebsocketService) {
+    }
 
-    findAllMessages() : Promise<Message[]> {
+    findAllMessages(): Promise<Message[]> {
         return this.messageRepository.find({}).catch((err) => {
             throw new HttpException({
                 error: err.message
@@ -44,8 +45,7 @@ export class ChatsService {
         })
 
         const channels_id = user.channels.map((c) => c.id)
-        for (const channel of publicChannels)
-        {
+        for (const channel of publicChannels) {
             if (!channels_id.includes(channel.id))
                 user.channels.push(channel)
         }
@@ -54,8 +54,7 @@ export class ChatsService {
         return user.channels
     }
 
-    async isUserInChannel(user_id: number, channel: Channel) : Promise<boolean>
-    {
+    async isUserInChannel(user_id: number, channel: Channel): Promise<boolean> {
         return channel.users.map(u => u.id).includes(user_id);
     }
 
@@ -80,41 +79,35 @@ export class ChatsService {
             newChannel.administrators.push(user)
 
 
-            if (ChannelDto.users.length > 0)
-            {
-                for (const user of ChannelDto.users)
-                {
+            if (ChannelDto.users.length > 0) {
+                for (const user of ChannelDto.users) {
                     let tmp = await this.usersService.findOne(user)
                     newChannel.users.push(tmp)
                 }
             }
             return this.channelRepository.save(newChannel)
-        }
-        catch (e)
-        {
+        } catch (e) {
             throw new WsException({
                 error: 'Cant create Channel'
             })
         }
     }
 
-    async getMessageFromChannel(id: number): Promise<Message[]>{
+    async getMessageFromChannel(id: number): Promise<Message[]> {
         try {
             const channel = await this.channelRepository.findOne(id)
-            if (channel)
-            {
+            if (channel) {
                 return this.messageRepository.find({
-                        relations: ['owner'],
-                        where: {
-                            channel
-                        },
-                        order: {
-                            created_at: "ASC"
-                        }
-                    })
+                    relations: ['owner'],
+                    where: {
+                        channel
+                    },
+                    order: {
+                        created_at: "ASC"
+                    }
+                })
             }
-        }
-        catch (e) {
+        } catch (e) {
             throw new WsException({
                 error: `Can't get message from channel`
             })
@@ -157,11 +150,9 @@ export class ChatsService {
         })
     }
 
-    async emitAllChannelForUserConcernedByChannelChanged(channel: Channel) : Promise<void>
-    {
+    async emitAllChannelForUserConcernedByChannelChanged(channel: Channel): Promise<void> {
         //optimisation: envoyez seulement au user qui ont été enlever/ajouté/mis admin/etc
-        for (const user_id of this.websocketService.onlineClients)
-        {
+        for (const user_id of this.websocketService.onlineClients) {
             const i = this.websocketService.onlineClients.indexOf(user_id)
             if (i !== -1) {
                 this.findAllChannel(user_id).then((channels) => {
@@ -175,45 +166,51 @@ export class ChatsService {
         return user.channels_admin.map((channel) => channel.id).includes(channel.id)
     }
 
-    isUserBannedFromChannel(user_id: number, channel: Channel)
-    {
+    isUserBannedFromChannel(user_id: number, channel: Channel) {
         return channel.banned_users.map((u) => u.id).includes(user_id);
     }
 
-    emitClientToHome(user_id: User, channel: Channel, message: string) {
-        const i = this.websocketService.onlineClients.indexOf(user_id.id)
-        if (i !== -1 && this.websocketService.clients[i].channelId === channel.id) {
-            this.websocketService.clients[i].socket.emit("goBackToHome", {
-                message,
-                type: "error"
-            })
+    emitClientToHome(user_id: number, channel: Channel, message: any) {
+        const i = this.websocketService.onlineClients.indexOf(user_id)
+        const client = this.websocketService.clients[i]
+        if (i !== -1 && client.channelId === channel.id) {
+            client.channelId = -1
+            client.socket.emit("goBackToHome", message)
         }
     }
 
     async setUsersChannelAdministrator(sub: number, user: User, promoted_user_id: number[], channel: Channel) {
         try {
-
-            const users = await this.usersService.findUsersByIds(promoted_user_id)
+            let administrators_id = channel.administrators.map((u) => u.id)
+            let difference = administrators_id.filter(x => !promoted_user_id.includes(x)).concat(promoted_user_id.filter(x => !administrators_id.includes(x)));
+            const users = await this.usersService.findUsersByIds(difference)
             if (!users && !channel)
                 throw new WsException(`invalid users or channel`)
-            channel.administrators = [user]
             if (this.isUserAdministrator(user, channel)) {
                 for (const u of users) {
-
-                    channel.administrators.push(u)
-                    await this.channelRepository.save(channel)
+                    if (this.isUserAdministrator(u, channel)) {
+                        console.log("remove", u.id)
+                        administrators_id = channel.administrators.map((u) => u.id)
+                        channel.administrators.splice(administrators_id.indexOf(u.id), 1)
+                    } else {
+                        console.log("add", u.id)
+                        channel.administrators.push(u)
+                    }
+                    this.emitClientToHome(u.id, channel, {
+                        message: "Current role for this channel changed",
+                        type: "info"
+                    })
                 }
+                await this.channelRepository.save(channel)
             }
-        }
-        catch (e)
-        {
+        } catch (e) {
             throw new WsException({
                 error: `Can't set user administrator`
             })
         }
     }
 
-    async banUserFromChannel(sub: number, payload: BanUsersFromChannelInterface): Promise<Boolean>{
+    async banUserFromChannel(sub: number, payload: BanUsersFromChannelInterface): Promise<Boolean> {
         let curr_channel = await this.findOneChannel(payload.channel_id)
         const current_admin_user = await this.usersService.findOne(sub)
         let state
@@ -227,7 +224,10 @@ export class ChatsService {
 
                 if (user_to_ban) {
                     curr_channel.banned_users.push(user_to_ban)
-                    await this.emitClientToHome(user_to_ban, curr_channel, "You've been banned from this channel")
+                    await this.emitClientToHome(user_to_ban.id, curr_channel, {
+                        message: "You've been banned from this channel",
+                        type: "error"
+                    })
                     state = true
                 }
             }
@@ -246,8 +246,13 @@ export class ChatsService {
 
             const current_privacy = curr_channel.privacy
 
-            if (curr_channel.privacy !== payload.privacy)
+            if (curr_channel.privacy !== payload.privacy) {
                 curr_channel.privacy = payload.privacy
+                this.emitAllBackToHome(sub, curr_channel, {
+                    message: "Current channel privacy changed",
+                    type: "info"
+                })
+            }
 
             if (curr_channel.privacy === PrivacyEnum.PUBLIC && current_privacy != curr_channel.privacy)
                 curr_channel.users = [user]
@@ -260,22 +265,51 @@ export class ChatsService {
                 curr_channel.users = [user]
 
             if (payload._private_users.length) {
-                    const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
-                    for (let u of users_to_add)
-                        curr_channel.users.push(u)
+                const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
+                for (let u of users_to_add)
+                    curr_channel.users.push(u)
+            }
+        }
+        if (payload.promoted_users_id) {
+            await this.setUsersChannelAdministrator(sub, user, payload.promoted_users_id, curr_channel)
+        }
+
+        curr_channel = await this.channelRepository.save(curr_channel)
+
+        this.findAllChannel(sub).then((res) => {
+            client.emit('getChannels', res)
+        })
+
+        await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel)
+
+    }
+
+
+    userIsConnectedAndInCurrentChannel(user_id: number, channel: Channel) {
+        const i = this.websocketService.onlineClients.indexOf(user_id)
+        if (i !== -1) {
+            const client = this.websocketService.clients[i]
+
+            return (client.channelId === channel.id)
+        }
+        return false
+    }
+
+    private emitAllBackToHome(sub: number, curr_channel: Channel, message: any) {
+
+        if (curr_channel.privacy === PrivacyEnum.PUBLIC || curr_channel.privacy === PrivacyEnum.PASSWORD) {
+            for (const user_id of this.websocketService.onlineClients) {
+                if (this.userIsConnectedAndInCurrentChannel(user_id, curr_channel) && user_id !== sub)
+                    this.emitClientToHome(user_id, curr_channel, message)
+            }
+        } else if (curr_channel.privacy === PrivacyEnum.PRIVATE) {
+            for (const user of curr_channel.users) {
+                const i = this.websocketService.onlineClients.indexOf(user.id)
+                if (i !== -1 && user.id !== sub) {
+                    if (this.userIsConnectedAndInCurrentChannel(user.id, curr_channel))
+                        this.emitClientToHome(user.id, curr_channel, message)
                 }
             }
-            if (payload.promoted_users_id) {
-                await this.setUsersChannelAdministrator(sub, user, payload.promoted_users_id, curr_channel)
-            }
-
-            curr_channel =  await this.channelRepository.save(curr_channel)
-
-            this.findAllChannel(sub).then((res) => {
-                client.emit('getChannels', res)
-            })
-
-            await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel)
-
         }
+    }
 }
