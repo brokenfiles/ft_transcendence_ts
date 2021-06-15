@@ -3,7 +3,7 @@
     <Navigation />
     <Sidebar @toggle="toggleSidebar"/>
     <client-only>
-      <chat />
+      <chat v-if="this.$auth.loggedIn"/>
     </client-only>
     <div class="application bg-ftgray min-h-screen text-cream w-screen">
       <div class="md:w-11/12 md:mx-auto mx-4">
