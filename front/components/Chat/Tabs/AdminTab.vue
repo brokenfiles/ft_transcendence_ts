@@ -27,12 +27,20 @@
               </span>
             </span>
           <client-only>
-            <toggle-button @change="updateAdmin(user)"
-                         :value="admin_ids.includes(user.id)"
-                         :labels="{checked: 'Admin', unchecked: 'User'}"/>
+            <toggle-button
+              v-if="user.id !== channel.owner.id"
+              @change="updateAdmin(user)"
+              :margin="5"
+              :width="60"
+              :value="admin_ids.includes(user.id)"
+              :labels="{checked: 'Admin', unchecked: 'User'}"/>
           </client-only>
-          <button @click="banUser(user)" class="focus:outline-none p-1 text-red-800 text-center">🔨</button>
-          <button @click="removeUser(user)" class="focus:outline-none p-1 text-red-800 text-center">❌</button>
+          <button @click="banUser(user)" v-if="user.id !== channel.owner.id"
+                  class="focus:outline-none p-1 text-red-800 text-center">🔨
+          </button>
+          <button @click="removeUser(user)" v-if="user.id !== channel.owner.id"
+                  class="focus:outline-none p-1 text-red-800 text-center">❌
+          </button>
         </div>
       </div>
       <button class="w-full pr-1 focus:outline-none" @click="saveChannel">
@@ -73,7 +81,8 @@ export default class AdminTab extends Vue {
   admin_ids: number[] = [...this.current_channel.administrators.map(u => u.id)]
 
   /** Hooks */
-  mounted() {}
+  mounted() {
+  }
 
   /** Methods */
   addUser(user: UserInterface) {

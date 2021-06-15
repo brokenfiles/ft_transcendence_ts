@@ -10,6 +10,7 @@ export interface ChannelInterface {
   created_at: Date
   updated_at: Date
   users: UserInterface[]
+  owner: UserInterface
   privacy: PrivacyEnum
   messages: MessageInterface[]
   banned_users: UserInterface[]
