@@ -178,7 +178,6 @@ export class ChatsService {
     isUserBannedFromChannel(user_id: number, channel: Channel)
     {
         return channel.banned_users.map((u) => u.id).includes(user_id);
-
     }
 
     async setUsersChannelAdministrator(sub: number, user: User, promoted_user_id: number[], channel: Channel) {
