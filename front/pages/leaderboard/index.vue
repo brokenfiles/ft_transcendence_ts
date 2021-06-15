@@ -23,7 +23,7 @@
       <div class="px-1">
         <div v-if="tab === 'users'">
           <div :class="getUserBG(user.id)" class="block flex items-center text-primary px-4 py-2 mb-2"
-               v-for="(user, index) in users" :key="`user-guild-${index}`">
+               v-for="(user, index) in sortedUsers" :key="`user-guild-${index}`">
             <leaderboard-rank :rank-number="index + 1" class="w-8 h-8 mr-4"/>
             <avatar class="h-12 w-12" :image-url="user.avatar"/>
             <nuxt-link :to="`/users/${user.login}`" class="ml-2 flex-1">
@@ -37,7 +37,7 @@
         </div>
         <div v-if="tab === 'guilds'">
           <div :class="getGuildBG(guild.id)" class="block flex items-center text-primary px-4 py-2 mb-2"
-               v-for="(guild, index) in guilds" :key="`user-guild-${index}`">
+               v-for="(guild, index) in sortedGuilds" :key="`user-guild-${index}`">
             <leaderboard-rank :rank-number="index + 1" class="w-8 h-8 mr-4"/>
             <span class="font-semibold">[{{ guild.anagram }}]</span>
             <nuxt-link :to="`/guilds/${guild.anagram}`" class="ml-2 flex-1 font-light">
@@ -47,7 +47,7 @@
               <span class="mr-2 hidden md:block">members :</span>
               <span class="font-light text-center block">{{ guild.users.length }}/{{guild.max_users}}</span>
             </div>
-            <p>{{ guild.war_points }} points</p>
+            <p>{{ guild.war_points }} war points</p>
           </div>
         </div>
       </div>
@@ -99,6 +99,19 @@ export default class Leaderboard extends Vue {
       return ['bg-green-200']
     return ['bg-cream']
   }
+
+  get sortedUsers () : UserInterface[] {
+    return this.users.sort((a, b) => {
+      return (a.points < b.points ? 1 : -1)
+    })
+  }
+
+  get sortedGuilds () : GuildInterface[] {
+    return this.guilds.sort((a, b) => {
+      return (a.war_points < b.war_points ? 1 : -1)
+    })
+  }
+
 }
 </script>
 

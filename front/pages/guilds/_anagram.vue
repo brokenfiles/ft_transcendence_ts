@@ -7,6 +7,7 @@
           <editable-field tag="div" classes="block text-lg font-light"
                           :editable="this.guild.id === guild.id"
                           :value="guild.description" @stopEditing="saveGuildDescription"
+                          placeholder="Edit the description"
                           v-if="this.$auth.user.id === this.guild.owner.id"/>
           <span class="block text-lg font-light" v-else>
             {{ guild.description }}
@@ -275,6 +276,8 @@ export default class SingleGuild extends Vue {
    * @param {String} newDescription
    */
   saveGuildDescription(newDescription: string) {
+    if (this.guild)
+      this.guild.description = newDescription
     this.$axios.patch(`guilds/mine`, {
       description: newDescription
     }).then(() => {

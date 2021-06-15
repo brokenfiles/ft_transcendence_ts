@@ -6,7 +6,7 @@ export class UpdateMeDto {
 
     @IsOptional()
     @IsString()
-    @Length(3, 16)
+    @Length(3, 24)
     display_name: string
 
     @IsOptional()

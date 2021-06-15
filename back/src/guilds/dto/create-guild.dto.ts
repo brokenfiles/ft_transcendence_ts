@@ -1,6 +1,5 @@
-import {IsEmpty, IsNotEmpty, IsOptional, Length} from "class-validator";
+import {IsOptional, Length} from "class-validator";
 import {User} from "../../users/entities/user.entity";
-import {IsNull} from "typeorm";
 
 export class CreateGuildDto {
 
@@ -8,7 +7,7 @@ export class CreateGuildDto {
     readonly name: string
 
     @IsOptional()
-    @Length(10, 80)
+    @Length(1, 80)
     readonly description: string
 
     @Length(3, 5)

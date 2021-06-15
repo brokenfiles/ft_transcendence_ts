@@ -1,8 +1,9 @@
 <template>
   <component :is="tag" :class="componentClasses" @click="editable && editField()">
     <input ref="inputField" type="text" class="bg-transparent focus:outline-white"
-           @blur="stopEdit()" @keyup.enter.prevent="editing = false" v-model="editingValue"
-           v-show="editing">
+           @blur="stopEdit" @keyup.enter.prevent="stopEditEnter" v-model="editingValue"
+           :placeholder="placeholder"
+           v-show="editing || (editingValue === '')">
     <span v-show="!editing">{{ !editingValue ? value : editingValue }}</span>
     <!-- Cette popup est là si on veut réactiver les popups sur les champs étitables -->
     <popup
@@ -25,18 +26,17 @@ import Popup from "~/components/Core/Popup.vue";
 })
 export default class EditableField extends Vue {
 
-  editing: boolean = false
-  editingValue?: string = ""
 
-  @Prop({required: true}) value?: string
+  @Prop({required: true}) value!: string
   @Prop({required: false, default: false}) editable?: boolean
 
   @Prop({required: false, default: 'p'}) readonly tag?: string
   @Prop({required: false, default: ''}) readonly classes?: string
 
-  mounted() {
-    this.editingValue = this.value
-  }
+  @Prop({required: false, default: ''}) readonly placeholder?: string
+
+  editing: boolean = false
+  editingValue: string = this.value
 
   editField() {
     this.editing = true
@@ -48,6 +48,14 @@ export default class EditableField extends Vue {
     this.editing = false
     if (this.value !== this.editingValue)
       this.$emit('stopEditing', this.editingValue)
+  }
+
+  stopEditEnter() {
+    this.editing = false
+    if (this.editingValue.length === 0) {
+      const element = (this.$refs as any).inputField as HTMLElement
+      element.blur()
+    }
   }
 
   get componentClasses() {

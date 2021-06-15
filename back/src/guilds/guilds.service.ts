@@ -13,16 +13,17 @@ export class GuildsService {
     constructor(@InjectRepository(Guild) private guildRepository : Repository<Guild>,
                 private usersService: UsersService) {}
 
-    findAll() : Promise<Guild[]> {
-        return this.guildRepository.find({
+    async findAll() : Promise<Guild[]> {
+
+        let guilds = await this.guildRepository.find({
             relations: [
                 'users', 'owner'
             ]
-        }).catch((err) => {
-            throw new HttpException({
-                error: err.message
-            }, HttpStatus.BAD_REQUEST)
         })
+        for (let guild of guilds) {
+            guild.points = guild.users.map(u => u.points).reduce((acc, curr) => acc + curr)
+        }
+        return guilds
     }
 
     findAllOrderedByPoints(): Promise<Guild[]> {
@@ -37,8 +38,8 @@ export class GuildsService {
         })
     }
 
-    findOne(id: number) : Promise<Guild> {
-        return this.guildRepository.findOne(id, {
+    async findOne(id: number) : Promise<Guild> {
+        let guild = await this.guildRepository.findOne(id, {
             relations: [
                 'users', 'owner', 'pending_users'
             ]
@@ -47,6 +48,8 @@ export class GuildsService {
                 error: err.message
             }, HttpStatus.BAD_REQUEST)
         })
+        guild.points = guild.users.map(u => u.points).reduce((acc, curr) => acc + curr)
+        return guild
     }
 
     async create(subOwner: number, createGuild: CreateGuildDto) : Promise<Guild> {
@@ -80,8 +83,8 @@ export class GuildsService {
             })
     }
 
-    findByAnagram(anagram) {
-        return this.guildRepository.findOneOrFail({
+    async findByAnagram(anagram) {
+        let guild = await this.guildRepository.findOneOrFail({
             where: {anagram},
             relations: ['users', 'owner', 'pending_users']
         }).catch(() => {
@@ -91,6 +94,8 @@ export class GuildsService {
                 ]
             }, HttpStatus.BAD_REQUEST)
         })
+        guild.points = guild.users.map(u => u.points).reduce((acc, curr) => acc + curr)
+        return guild
     }
 
     /**
@@ -230,6 +235,10 @@ export class GuildsService {
                 message: [`You don't have a guild`]
             }, HttpStatus.BAD_REQUEST)
         let guild = await this.findOne(user.guild.id)
+        if (guild.owner.id !== user.id)
+            throw new HttpException({
+                message: [`You can't update the guild unless you're owner`]
+            }, HttpStatus.UNAUTHORIZED)
         Object.assign(guild, updateGuild)
         return this.guildRepository.save(guild)
             .catch((err) => {

@@ -8,7 +8,7 @@ import {User} from "../entities/user.entity";
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
 
-    @Length(3, 16)
+    @Length(3, 24)
     @IsOptional()
     display_name: string
 

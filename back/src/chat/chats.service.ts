@@ -208,11 +208,10 @@ export class ChatsService {
         if (this.isUserAdministrator(current_admin_user, curr_channel))
             for (const u of user_to_ban) {
 
-                if (!curr_channel.banned_users.map((u) => u.id).includes(current_admin_user.id) &&
-                    this.isUserAdministrator(current_admin_user, curr_channel))
-                    curr_channel.banned_users.push(user_to_ban)
+                // if (!curr_channel.banned_users.map((u) => u.id).includes(current_admin_user.id) &&
+                //     this.isUserAdministrator(current_admin_user, curr_channel))
+                    // curr_channel.banned_users.push(user_to_ban)
             }
-    }
     }
 
     async changeChannelProperties(client: Socket, sub: number, payload: ChangeChannelPropertyInterface) {
