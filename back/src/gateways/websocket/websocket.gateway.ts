@@ -1,5 +1,6 @@
 import {
-    OnGatewayConnection, OnGatewayDisconnect,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
     OnGatewayInit,
     SubscribeMessage,
     WebSocketGateway,
@@ -13,14 +14,11 @@ import {WsJwtAuthGuard} from "../../auth/ws-jwt-auth.guard";
 import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFilter";
 import {ChatsService} from "../../chat/chats.service";
 import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
-import {Channel} from "../../chat/entities/channel.entity";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
 import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
-import {SetUserAdminInterface} from "./interfaces/set-user-admin.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
-
 
 
 @WebSocketGateway(81,
@@ -170,7 +168,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @SubscribeMessage('toggleBanUserFromChannel')
     async banUserFromChannel(client: Socket, payload: BanUsersFromChannelInterface) {
         const {sub} = (client.handshake as any).user
-        await this.chatsService.banUserFromChannel(sub, payload)
+        const banned_state = await this.chatsService.banUserFromChannel(sub, payload)
+        return {banned: banned_state}
     }
 
 
