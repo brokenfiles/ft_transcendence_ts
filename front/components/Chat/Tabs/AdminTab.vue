@@ -26,8 +26,11 @@
                 {{ user.login }}
               </span>
             </span>
-          <toggle-button v-model="admin" :labels="{checked: 'Admin', unchecked: 'User'}"/>
-          <button @click="removeUser(user)" class="focus:outline-none p-2 text-red-800 text-center">❌</button>
+          <toggle-button @change="updateAdmin(user)"
+                         :value="admin_ids.includes(user.id)"
+                         :labels="{checked: 'Admin', unchecked: 'User'}"/>
+          <button @click="banUser(user)" class="focus:outline-none p-1 text-red-800 text-center">🔨</button>
+          <button @click="removeUser(user)" class="focus:outline-none p-1 text-red-800 text-center">❌</button>
         </div>
       </div>
       <button class="w-full pr-1 focus:outline-none" @click="saveChannel">
@@ -60,12 +63,12 @@ export default class AdminTab extends Vue {
   /** Properties */
   @Prop({required: true}) current_channel!: ChannelInterface
 
-  admin: boolean = false
   /** Variables */
-  list_expanded: boolean = false
+  admin: boolean = false
 
   /** Models */
   channel: ChannelInterface = {...this.current_channel}
+  admin_ids: number[] = [...this.current_channel.administrators.map(u => u.id)]
 
   /** Hooks */
   mounted() {
@@ -86,15 +89,42 @@ export default class AdminTab extends Vue {
       this.current_channel.users.splice(idx, 1)
   }
 
+  banUser(user: UserInterface): void {
+
+  }
+
   saveChannel(): void {
-    this.$socket.client.emit('changeChannelProperty', {
-      channel_id: this.channel.id,
-      privacy: this.channel.privacy,
-      password: this.channel.password,
-      _private_users: this.channel.users.map(u => u.id)
-    })
-    this.$toast.success(`Saving the channel`)
-    this.$emit('channelSaved', this.channel)
+    if (confirm(`Are you sure ?`)) {
+      this.$socket.client.emit('changeChannelProperty', {
+        channel_id: this.channel.id,
+        privacy: this.channel.privacy,
+        password: this.channel.password,
+        promoted_users_id: this.admin_ids,
+        _private_users: this.channel.users.map(u => u.id)
+      })
+      this.$toast.success(`Saving the channel`)
+      this.$emit('channelSaved', this.channel)
+    }
+  }
+
+  addAdmin(userId: number): void {
+    if (!this.admin_ids.includes(userId)) {
+      this.admin_ids.push(userId)
+    }
+  }
+
+  removeAdmin(userId: number): void {
+    if (this.admin_ids.includes(userId)) {
+      this.admin_ids.splice(this.admin_ids.indexOf(userId), 1)
+    }
+  }
+
+  updateAdmin(user: UserInterface): void {
+    if (this.admin_ids.includes(user.id)) {
+      this.removeAdmin(user.id)
+    } else {
+      this.addAdmin(user.id)
+    }
   }
 
   /** Computed */

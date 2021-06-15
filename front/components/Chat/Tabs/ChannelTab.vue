@@ -1,19 +1,21 @@
 <template>
   <div>
-    <div v-if="curr_channel">
-      <back-button @back="goBack">Back to channels</back-button>
-      <p class="text-right">
-        <span class="text-gray-500 text-sm">
-          Created
-          <client-only>
-            <timeago :datetime="curr_channel.created_at">{{ curr_channel.created_at }}</timeago>
-          </client-only>
-        </span>
-        {{ curr_channel.name }}
-      </p>
-      <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="block focus:outline-none mt-1 text-cream">
-        <font-awesome-icon class="mr-1" :icon="['fas', 'user-shield']"/> Admin dashboard
-      </button>
+    <div v-if="curr_channel" class="relative">
+      <div>
+        <back-button @back="goBack">Back to channels</back-button>
+        <p class="text-right">
+          <span class="text-gray-500 text-sm">
+            Created
+            <client-only>
+              <timeago :datetime="curr_channel.created_at">{{ curr_channel.created_at }}</timeago>
+            </client-only>
+          </span>
+          {{ curr_channel.name }}
+        </p>
+        <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="block focus:outline-none mt-1 text-cream">
+          <font-awesome-icon class="mr-1" :icon="['fas', 'user-shield']"/> Admin dashboard
+        </button>
+      </div>
       <hr class="mt-1">
       <div class="messages my-4">
         <div v-for="(message, index) in messages" :key="`message-${index}`" class="">
