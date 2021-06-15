@@ -107,7 +107,8 @@ export default class AdminTab extends Vue {
     }
     if (confirmed) {
       this.$socket.client.emit('toggleBanUserFromChannel', {
-        user_id: user.id
+		  toggle_ban_user_id: user.id,
+		  channel_id: this.channel.id
       })
       this.$toast.success(`Toggled ban user ${user.display_name}`)
       this.$emit('channelSaved', this.channel)

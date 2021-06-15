@@ -167,7 +167,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('banUserFromChannel')
+    @SubscribeMessage('toggleBanUserFromChannel')
     async banUserFromChannel(client: Socket, payload: BanUsersFromChannelInterface) {
         const {sub} = (client.handshake as any).user
         await this.chatsService.banUserFromChannel(sub, payload)
