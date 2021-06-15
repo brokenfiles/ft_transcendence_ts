@@ -133,7 +133,7 @@ import {GuildInterface} from "~/utils/interfaces/guilds/guild.interface";
 import {Context} from "@nuxt/types";
 import Avatar from "~/components/User/Profile/Avatar.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
-import EditableField from "~/components/User/Profile/Editable/EditableField.vue";
+import EditableField from "~/components/Core/Editable/EditableField.vue";
 
 @Component({
   components: {

@@ -48,7 +48,7 @@ import UserOnlineIcon from "~/components/User/Profile/UserOnlineIcon.vue";
 import {Component, namespace} from "nuxt-property-decorator";
 import Achievement from "~/components/User/Profile/Statistics/Achievement.vue";
 import Statistic from "~/components/User/Profile/Statistics/Statistic.vue";
-import EditableField from "~/components/User/Profile/Editable/EditableField.vue";
+import EditableField from "~/components/Core/Editable/EditableField.vue";
 import FriendButton from "~/components/User/Profile/FriendButton.vue";
 import {FriendState} from "~/utils/enums/friend-state.enum";
 import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
