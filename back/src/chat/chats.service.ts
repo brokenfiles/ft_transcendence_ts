@@ -54,7 +54,7 @@ export class ChatsService {
         return user.channels
     }
 
-    async isUserInChannel(user_id: number, channel: Channel): Promise<boolean> {
+    isUserInChannel(user_id: number, channel: Channel): boolean {
         return channel.users.map(u => u.id).includes(user_id);
     }
 
@@ -150,16 +150,33 @@ export class ChatsService {
         })
     }
 
-    async emitAllChannelForUserConcernedByChannelChanged(channel: Channel): Promise<void> {
+    async emitAllChannelForUserConcernedByChannelChanged(channel: Channel, users: number[]): Promise<void> {
         //optimisation: envoyez seulement au user qui ont été enlever/ajouté/mis admin/etc
-        for (const user_id of this.websocketService.onlineClients) {
-            const i = this.websocketService.onlineClients.indexOf(user_id)
-            if (i !== -1) {
-                this.findAllChannel(user_id).then((channels) => {
-                    this.websocketService.clients[i].socket.emit('getChannels', channels)
-                })
+
+        // if (channel.privacy === PrivacyEnum.PUBLIC || channel.privacy === PrivacyEnum.PASSWORD)
+        // {
+            for (const user_id of this.websocketService.onlineClients) {
+                const i = this.websocketService.onlineClients.indexOf(user_id)
+                if (i !== -1) {
+                    this.findAllChannel(user_id).then((channels) => {
+                        this.websocketService.clients[i].socket.emit('getChannels', channels)
+                    })
+                }
             }
-        }
+        // }
+        // else if (channel.privacy === PrivacyEnum.PRIVATE)
+        // {
+        //     console.log(users)
+        //     for (const user_id of users) {
+        //         const i = this.websocketService.onlineClients.indexOf(user_id)
+        //         if (i !== -1) {
+        //             this.findAllChannel(user_id).then((channels) => {
+        //                 this.websocketService.clients[i].socket.emit('getChannels', channels)
+        //             })
+        //         }
+        //     }
+        // }
+
     }
 
     isUserAdministrator(user: User, channel: Channel): boolean {
@@ -189,11 +206,9 @@ export class ChatsService {
             if (this.isUserAdministrator(user, channel)) {
                 for (const u of users) {
                     if (this.isUserAdministrator(u, channel)) {
-                        console.log("remove", u.id)
                         administrators_id = channel.administrators.map((u) => u.id)
                         channel.administrators.splice(administrators_id.indexOf(u.id), 1)
                     } else {
-                        console.log("add", u.id)
                         channel.administrators.push(u)
                     }
                     this.emitClientToHome(u.id, channel, {
@@ -232,7 +247,7 @@ export class ChatsService {
                 }
             }
             await this.channelRepository.save(curr_channel)
-            await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel)
+            await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel, curr_channel.users.map((u) => u.id))
             return state
         }
         // return false
@@ -242,9 +257,11 @@ export class ChatsService {
 
         let curr_channel = await this.findOneChannel(payload.channel_id)
         const user = await this.usersService.findOne(sub)
-        if (curr_channel && user && this.isUserAdministrator(user, curr_channel)) {
 
-            const current_privacy = curr_channel.privacy
+        let users_before = curr_channel.users.map((u) => u.id)
+        let users_diff_entity = null
+
+        if (curr_channel && user && this.isUserAdministrator(user, curr_channel)) {
 
             if (curr_channel.privacy !== payload.privacy) {
                 curr_channel.privacy = payload.privacy
@@ -254,42 +271,44 @@ export class ChatsService {
                 })
             }
 
-            if (curr_channel.privacy === PrivacyEnum.PUBLIC && current_privacy != curr_channel.privacy)
-                curr_channel.users = [user]
-
             if (curr_channel.privacy === PrivacyEnum.PASSWORD && payload.privacy === PrivacyEnum.PASSWORD)
                 curr_channel.password = payload.password
 
-            //si il faut ajouté des users dans le channel privé
-            if (curr_channel.privacy === PrivacyEnum.PRIVATE && current_privacy === PrivacyEnum.PRIVATE)
-                curr_channel.users = [user]
-
             if (payload._private_users.length) {
-                const users_to_add = await this.usersService.findUsersByIds(payload._private_users)
-                for (let u of users_to_add)
-                    curr_channel.users.push(u)
+
+                const new_users = payload._private_users
+                const users_diff = users_before.filter(x => !new_users.includes(x)).concat(new_users.filter(x => !users_before.includes(x)));
+
+                users_diff_entity = await this.usersService.findUsersByIds(users_diff)
+                for (const u of users_diff_entity)
+                {
+                    if (this.isUserInChannel(u.id, curr_channel))
+                    {
+                        users_before = curr_channel.users.map((user) => user.id)
+                        curr_channel.users.splice(users_before.indexOf(u.id), 1)
+                        if (curr_channel.privacy === PrivacyEnum.PRIVATE)
+                            this.emitClientToHome(u.id, curr_channel, {
+                                message: `You've beed remove from ${curr_channel.name}'s users`,
+                                type: "error"
+                            })
+                    }
+                    else
+                        curr_channel.users.push(u)
+                }
             }
         }
-        if (payload.promoted_users_id) {
+        if (payload.promoted_users_id)
             await this.setUsersChannelAdministrator(sub, user, payload.promoted_users_id, curr_channel)
-        }
 
         curr_channel = await this.channelRepository.save(curr_channel)
 
-        this.findAllChannel(sub).then((res) => {
-            client.emit('getChannels', res)
-        })
-
-        await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel)
-
+        await this.emitAllChannelForUserConcernedByChannelChanged(curr_channel, [...new Set([...users_before ,...payload._private_users])])
     }
-
 
     userIsConnectedAndInCurrentChannel(user_id: number, channel: Channel) {
         const i = this.websocketService.onlineClients.indexOf(user_id)
         if (i !== -1) {
             const client = this.websocketService.clients[i]
-
             return (client.channelId === channel.id)
         }
         return false
@@ -297,19 +316,9 @@ export class ChatsService {
 
     private emitAllBackToHome(sub: number, curr_channel: Channel, message: any) {
 
-        if (curr_channel.privacy === PrivacyEnum.PUBLIC || curr_channel.privacy === PrivacyEnum.PASSWORD) {
-            for (const user_id of this.websocketService.onlineClients) {
-                if (this.userIsConnectedAndInCurrentChannel(user_id, curr_channel) && user_id !== sub)
-                    this.emitClientToHome(user_id, curr_channel, message)
-            }
-        } else if (curr_channel.privacy === PrivacyEnum.PRIVATE) {
-            for (const user of curr_channel.users) {
-                const i = this.websocketService.onlineClients.indexOf(user.id)
-                if (i !== -1 && user.id !== sub) {
-                    if (this.userIsConnectedAndInCurrentChannel(user.id, curr_channel))
-                        this.emitClientToHome(user.id, curr_channel, message)
-                }
-            }
+        for (const user_id of this.websocketService.onlineClients) {
+            if (this.userIsConnectedAndInCurrentChannel(user_id, curr_channel) && user_id !== sub)
+                this.emitClientToHome(user_id, curr_channel, message)
         }
     }
 }

@@ -159,15 +159,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         // client.emit('SendMessagesToClient', messages)
     }
 
-    // @UseGuards(WsJwtAuthGuard)
-    // @UseFilters(new UnauthorizedExceptionFilter())
-    // @SubscribeMessage('setUsersAdmin')
-    // async getMessagesEvent(client: Socket, payload: SetUserAdminInterface): Promise<void> {
-    //     const {sub} = (client.handshake as any).user
-    //     if (!payload.channel_id || !payload.promoted_users_id)
-    //         return null
-    //     await this.chatsService.setUsersChannelAdministrator(sub, payload.promoted_users_id, payload.channel_id, payload.state)
-    // }
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
