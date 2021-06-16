@@ -257,7 +257,7 @@ export default class SingleGuild extends Vue {
    * @param user
    */
   promoteUserMasterOfGuild(user: UserInterface) {
-    if (confirm(`Are you sure ? You won't be ${this.guild?.name}\'s master after this actions.`)) {
+    if (confirm(`Are you sure ? You won't be ${this.guild?.name}\'s master after this action.`)) {
       this.$axios.patch(`guilds/mine`, {
         owner: user
       }).then(() => {
