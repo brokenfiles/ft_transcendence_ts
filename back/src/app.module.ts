@@ -13,10 +13,12 @@ import {ChatsModule} from "./chat/chats.module";
 import {MulterModule} from "@nestjs/platform-express";
 import {CdnModule} from "./cdn/cdn.module";
 import {GameModule} from "./game/game.module";
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
   imports: [
       TypeOrmModule.forRoot(config),
+      ScheduleModule.forRoot(),
       MulterModule.register({
           dest: '../uploads',
       }),

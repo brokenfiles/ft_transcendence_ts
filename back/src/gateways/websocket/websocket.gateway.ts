@@ -20,7 +20,7 @@ import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
 import {GameService} from "../../game/game.service";
-import {Ball, createGamePayload, Pad} from "../../game/interfaces/game.interfaces";
+import {CreateGameInterface, PadInterface} from "../../game/interfaces/game.interfaces";
 
 
 @WebSocketGateway(81,
@@ -186,7 +186,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('CreateGame')
-    createGame(client: Socket, payload: createGamePayload)
+    createGame(client: Socket, payload: CreateGameInterface)
     {
         this.gameService.createGame(payload)
         return {
@@ -197,21 +197,19 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('updatePadCoordinates')
-    moveCurrentPad(client: Socket, padPayload: Pad)
+    @SubscribeMessage('PlayerReady')
+    playerReady(client: Socket, state: boolean) : boolean
     {
-        this.gameService.updatePadCoordinates(padPayload)
+        return this.gameService.userIsReady(client, state)
     }
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('updateBallCoordinates')
-    updateBall(client: Socket, ballPayload: Ball)
+    @SubscribeMessage('updatePadCoordinates')
+    moveCurrentPad(client: Socket, padPayload: PadInterface)
     {
-        this.gameService.updateBall(ballPayload)
+        this.gameService.updatePadCoordinates(padPayload)
     }
-
-
 
 }
 

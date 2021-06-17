@@ -69,13 +69,17 @@ export default class Game extends Vue {
 
 	startGame()
 	{
-		if (this.context && this.stop === 0)
-			this.stop = window.setInterval(() => this.loop(), 20)
-		else
-		{
-			window.clearTimeout(this.stop)
-			this.stop = 0
-		}
+		this.$socket.client.emit("PlayerReady", this.stop === 0, (state) => {
+
+			if (this.context && state) {
+				this.stop = window.setInterval(() => this.loop(), 20)
+			}
+			else
+			{
+				window.clearTimeout(this.stop)
+				this.stop = 0
+			}
+		})
 	}
 
 	loop() {
@@ -93,9 +97,6 @@ export default class Game extends Vue {
 			})
 		}
 		this.ball.drawNextPosition(this.context)
-		this.$socket.client.emit("updateBallCoordinates", {
-			rightPad: this.rightPad
-		})
 	}
 
 	keyDownEvent(event: KeyboardEvent) {

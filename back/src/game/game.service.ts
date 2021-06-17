@@ -1,38 +1,39 @@
 import {Injectable} from "@nestjs/common";
-import {Pad, Ball, GameInterface, createGamePayload} from "./interfaces/game.interfaces";
+import {GameClass} from "./classes/game.classes";
+import {Socket} from "socket.io";
+import {SchedulerRegistry} from "@nestjs/schedule";
+import {CreateGameInterface, PadInterface} from "./interfaces/game.interfaces";
 
 @Injectable()
 export class GameService {
 
+    game: GameClass
 
-    gameInterface: GameInterface = new class implements GameInterface {
-        ball: Ball;
-        gameHeight: number;
-        gameWith: number;
-        leftPad: Pad;
-        rightPad: Pad;
+    constructor(private schedulerRegistry: SchedulerRegistry) {}
+
+    createGame(payload: CreateGameInterface) {
+        this.game = new GameClass(payload)
+        console.log(this.game)
     }
 
-    constructor() {
-
+    updatePadCoordinates(padPayload: PadInterface) {
+        this.game.rightPad.setCoordinates(padPayload)
     }
 
-    createGame(payload: createGamePayload) {
+    userIsReady(client: Socket, state: boolean) : boolean {
 
-        this.gameInterface.ball = payload.ball
-        this.gameInterface.rightPad = payload.rightPad
-        this.gameInterface.leftPad = payload.leftPad
-        this.gameInterface.gameWith = 640
-        this.gameInterface.gameHeight = 480
-    }
-
-    updatePadCoordinates(padPayload: Pad) {
-        this.gameInterface.rightPad = padPayload
-    }
-
-    updateBall(ballPayload: Ball) {
-        this.gameInterface.ball = ballPayload
-        console.log("new position for ", this.gameInterface.ball)
-
+        if (state === true) {
+            const interval = setInterval(() => {
+                // this.gameInterface.ball.updatePosition()
+            }, 200);
+            this.schedulerRegistry.addInterval("game", interval);
+        }
+        else
+        {
+            this.schedulerRegistry.deleteInterval("game");
+        }
+        const intervals = this.schedulerRegistry.getIntervals();
+        console.log(intervals)
+        return state
     }
 }
