@@ -12,6 +12,7 @@ import {FriendsModule} from "./friends/friends.module";
 import {ChatsModule} from "./chat/chats.module";
 import {MulterModule} from "@nestjs/platform-express";
 import {CdnModule} from "./cdn/cdn.module";
+import {GameModule} from "./game/game.module";
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import {CdnModule} from "./cdn/cdn.module";
       AchievementsModule,
       FriendsModule,
       ChatsModule,
-      CdnModule
+      CdnModule,
+      GameModule
   ],
   controllers: [AppController],
   providers: [AppService],
