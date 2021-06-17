@@ -51,6 +51,8 @@ export default class Game extends Vue {
 		document.addEventListener('keyup', this.keyUpEvent)
 
 		this.$socket.client.emit('CreateGame', {
+			width: 620,
+			height: 480,
 			rightPad: this.rightPad,
 			leftPad: this.leftPad,
 			ball: this.ball

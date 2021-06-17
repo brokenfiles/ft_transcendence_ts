@@ -68,8 +68,8 @@ export class GameClass {
     leftPad: Pad
 
     constructor(createGame: CreateGameInterface) {
-        this.gameHeight = 480
-        this.gameWith = 640
+        this.gameHeight = createGame.height
+        this.gameWith = createGame.width
         this.ball = new Ball(createGame.ball)
         this.rightPad = new Pad(createGame.rightPad)
         this.leftPad = new Pad(createGame.leftPad)

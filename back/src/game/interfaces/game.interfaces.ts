@@ -1,15 +1,12 @@
-export interface Coordinates {
-    x: number
-    y: number
-}
+import {Coordinates} from "../classes/game.classes";
 
-export interface Pad {
+export interface PadInterface {
     coordinates: Coordinates
     width: number
     height: number
 }
 
-export interface Ball {
+export interface BallInterface {
     coordinates: Coordinates
     h: number
     w: number
@@ -18,16 +15,10 @@ export interface Ball {
     ySpeed: number
 }
 
-export interface GameInterface {
-    gameWith: number
-    gameHeight: number
-    ball: Ball
-    rightPad: Pad
-    leftPad: Pad
-}
-
-export interface createGamePayload {
-    rightPad: Pad
-    leftPad: Pad
-    ball: Ball
+export interface CreateGameInterface {
+    width: number
+    height: number
+    rightPad: PadInterface
+    leftPad: PadInterface
+    ball: BallInterface
 }
