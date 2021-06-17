@@ -13,7 +13,6 @@ export class GameService {
 
     createGame(payload: CreateGameInterface) {
         this.game = new GameClass(payload)
-        console.log(this.game)
     }
 
     updatePadCoordinates(padPayload: PadInterface) {
@@ -24,8 +23,15 @@ export class GameService {
 
         if (state === true) {
             const interval = setInterval(() => {
-                // this.gameInterface.ball.updatePosition()
-            }, 200);
+
+
+                if (this.game.ball.updatePosition(this.game))
+                {
+                    client.emit("BallHit", this.game.ball)
+                }
+
+
+            }, 20);
             this.schedulerRegistry.addInterval("game", interval);
         }
         else

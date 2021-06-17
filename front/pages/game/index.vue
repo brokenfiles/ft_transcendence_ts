@@ -15,6 +15,8 @@ import Vue from 'vue'
 import {Component} from "nuxt-property-decorator";
 import {Ball} from "~/pages/game/classes/ball.class";
 import {Pad} from "~/pages/game/classes/pad.class";
+import {Socket} from "vue-socket.io-extended";
+import {BallInterface} from "../../../back/src/game/interfaces/game.interfaces";
 
 interface Keys {
 	pressed: string[]
@@ -88,14 +90,19 @@ export default class Game extends Vue {
 
 		if (this.keys.pressed.includes('ArrowDown')) {
 			this.rightPad.draw(this.context, 'UP')
+			console.log(this.rightPad)
 			this.$socket.client.emit("updatePadCoordinates", {
-				rightPad: this.rightPad
+				coordinates: this.rightPad.coordinates,
+				width: this.rightPad.w,
+				height: this.rightPad.h
 			})
 		}
 		if (this.keys.pressed.includes('ArrowUp')) {
 			this.rightPad.draw(this.context, 'DOWN')
 			this.$socket.client.emit("updatePadCoordinates", {
-				rightPad: this.rightPad
+				coordinates: this.rightPad.coordinates,
+				width: this.rightPad.w,
+				height: this.rightPad.h
 			})
 		}
 		this.ball.drawNextPosition(this.context)
@@ -135,6 +142,12 @@ export default class Game extends Vue {
 
 	upPad() {
 		this.rightPad.draw(this.context, "DOWN")
+	}
+
+	@Socket('BallHit')
+	ballHitSomething(ball: BallInterface)
+	{
+		this.$toast.info("the ball hit something :d")
 	}
 }
 

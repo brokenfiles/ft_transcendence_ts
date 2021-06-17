@@ -2,8 +2,8 @@ import {Coordinates} from "../classes/game.classes";
 
 export interface PadInterface {
     coordinates: Coordinates
-    width: number
-    height: number
+    w: number
+    h: number
 }
 
 export interface BallInterface {

@@ -10,8 +10,10 @@ export class Pad {
     h: number;
 
     constructor(x: number, y: number, w: number, h: number) {
-        this.coordinates.x = x
-        this.coordinates.y = y
+        this.coordinates = {
+            x: x,
+            y: y
+        }
         this.w = w
         this.h = h
     }

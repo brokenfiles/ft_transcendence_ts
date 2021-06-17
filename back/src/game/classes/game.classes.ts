@@ -16,8 +16,8 @@ export class Pad {
             x: currPad.coordinates.x,
             y: currPad.coordinates.y
         }
-        this.width = 10
-        this.height = 74
+        this.width = currPad.w
+        this.height = currPad.h
     }
 
     public setCoordinates(pad: PadInterface)
@@ -49,15 +49,19 @@ export class Ball {
         this.ySpeed = ball.ySpeed
     }
 
-    // updatePosition() {
-    //     this.coordinates.x += this.xSpeed
-    //     console.log("ball updated")
-    //     this.coordinates.y += this.ySpeed
-    //     if (this.coordinates.y <= 0 || this.coordinates.y + this.h / 2 >= 480)
-    //         this.ySpeed *= -1
-    //     if (this.coordinates.x <= 0 || this.coordinates.x + this.w / 2 >= 640)
-    //         this.xSpeed *= -1
-    // }
+    updatePosition(game: GameClass) : boolean {
+        this.coordinates.x += this.xSpeed
+        this.coordinates.y += this.ySpeed
+        if (this.coordinates.y <= 0 || this.coordinates.y + this.h / 2 >= game.gameHeight) {
+            this.ySpeed *= -1
+            return true
+        }
+        if (this.coordinates.x <= 0 || this.coordinates.x + this.w / 2 >= game.gameWith) {
+            this.xSpeed *= -1
+            return true
+        }
+        return false
+    }
 }
 
 export class GameClass {

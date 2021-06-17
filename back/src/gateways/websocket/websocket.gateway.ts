@@ -70,6 +70,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         }
     }
 
+    /************************ CHAT EVENTS PART ************************/
+
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('msgToServer')
