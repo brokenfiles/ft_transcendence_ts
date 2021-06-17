@@ -9,7 +9,7 @@
           </div>
           <div class="item-content pr-8 pl-4 font-semibold">
             <div class="item-link my-2 text-xl" @click="extended = false">
-              <nuxt-link to="#">Join a queue</nuxt-link>
+              <nuxt-link to="/game">Join a queue</nuxt-link>
             </div>
             <div class="item-link my-2">
               <div class="flex border-2 items-center rounded py-2 px-4">

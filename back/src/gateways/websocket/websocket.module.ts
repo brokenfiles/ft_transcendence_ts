@@ -7,12 +7,13 @@ import {Message} from "../../chat/entities/message.entity";
 import {ChatsService} from "../../chat/chats.service";
 import {UsersService} from "../../users/users.service";
 import {User} from "../../users/entities/user.entity";
+import {GameService} from "../../game/game.service";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Channel, Message, User]),
     ],
-    providers: [WebsocketService, WebsocketGateway, ChatsService, UsersService],
+    providers: [WebsocketService, WebsocketGateway, ChatsService, UsersService, GameService],
     exports: [WebsocketService]
 })
 export class WebsocketModule {}

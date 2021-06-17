@@ -19,6 +19,8 @@ import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
+import {GameService} from "../../game/game.service";
+import {Ball, createGamePayload, Pad} from "../../game/interfaces/game.interfaces";
 
 
 @WebSocketGateway(81,
@@ -31,7 +33,8 @@ import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
     constructor(private websocketService: WebsocketService,
-                private chatsService: ChatsService) {
+                private chatsService: ChatsService,
+                private gameService: GameService) {
     }
 
     @WebSocketServer() server: Server
@@ -177,6 +180,39 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         await this.chatsService.changeChannelProperties(client, sub, payload)
     }
+
+    /************************ GAME EVENTS PART ************************/
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('CreateGame')
+    createGame(client: Socket, payload: createGamePayload)
+    {
+        this.gameService.createGame(payload)
+        return {
+            msg: "Game successfully created",
+            type: "info"
+        }
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('updatePadCoordinates')
+    moveCurrentPad(client: Socket, padPayload: Pad)
+    {
+        this.gameService.updatePadCoordinates(padPayload)
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('updateBallCoordinates')
+    updateBall(client: Socket, ballPayload: Ball)
+    {
+        this.gameService.updateBall(ballPayload)
+    }
+
+
+
 }
 
 
