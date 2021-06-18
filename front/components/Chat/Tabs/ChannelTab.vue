@@ -9,13 +9,13 @@
   <!--          Admin dashboard-->
           </button>
         </div>
-        <p class="text-center w-full">
-<!--          <span class="text-gray-500 text-sm">-->
-<!--            Created-->
-<!--            <client-only>-->
-<!--              <timeago :datetime="curr_channel.created_at">{{ curr_channel.created_at }}</timeago>-->
-<!--            </client-only>-->
-<!--          </span>-->
+        <p class="text-center w-full" @mouseover="showChannelCreationDate = true" @mouseleave="showChannelCreationDate = false">
+          <span class="text-gray-500 text-sm absolute bg-primary block" v-if="showChannelCreationDate === true">
+            Created
+            <client-only>
+              <timeago :datetime="curr_channel.created_at">{{ curr_channel.created_at }}</timeago>
+            </client-only>
+          </span>
           {{ curr_channel.name }}
         </p>
         <hr class="mt-1">
@@ -47,17 +47,22 @@ import ChatMessage from "~/components/Chat/Tabs/Components/ChatMessage.vue";
 import BackButton from "~/components/Chat/Tabs/Components/BackButton.vue";
 import {ChannelInterface} from "~/utils/interfaces/chat/channel.interface";
 import {Message} from "postcss";
+import Popup from "~/components/Core/Popup.vue";
 
 @Component({
   components: {
     ChatMessage,
-    BackButton
+    BackButton,
+    Popup
   }
 })
 export default class ChannelTab extends Vue {
 
   /** Models */
   model_message: string = ''
+
+  /** Variables */
+  showChannelCreationDate: boolean = false
 
   /** Properties */
   @Prop({required: true}) curr_channel!: ChannelInterface

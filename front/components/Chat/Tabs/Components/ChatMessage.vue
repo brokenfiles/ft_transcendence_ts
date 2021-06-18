@@ -6,23 +6,18 @@
       <avatar class="z-40 h-8 w-8"
               :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
               :image-url="message.owner.avatar"/>
-      <p class="flex-1 font-bold leading-3"
+      <p class="flex-1"
         :class="{'ml-2': authenticatedId !== message.owner.id}">
-<!--        <span class="font-thin text-xs">-->
-<!--          <client-only>-->
-<!--            <timeago :datetime="message.created_at">{{ message.created_at }}</timeago>-->
-<!--          </client-only>-->
-<!--        </span>-->
       </p>
     </nuxt-link>
-<!--    :class="{'pr-10 text-right bg-yellow text-black': authenticatedId === message.owner.id,-->
-<!--    'pl-10 bg-gray-600': authenticatedId !== message.owner.id}"-->
-    <p :class="{'speech-bubble-left pl-2 w-max pr-2': previousMessageOwnerID !== message.owner.id && authenticatedId !== message.owner.id,
-     'speech-bubble-right text-right pl-2 pr-2 w-max ml-auto': previousMessageOwnerID !== message.owner.id && authenticatedId === message.owner.id,
-     'speech-bubble-right-without-triangle pl-2 text-right pr-2 w-max ml-auto': previousMessageOwnerID === message.owner.id && authenticatedId === message.owner.id,
-     'speech-bubble-left-without-triangle pl-2 w-max pr-2': previousMessageOwnerID === message.owner.id && authenticatedId !== message.owner.id}">
+    <p :class="classes" @mouseover="showMessageSendingDate = true" @mouseleave="showMessageSendingDate = false">
       {{ message.text }}
     </p>
+    <span class="text-gray-500 text-sm absolute bg-primary block z-50 -mt-6" v-if="showMessageSendingDate">
+      <client-only>
+        <timeago :datetime="message.created_at">{{ message.created_at }}</timeago>
+      </client-only>
+    </span>
   </div>
 </template>
 
@@ -43,6 +38,9 @@ export default class ChatMessage extends Vue {
   @Prop({required: true}) message!: MessageInterface
   @Prop({required: false}) previous_message?: MessageInterface
 
+  /** Variables */
+  showMessageSendingDate: boolean = false
+
   /** Computed */
   get authenticatedId(): number {
     if (!this.$auth || !this.$auth.user)
@@ -58,6 +56,17 @@ export default class ChatMessage extends Vue {
       return this.previous_message?.owner.id
     else
       return -1
+  }
+
+  get classes(): string[] {
+    if (this.previousMessageOwnerID !== this.message.owner.id && this.authenticatedId !== this.message.owner.id)
+      return ['speech-bubble-left pl-2 w-max pr-2 order-2 ml-2']
+    else if (this.previousMessageOwnerID !== this.message.owner.id && this.authenticatedId === this.message.owner.id)
+      return ['speech-bubble-right text-right pl-2 pr-2 w-max ml-auto order-2 ml-2']
+    else if (this.previousMessageOwnerID === this.message.owner.id && this.authenticatedId === this.message.owner.id)
+      return ['speech-bubble-right-without-triangle pl-2 text-right pr-2 w-max ml-auto']
+    else if (this.previousMessageOwnerID === this.message.owner.id && this.authenticatedId !== this.message.owner.id)
+      return ['speech-bubble-left-without-triangle pl-2 w-max pr-2']
   }
 
 }
