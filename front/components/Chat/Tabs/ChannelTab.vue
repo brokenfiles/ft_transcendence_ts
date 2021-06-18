@@ -1,23 +1,26 @@
 <template>
   <div>
     <div v-if="curr_channel" class="relative">
-      <div>
-        <back-button @back="goBack">Back to channels</back-button>
-        <p class="text-right">
-          <span class="text-gray-500 text-sm">
-            Created
-            <client-only>
-              <timeago :datetime="curr_channel.created_at">{{ curr_channel.created_at }}</timeago>
-            </client-only>
-          </span>
+      <div class="absolute bg-primary z-50 w-full">
+        <div class="items-stretch flex">
+          <back-button @back="goBack" class="left-0 w-full">Back to channels</back-button>
+          <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="focus:outline-none text-cream">
+            <font-awesome-icon class="mr-1" :icon="['fas', 'user-shield']"/>
+  <!--          Admin dashboard-->
+          </button>
+        </div>
+        <p class="text-center w-full">
+<!--          <span class="text-gray-500 text-sm">-->
+<!--            Created-->
+<!--            <client-only>-->
+<!--              <timeago :datetime="curr_channel.created_at">{{ curr_channel.created_at }}</timeago>-->
+<!--            </client-only>-->
+<!--          </span>-->
           {{ curr_channel.name }}
         </p>
-        <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="block focus:outline-none mt-1 text-cream">
-          <font-awesome-icon class="mr-1" :icon="['fas', 'user-shield']"/> Admin dashboard
-        </button>
+        <hr class="mt-1">
       </div>
-      <hr class="mt-1">
-      <div class="messages my-4">
+      <div class="messages pt-16">
         <div v-for="(message, index) in messages" :key="`message-${index}`" class="">
           <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
         </div>
