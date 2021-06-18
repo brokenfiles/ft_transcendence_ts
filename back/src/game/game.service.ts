@@ -9,6 +9,7 @@ import {Game} from "./entity/game.entity";
 import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
 import {GameState} from "./enums/game-state.enum";
+import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-join-match.interface";
 
 @Injectable()
 export class GameService {
@@ -28,22 +29,10 @@ export class GameService {
         game.state = GameState.CREATING
         game.player1 = players[0]
         game.player2 = players[1]
+        const currGame = await this.gameRepository.save(game)
+        this.games.push(new GameClass(currGame.uuid))
+        return currGame.uuid
 
-        return (await this.gameRepository.save(game)).uuid
-    }
-
-    async createGame(payload: CreateGameInterface) {
-
-        const p1 = await this.userService.findOne(payload.p1)
-        const p2 = await this.userService.findOne(payload.p2)
-
-        let game = this.gameRepository.create()
-        game.state = "creating"
-        game.player1 = p1
-        game.player2 = p2
-        game = await this.gameRepository.save(game)
-
-        this.games.push(new GameClass(payload))
     }
 
     updatePadCoordinates(padPayload: PadInterface) {
@@ -69,5 +58,20 @@ export class GameService {
         const intervals = this.schedulerRegistry.getIntervals();
         console.log(intervals)
         return state
+    }
+
+
+    getGameByUUID(uuid: string) : GameClass
+    {
+        for (let game of this.games)
+        {
+            if (game.uuid === uuid)
+                return game
+        }
+        return null
+    }
+
+    clientJoinGame(client: Socket, payload: ClientJoinMatchInterface) : GameClass | null {
+        return this.getGameByUUID(payload.uuid)
     }
 }

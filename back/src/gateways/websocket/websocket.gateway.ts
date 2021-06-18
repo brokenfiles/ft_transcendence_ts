@@ -24,6 +24,7 @@ import {CreateGameInterface, PadInterface} from "../../game/interfaces/game.inte
 import {QueueService} from "../../game/queue.service";
 import {UserInterface} from "../../game/interfaces/queue.iterfaces";
 import {JwtService} from "@nestjs/jwt";
+import {ClientJoinMatchInterface} from "./interfaces/client-join-match.interface";
 
 
 @WebSocketGateway(81,
@@ -193,21 +194,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('CreateGame')
-    async createGame(client: Socket, payload: CreateGameInterface) {
-        await this.gameService.createGame(payload)
-        return {
-            msg: "Game successfully created",
-            type: "info"
-        }
-    }
-
-    @UseGuards(WsJwtAuthGuard)
-    @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('PlayerReady')
-    playerReady(client: Socket, state: boolean) : boolean
+    @SubscribeMessage('clientJoinedMatch')
+    ClientJoinGame(client: Socket, payload: ClientJoinMatchInterface)
     {
-        return this.gameService.userIsReady(client, state)
+        return this.gameService.clientJoinGame(client, payload)
     }
 
     @UseGuards(WsJwtAuthGuard)

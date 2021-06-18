@@ -11,20 +11,26 @@ export class Pad {
     width: number
     height: number
 
-    constructor(currPad: PadInterface) {
-        this.coordinates = {
-            x: currPad.coordinates.x,
-            y: currPad.coordinates.y
-        }
-        this.width = currPad.w
-        this.height = currPad.h
+    constructor(side: string) {
+        if (side === "left")
+          this.setCoordinates({
+              x: 10,
+              y: 480 / 2 - 74 / 2
+          })
+        else if (side === "right")
+            this.setCoordinates({
+                x: 620,
+                y: 480 / 2 - 74 / 2
+            })
+        this.width = 10
+        this.height = 74
     }
 
-    public setCoordinates(pad: PadInterface)
+    public setCoordinates(coordinates: Coordinates)
     {
         this.coordinates = {
-            x: pad.coordinates.x,
-            y: pad.coordinates.y
+            x: coordinates.x,
+            y: coordinates.y
         }
     }
 }
@@ -37,16 +43,16 @@ export class Ball {
     xSpeed: number
     ySpeed: number
 
-    constructor(ball: BallInterface) {
+    constructor() {
         this.coordinates = {
-            x: ball.coordinates.x,
-            y: ball.coordinates.y
+            x: 620 / 2 - 5,
+            y: 480 / 2 - 5
         }
-        this.w = ball.w
-        this.h = ball.h
-        this.color = ball.color
-        this.xSpeed = ball.xSpeed
-        this.ySpeed = ball.ySpeed
+        this.w = 10
+        this.h = 10
+        this.color = 0xfff
+        this.xSpeed = 3
+        this.ySpeed = -3
     }
 
     updatePosition(game: GameClass) : boolean {
@@ -65,17 +71,19 @@ export class Ball {
 }
 
 export class GameClass {
+    uuid: string
     gameWith: number
     gameHeight: number
     ball: Ball
     rightPad: Pad
     leftPad: Pad
 
-    constructor(createGame: CreateGameInterface) {
-        this.gameHeight = createGame.height
-        this.gameWith = createGame.width
-        this.ball = new Ball(createGame.ball)
-        this.rightPad = new Pad(createGame.rightPad)
-        this.leftPad = new Pad(createGame.leftPad)
+    constructor(uuid: string) {
+        this.uuid = uuid
+        this.gameHeight = 480
+        this.gameWith = 620
+        this.ball = new Ball()
+        this.rightPad = new Pad("right")
+        this.leftPad = new Pad("left")
     }
 }
