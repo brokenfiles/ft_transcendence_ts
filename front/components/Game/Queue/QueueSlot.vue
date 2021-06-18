@@ -30,7 +30,7 @@ import Avatar from "~/components/User/Profile/Avatar.vue";
 export default class QueueSlot extends Vue {
 
   /** Properties */
-  @Prop({required: true}) player: UserInterface | null
+  @Prop({required: true}) player?: UserInterface | null
   @Prop({required: true}) color!: string
 
   styleForElement (variable: any, value: any) : any {

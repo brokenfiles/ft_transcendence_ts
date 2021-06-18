@@ -54,8 +54,10 @@ export default class ChatMessage extends Vue {
   get previousMessageOwnerID(): number {
     if (this.previous_message === null)
       return -1
-    else
+    else if (this.previous_message)
       return this.previous_message?.owner.id
+    else
+      return -1
   }
 
 }
