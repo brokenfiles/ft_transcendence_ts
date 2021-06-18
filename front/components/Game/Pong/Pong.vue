@@ -88,7 +88,7 @@ export default class Pong extends Vue {
 
   clearRect (coordinates: Coordinates, w: number, h: number) {
     if (this.context) {
-      this.context.clearRect(coordinates.x, coordinates.y, w, h)
+      this.context.clearRect(coordinates.x, coordinates.y - 1 , w, h + 2)
     }
   }
 

@@ -56,9 +56,10 @@ export class GameService {
         }
     }
 
-    userIsReady(client: Socket, state: boolean) : boolean {
+    PlayersAreReady(sub: number) {
+        const game = this.getGameByUserId(sub)
 
-        if (state === true) {
+        if (game) {
             const interval = setInterval(() => {
 
                 // if (this.game.ball.updatePosition(this.game))
@@ -66,15 +67,12 @@ export class GameService {
                 //     client.emit("BallHit", this.game.ball)
                 // }
             }, 20);
-            this.schedulerRegistry.addInterval("game", interval);
+            this.schedulerRegistry.addInterval(game.uuid, interval);
         }
-        else
-        {
-            this.schedulerRegistry.deleteInterval("game");
-        }
+            // this.schedulerRegistry.deleteInterval("game");
         const intervals = this.schedulerRegistry.getIntervals();
         console.log(intervals)
-        return state
+        // return state
     }
 
 

@@ -202,6 +202,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientReadyToPlay')
+    async clientReadyToPlay(client: Socket) {
+        const {sub} = (client.handshake as any).user
+        return this.gameService.PlayersAreReady(sub);
+    }
+
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedQueue')
     async joinQueue(client: Socket) {
         await this.queueService.addPlayerToQueue(client)
