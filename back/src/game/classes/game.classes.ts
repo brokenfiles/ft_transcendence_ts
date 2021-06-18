@@ -1,4 +1,5 @@
 import {BallInterface, CreateGameInterface, PadInterface} from "../interfaces/game.interfaces";
+import {User} from "../../users/entities/user.entity";
 
 export interface Coordinates {
     x: number
@@ -77,13 +78,15 @@ export class GameClass {
     ball: Ball
     rightPad: Pad
     leftPad: Pad
+    players: User[]
 
-    constructor(uuid: string) {
+    constructor(uuid: string, players: User[]) {
         this.uuid = uuid
         this.gameHeight = 480
         this.gameWith = 620
         this.ball = new Ball()
         this.rightPad = new Pad("right")
         this.leftPad = new Pad("left")
+        this.players = players
     }
 }

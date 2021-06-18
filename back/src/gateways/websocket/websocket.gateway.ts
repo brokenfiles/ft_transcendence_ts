@@ -195,9 +195,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedMatch')
-    ClientJoinGame(client: Socket, payload: ClientJoinMatchInterface)
-    {
-        return this.gameService.clientJoinGame(client, payload)
+    async ClientJoinGame(client: Socket, payload: ClientJoinMatchInterface) {
+        return this.gameService.clientJoinGame(client, payload);
     }
 
     @UseGuards(WsJwtAuthGuard)

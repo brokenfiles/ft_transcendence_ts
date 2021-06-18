@@ -29,7 +29,7 @@ export class GameService {
         game.state = GameState.CREATING
         game.players = players
         const currGame = await this.gameRepository.save(game)
-        this.games.push(new GameClass(currGame.uuid))
+        this.games.push(new GameClass(currGame.uuid, game.players))
         return currGame.uuid
 
     }
@@ -70,7 +70,7 @@ export class GameService {
         return null
     }
 
-    clientJoinGame(client: Socket, payload: ClientJoinMatchInterface) : GameClass | null {
+    clientJoinGame(client: Socket, payload: ClientJoinMatchInterface): GameClass | null {
         return this.getGameByUUID(payload.uuid)
     }
 }
