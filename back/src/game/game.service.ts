@@ -14,7 +14,7 @@ import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-
 @Injectable()
 export class GameService {
 
-    games: GameClass[]
+    games: GameClass[] = []
 
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
                 private schedulerRegistry: SchedulerRegistry,
@@ -27,8 +27,7 @@ export class GameService {
     async initGame (players: User[]) : Promise<string> {
         let game = this.gameRepository.create()
         game.state = GameState.CREATING
-        game.player1 = players[0]
-        game.player2 = players[1]
+        game.players = players
         const currGame = await this.gameRepository.save(game)
         this.games.push(new GameClass(currGame.uuid))
         return currGame.uuid

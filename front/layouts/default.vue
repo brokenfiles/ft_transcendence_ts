@@ -130,6 +130,7 @@ html {
 .application {
   padding-left: 72px;
   padding-top: 72px;
+  padding-bottom: 72px;
 }
 
 @media screen and (max-width: 768px) {

@@ -11,6 +11,7 @@ import {Message} from "../../chat/entities/message.entity";
 import {Achievement} from "../../achievement/entities/achievement.entity";
 import {Role} from "../../auth/roles/enums/role.enum";
 import {Picture} from "../../cdn/entites/picture.entity";
+import {Game} from "../../game/entity/game.entity";
 
 @Entity("users")
 export class User {
@@ -52,6 +53,12 @@ export class User {
         onDelete: "SET NULL"
     })
     channels: Channel[]
+
+    @ManyToMany(() => Game, game => game.players, {
+        cascade: true,
+        onDelete: "SET NULL"
+    })
+    games: Game[]
 
     @ManyToMany(() => Channel, channel => channel.banned_users)
     banned_channels: Channel[]

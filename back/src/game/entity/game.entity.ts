@@ -16,14 +16,9 @@ export class Game {
     @Generated("uuid")
     uuid: string
 
-
-    @OneToOne(() => User)
-    @JoinColumn()
-    player1: User
-
-    @OneToOne(() => User)
-    @JoinColumn()
-    player2: User
+    @ManyToMany(() => User, u => u.games)
+    @JoinTable()
+    players: User[]
 
     @Column()
     state: string
