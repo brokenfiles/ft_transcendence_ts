@@ -68,6 +68,13 @@ export class WebsocketService {
         return this._clients
     }
 
+    public getClient(userId: number): ClientInterface | undefined {
+        const idx = this._clients.map(u => u.userId).indexOf(userId)
+        if (idx !== -1)
+            return this._clients[idx]
+        return undefined
+    }
+
     findClientFromSocket(client: Socket) : ClientInterface | undefined
     {
         for (const c of this._clients)

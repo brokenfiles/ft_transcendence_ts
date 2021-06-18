@@ -39,7 +39,7 @@ export default class Queue extends Vue {
     // add the player who rendering the component in the queued players
     this.queued_players.push(this.user)
     // when a client mount this component, we emit an event to avert the back
-    this.$socket.client.emit('clientJoinedQueue', this.user)
+    this.$socket.client.emit('clientJoinedQueue', this.user.id)
   }
 
   /**
