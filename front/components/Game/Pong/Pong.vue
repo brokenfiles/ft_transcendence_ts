@@ -9,7 +9,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import {Component, Prop} from 'nuxt-property-decorator'
-import {Coordinates, Keys, MatchInterface} from "~/utils/interfaces/game/match.interface";
+import {Coordinates, Keys, MatchInterface, Pad} from "~/utils/interfaces/game/match.interface";
 
 @Component({})
 export default class Pong extends Vue {
@@ -23,6 +23,7 @@ export default class Pong extends Vue {
   keys: Keys = {
     pressed: []
   }
+  loop_id: number = -1
 
   /** Methods */
   mounted () {
@@ -38,16 +39,21 @@ export default class Pong extends Vue {
     }
 
     /* Event listeners */
-    document.addEventListener('keydown', this.keyDownEvent)
-    document.addEventListener('keyup', this.keyUpEvent)
+    if (this.isAPlayer) {
+      document.addEventListener('keydown', this.keyDownEvent)
+      document.addEventListener('keyup', this.keyUpEvent)
+    }
 
-    this.updateGame()
+    this.loop_id = window.setInterval(this.updateGame, 20)
   }
 
   beforeDestroy () {
     // destroying the component
-    document.removeEventListener('keydown', this.keyDownEvent)
-    document.removeEventListener('keyup', this.keyUpEvent)
+    if (this.isAPlayer) {
+      document.removeEventListener('keydown', this.keyDownEvent)
+      document.removeEventListener('keyup', this.keyUpEvent)
+    }
+    clearInterval(this.loop_id)
   }
 
   /**
@@ -73,8 +79,27 @@ export default class Pong extends Vue {
 
   printRectangle (coordinates: Coordinates, w: number, h: number, color: string) {
     if (this.context) {
+      // this.context.clearRect(coordinates.x, coordinates.y, w, h)
       this.context.fillStyle = `${color}`
       this.context.fillRect(coordinates.x, coordinates.y, w, h)
+    }
+  }
+
+  clearRect (coordinates: Coordinates, w: number, h: number) {
+    if (this.context) {
+      this.context.clearRect(coordinates.x, coordinates.y, w, h)
+    }
+  }
+
+  changePadPosition (way: string) {
+    let match = this.match as any
+    let pad = match[this.userPad] as Pad
+    if (way === "up") {
+      this.clearRect(pad.coordinates, pad.width, pad.height)
+      pad.coordinates.y -= 5
+    } else if (way === "down") {
+      this.clearRect(pad.coordinates, pad.width, pad.height)
+      pad.coordinates.y += 5
     }
   }
 
@@ -82,9 +107,28 @@ export default class Pong extends Vue {
    * Update the game
    */
   updateGame () {
+    if (this.keys.pressed.includes('ArrowDown'))
+      this.changePadPosition("down")
+    if (this.keys.pressed.includes("ArrowUp"))
+      this.changePadPosition("up")
+
     this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
     this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
     this.printRectangle(this.match.ball.coordinates, 10, 10, 'white')
+  }
+
+  /** Computed */
+  get isAPlayer () : boolean {
+    return (this.$auth.user && this.match.players.map(u => u.id).includes(this.$auth.user.id))
+  }
+
+  get userPad () : string {
+    const map = this.match.players.map(u => u.id)
+    const userId = this.$auth.user ? this.$auth.user.id : -1
+    if (map[0] === userId)
+      return 'rightPad'
+    else
+      return 'leftPad'
   }
 
 }
