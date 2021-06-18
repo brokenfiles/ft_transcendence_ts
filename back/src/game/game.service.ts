@@ -56,6 +56,60 @@ export class GameService {
         }
     }
 
+    async clientReadyToPlay(sub: number) {
+        const game = this.getGameByUserId(sub)
+        if (game) {
+            let user = null
+            if (game.players[0].id === sub)
+                user = game.players[0]
+            else if (game.players[1].id === sub)
+                user = game.players[1]
+            if (user) {
+                if (!game.playersReady.includes(user)) {
+                    game.addReady(user)
+                    if (game.playersReady.length === 2) {
+                        const interval = setInterval(() => {
+                            let ball = game.ball
+                            let updated = false
+                            ball.coordinates.x += ball.xSpeed
+                            ball.coordinates.y += ball.ySpeed
+                            if (ball.coordinates.y <= 0 || ball.coordinates.y + 10 >= 480) {
+                                ball.ySpeed *= -1
+                                updated = true
+                            }
+                            if (ball.coordinates.x <= 0 || ball.coordinates.x + 10 >= 640) {
+                                // player won!
+                            }
+
+                            //collisions with pad
+                            // const pads = [game.leftPad, game.rightPad]
+                            // for (const pad of pads) {
+                            //     if (ball.coordinates.x >= pad.coordinates.x + pad.width && ball.coordinates.y >= pad.coordinates.y && ball.coordinates.y + pad.height <= pad.coordinates.y + pad.height) {
+                            //         ball.xSpeed *= -1
+                            //         updated = true
+                            //     }
+                            // }
+
+                            if (updated) {
+                                for (const player of game.players) {
+                                    // envoyer aux users la nouvelle position du pad
+                                    this.websocketService.getClient(player.id).socket.emit('ballUpdated', ball)
+                                }
+                            }
+
+                        }, 20)
+                        this.schedulerRegistry.addInterval(game.uuid, interval);
+                    }
+                }
+            }
+        }
+    }
+
+    private updateGame (game: GameClass) {
+
+    }
+
+
     userIsReady(client: Socket, state: boolean) : boolean {
 
         if (state === true) {
@@ -76,7 +130,6 @@ export class GameService {
         console.log(intervals)
         return state
     }
-
 
     getGameByUUID(uuid: string) : GameClass
     {

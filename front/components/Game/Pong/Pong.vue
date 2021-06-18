@@ -11,6 +11,7 @@ import Vue from 'vue'
 import {Component, Prop} from 'nuxt-property-decorator'
 import {Coordinates, Keys, MatchInterface, Pad} from "~/utils/interfaces/game/match.interface";
 import {Socket} from "vue-socket.io-extended";
+import {BallInterface} from "~/utils/interfaces/game/ball.interface";
 
 @Component({})
 export default class Pong extends Vue {
@@ -46,6 +47,8 @@ export default class Pong extends Vue {
     }
 
     this.loop_id = window.setInterval(this.updateGame, 20)
+    // avert the backend that the player is ready to play
+    this.$socket.client.emit(`clientReadyToPlay`)
   }
 
   beforeDestroy () {
@@ -92,6 +95,14 @@ export default class Pong extends Vue {
     }
   }
 
+  updateBallPosition () {
+    let ball = this.match.ball
+    this.clearRect(ball.coordinates, 10, 10)
+    ball.coordinates.x += ball.xSpeed
+    ball.coordinates.y += ball.ySpeed
+    this.printRectangle(ball.coordinates, 10, 10, "white")
+  }
+
   changePadPosition (way: string) {
     let match = this.match as any
     let pad = match[this.userPad] as Pad
@@ -120,7 +131,9 @@ export default class Pong extends Vue {
 
     this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
     this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
-    this.printRectangle(this.match.ball.coordinates, 10, 10, 'white')
+
+    // if game is started
+    this.updateBallPosition()
   }
 
   /** Sockets */
@@ -131,6 +144,12 @@ export default class Pong extends Vue {
     this.clearRect(pad.coordinates, pad.width, pad.height)
     pad.coordinates = coordinates
     this.printRectangle(pad.coordinates, pad.width, pad.height, 'red')
+  }
+
+  @Socket("ballUpdated")
+  ballUpdatedEvent (ball: BallInterface) {
+    this.clearRect(this.match.ball.coordinates, 10, 10)
+    this.match.ball = ball
   }
 
   /** Computed */
