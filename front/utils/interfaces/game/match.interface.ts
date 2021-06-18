@@ -1,3 +1,8 @@
+import {UserInterface} from "~/utils/interfaces/users/user.interface";
+
+export interface Keys {
+  pressed: string[]
+}
 
 export interface Coordinates {
   x: number
@@ -24,6 +29,7 @@ export interface MatchInterface {
   uuid: string
   gameWith: number
   gameHeight: number
+  players: UserInterface[]
   ball: Ball
   rightPad: Pad
   leftPad: Pad
