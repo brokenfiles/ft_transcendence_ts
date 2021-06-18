@@ -231,6 +231,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         await this.gameService.updatePadCoordinates(sub, coordinates)
     }
 
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientReadyToPlay')
+    async clientReadyToPlay(client: Socket) {
+        const {sub} = (client.handshake as any).user
+        await this.gameService.clientReadyToPlay(sub)
+    }
+
 }
 
 

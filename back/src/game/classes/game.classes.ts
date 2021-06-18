@@ -79,6 +79,7 @@ export class GameClass {
     rightPad: Pad
     leftPad: Pad
     players: User[]
+    playersReady: User[]
 
     constructor(uuid: string, players: User[]) {
         this.uuid = uuid
@@ -88,5 +89,10 @@ export class GameClass {
         this.rightPad = new Pad("right")
         this.leftPad = new Pad("left")
         this.players = players
+        this.playersReady = []
+    }
+
+    public addReady (player: User) {
+        this.playersReady.push(player)
     }
 }
