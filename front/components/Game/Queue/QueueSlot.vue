@@ -59,7 +59,7 @@ export default class QueueSlot extends Vue {
     return ""
   }
 
-  get guild () : string | boolean {
+  get guild () : string | boolean | undefined {
     if (this.player && this.player.guild) {
       return this.player.guild?.name
     }
