@@ -21,6 +21,8 @@ import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-proper
 import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
 import {GameService} from "../../game/game.service";
 import {CreateGameInterface, PadInterface} from "../../game/interfaces/game.interfaces";
+import {QueueService} from "../../game/queue.service";
+import {UserInterface} from "../../game/interfaces/queue.iterfaces";
 
 
 @WebSocketGateway(81,
@@ -34,7 +36,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     constructor(private websocketService: WebsocketService,
                 private chatsService: ChatsService,
-                private gameService: GameService) {
+                private gameService: GameService,
+                private queueService: QueueService) {
     }
 
     @WebSocketServer() server: Server
@@ -212,6 +215,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     {
         this.gameService.updatePadCoordinates(padPayload)
     }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientJoinedQueue')
+    async joinQueue(client: Socket, payload: UserInterface)
+    {
+        await this.queueService.addPlayerToQueue(client, payload)
+    }
+
 
 }
 

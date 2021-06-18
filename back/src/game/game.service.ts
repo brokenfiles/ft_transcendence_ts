@@ -29,8 +29,6 @@ export class GameService {
                 {
                     client.emit("BallHit", this.game.ball)
                 }
-
-
             }, 20);
             this.schedulerRegistry.addInterval("game", interval);
         }
