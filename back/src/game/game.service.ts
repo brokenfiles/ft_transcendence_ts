@@ -1,5 +1,5 @@
 import {Injectable} from "@nestjs/common";
-import {GameClass} from "./classes/game.classes";
+import {Coordinates, GameClass} from "./classes/game.classes";
 import {Socket} from "socket.io";
 import {SchedulerRegistry} from "@nestjs/schedule";
 import {CreateGameInterface, PadInterface} from "./interfaces/game.interfaces";
@@ -10,6 +10,7 @@ import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
 import {GameState} from "./enums/game-state.enum";
 import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-join-match.interface";
+import {WebsocketService} from "../gateways/websocket/websocket.service";
 
 @Injectable()
 export class GameService {
@@ -18,7 +19,8 @@ export class GameService {
 
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
                 private schedulerRegistry: SchedulerRegistry,
-                private userService: UsersService) {}
+                private userService: UsersService,
+                private websocketService: WebsocketService) {}
 
     /**
      * Init the game and return the uuid
@@ -31,11 +33,27 @@ export class GameService {
         const currGame = await this.gameRepository.save(game)
         this.games.push(new GameClass(currGame.uuid, game.players))
         return currGame.uuid
-
     }
 
-    updatePadCoordinates(padPayload: PadInterface) {
-        // this.game.rightPad.setCoordinates(padPayload)
+    updatePadCoordinates(sub: number, coordinates: Coordinates) {
+        const game = this.getGameByUserId(sub)
+        if (game) {
+            let pad = null
+            if (game.players[0].id === sub) {
+                pad = game.rightPad
+            } else if (game.players[1].id === sub) {
+                pad = game.leftPad
+            }
+            if (pad) {
+                pad.setCoordinates(coordinates)
+                for (const player of game.players) {
+                    if (player.id !== sub) {
+                        // envoyer aux users la nouvelle position du pad
+                        this.websocketService.getClient(player.id).socket.emit('otherPlayerPadUpdated', coordinates)
+                    }
+                }
+            }
+        }
     }
 
     userIsReady(client: Socket, state: boolean) : boolean {
@@ -66,6 +84,15 @@ export class GameService {
         {
             if (game.uuid === uuid)
                 return game
+        }
+        return null
+    }
+
+    getGameByUserId (userId: number) : GameClass {
+        for (const game of this.games) {
+            if (game.players.map(u => u.id).includes(userId)) {
+                return game
+            }
         }
         return null
     }

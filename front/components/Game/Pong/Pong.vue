@@ -10,6 +10,7 @@
 import Vue from 'vue'
 import {Component, Prop} from 'nuxt-property-decorator'
 import {Coordinates, Keys, MatchInterface, Pad} from "~/utils/interfaces/game/match.interface";
+import {Socket} from "vue-socket.io-extended";
 
 @Component({})
 export default class Pong extends Vue {
@@ -97,10 +98,15 @@ export default class Pong extends Vue {
     if (way === "up") {
       this.clearRect(pad.coordinates, pad.width, pad.height)
       pad.coordinates.y -= 5
+      if (pad.coordinates.y <= 0)
+        pad.coordinates.y = 0
     } else if (way === "down") {
       this.clearRect(pad.coordinates, pad.width, pad.height)
       pad.coordinates.y += 5
+      if (pad.coordinates.y + pad.height > this.match.gameHeight)
+        pad.coordinates.y = this.match.gameHeight - pad.height
     }
+    this.$socket.client.emit(`clientUpdatedPadPosition`, pad.coordinates)
   }
 
   /**
@@ -117,6 +123,16 @@ export default class Pong extends Vue {
     this.printRectangle(this.match.ball.coordinates, 10, 10, 'white')
   }
 
+  /** Sockets */
+  @Socket("otherPlayerPadUpdated")
+  otherPlayerPadUpdatedEvent (coordinates: Coordinates) {
+    let match = this.match as any
+    let pad = match[this.otherPad] as Pad
+    this.clearRect(pad.coordinates, pad.width, pad.height)
+    pad.coordinates = coordinates
+    this.printRectangle(pad.coordinates, pad.width, pad.height, 'red')
+  }
+
   /** Computed */
   get isAPlayer () : boolean {
     return (this.$auth.user && this.match.players.map(u => u.id).includes(this.$auth.user.id))
@@ -126,6 +142,15 @@ export default class Pong extends Vue {
     const map = this.match.players.map(u => u.id)
     const userId = this.$auth.user ? this.$auth.user.id : -1
     if (map[0] === userId)
+      return 'rightPad'
+    else
+      return 'leftPad'
+  }
+
+  get otherPad () : string {
+    const map = this.match.players.map(u => u.id)
+    const userId = this.$auth.user ? this.$auth.user.id : -1
+    if (map[0] !== userId)
       return 'rightPad'
     else
       return 'leftPad'

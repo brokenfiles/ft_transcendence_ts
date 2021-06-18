@@ -25,6 +25,7 @@ import {QueueService} from "../../game/queue.service";
 import {UserInterface} from "../../game/interfaces/queue.iterfaces";
 import {JwtService} from "@nestjs/jwt";
 import {ClientJoinMatchInterface} from "./interfaces/client-join-match.interface";
+import {Coordinates} from "../../game/classes/game.classes";
 
 
 @WebSocketGateway(81,
@@ -201,14 +202,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('updatePadCoordinates')
-    moveCurrentPad(client: Socket, padPayload: PadInterface)
-    {
-        this.gameService.updatePadCoordinates(padPayload)
-    }
-
-    @UseGuards(WsJwtAuthGuard)
-    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedQueue')
     async joinQueue(client: Socket) {
         await this.queueService.addPlayerToQueue(client)
@@ -219,6 +212,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @SubscribeMessage('clientLeftQueue')
     async leaveQueue(client: Socket) {
         await this.queueService.removeFromQueue(client)
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientUpdatedPadPosition')
+    async clientUpdatedPadPosition(client: Socket, coordinates: Coordinates) {
+        const {sub} = (client.handshake as any).user
+        await this.gameService.updatePadCoordinates(sub, coordinates)
     }
 
 }
