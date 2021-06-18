@@ -1,4 +1,4 @@
-import {Coordinates} from "~/pages/game/classes/coordinates.interface";
+import {Coordinates} from "~/utils/interfaces/game/coordinates.interface";
 
 export class Pad {
 

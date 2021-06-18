@@ -13,10 +13,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import {Component} from "nuxt-property-decorator";
-import {Ball} from "~/pages/game/classes/ball.class";
-import {Pad} from "~/pages/game/classes/pad.class";
 import {Socket} from "vue-socket.io-extended";
-import {BallInterface} from "../../../back/src/game/interfaces/game.interfaces";
+import {Pad} from "~/utils/classes/pad.class";
+import {Ball} from "~/utils/classes/ball.class";
+import {BallInterface} from "~/utils/interfaces/game/ball.interface";
 
 interface Keys {
 	pressed: string[]

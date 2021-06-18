@@ -36,6 +36,10 @@ export default {
       src: '~/plugins/toggle-button.js',
       mode: 'client'
     },
+    {
+      src: '~/plugins/spinners.js',
+      mode: 'client'
+    }
   ],
 
 
