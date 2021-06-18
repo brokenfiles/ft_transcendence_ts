@@ -222,11 +222,16 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedQueue')
-    async joinQueue(client: Socket)
-    {
+    async joinQueue(client: Socket) {
         await this.queueService.addPlayerToQueue(client)
     }
 
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientLeftQueue')
+    async leaveQueue(client: Socket) {
+        await this.queueService.removeFromQueue(client)
+    }
 
 }
 

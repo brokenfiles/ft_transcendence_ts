@@ -41,6 +41,14 @@ export default class Queue extends Vue {
     this.$socket.client.emit('clientJoinedQueue')
   }
 
+  beforeDestroy () {
+    const idx = this.queued_players.map(u => u.id).indexOf(this.user.id)
+    if (idx !== -1) {
+      this.queued_players.splice(idx, 1)
+      this.$socket.client.emit('clientLeftQueue', this.user.id)
+    }
+  }
+
   /**
    * Get the player by his id or null
    * @param n
