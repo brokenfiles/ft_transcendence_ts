@@ -53,6 +53,8 @@ export default class Game extends Vue {
 		document.addEventListener('keyup', this.keyUpEvent)
 
 		this.$socket.client.emit('CreateGame', {
+			p1: 1,
+			p2: 2,
 			width: 620,
 			height: 480,
 			rightPad: this.rightPad,
@@ -91,19 +93,11 @@ export default class Game extends Vue {
 		if (this.keys.pressed.includes('ArrowDown')) {
 			this.rightPad.draw(this.context, 'UP')
 			console.log(this.rightPad)
-			this.$socket.client.emit("updatePadCoordinates", {
-				coordinates: this.rightPad.coordinates,
-				width: this.rightPad.w,
-				height: this.rightPad.h
-			})
+			this.$socket.client.emit("updatePadCoordinates", this.rightPad)
 		}
 		if (this.keys.pressed.includes('ArrowUp')) {
 			this.rightPad.draw(this.context, 'DOWN')
-			this.$socket.client.emit("updatePadCoordinates", {
-				coordinates: this.rightPad.coordinates,
-				width: this.rightPad.w,
-				height: this.rightPad.h
-			})
+			this.$socket.client.emit("updatePadCoordinates", this.rightPad)
 		}
 		this.ball.drawNextPosition(this.context)
 	}

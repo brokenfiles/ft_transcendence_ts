@@ -3,15 +3,31 @@ import {GameClass} from "./classes/game.classes";
 import {Socket} from "socket.io";
 import {SchedulerRegistry} from "@nestjs/schedule";
 import {CreateGameInterface, PadInterface} from "./interfaces/game.interfaces";
+import {InjectRepository} from "@nestjs/typeorm";
+import {Repository} from "typeorm";
+import {Game} from "./entity/game.entity";
+import {UsersService} from "../users/users.service";
 
 @Injectable()
 export class GameService {
 
     game: GameClass
 
-    constructor(private schedulerRegistry: SchedulerRegistry) {}
+    constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
+                private schedulerRegistry: SchedulerRegistry,
+                private userService: UsersService) {}
 
-    createGame(payload: CreateGameInterface) {
+    async createGame(payload: CreateGameInterface) {
+
+        const p1 = await this.userService.findOne(payload.p1)
+        const p2 = await this.userService.findOne(payload.p2)
+
+        let game = this.gameRepository.create()
+        game.state = "creating"
+        game.player1 = p1
+        game.player2 = p2
+        game = await this.gameRepository.save(game)
+
         this.game = new GameClass(payload)
     }
 
@@ -23,7 +39,6 @@ export class GameService {
 
         if (state === true) {
             const interval = setInterval(() => {
-
 
                 if (this.game.ball.updatePosition(this.game))
                 {

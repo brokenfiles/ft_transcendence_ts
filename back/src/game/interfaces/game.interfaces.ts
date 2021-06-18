@@ -16,6 +16,8 @@ export interface BallInterface {
 }
 
 export interface CreateGameInterface {
+    p1: number
+    p2: number
     width: number
     height: number
     rightPad: PadInterface

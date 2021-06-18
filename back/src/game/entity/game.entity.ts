@@ -1,7 +1,7 @@
 import {
     Column,
     CreateDateColumn,
-    Entity, Generated, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany,
+    Entity, Generated, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne,
     PrimaryGeneratedColumn, UpdateDateColumn
 } from "typeorm";
 import {User} from "../../users/entities/user.entity";
@@ -16,9 +16,14 @@ export class Game {
     @Generated("uuid")
     uuid: string
 
-    // @ManyToMany(() => User, user => user.channels)
-    // @JoinTable()
-    // users: User[]
+
+    @OneToOne(() => User)
+    @JoinColumn()
+    player1: User
+
+    @OneToOne(() => User)
+    @JoinColumn()
+    player2: User
 
     @Column()
     state: string
