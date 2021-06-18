@@ -16,7 +16,7 @@ export class QueueService {
         const {sub} = (client.handshake as any).user
         const newUser = await this.userService.findOne(sub)
         const newClient = this.websocketService.getClient(sub)
-        if (newClient) {
+        if (newClient && !this.queue.includes(sub)) {
             if (this.queue.length === 0) {
                 this.queue.push(sub)
             } else if (this.queue.length === 1) {
@@ -41,6 +41,23 @@ export class QueueService {
                     }
                 }
                 this.queue = []
+            }
+        }
+    }
+
+    async removeFromQueue(client: Socket) {
+        const clientIdx = this.websocketService.clients.map(c => c.id).indexOf(client.id)
+        if (clientIdx !== -1) {
+            const client = this.websocketService.clients[clientIdx]
+            const queueIdx = this.queue.indexOf(client.userId)
+            if (queueIdx !== -1) {
+                this.queue.splice(queueIdx, 1)
+                if (this.queue.length === 1) {
+                    const firstClient = this.websocketService.getClient(this.queue[0])
+                    if (firstClient) {
+                        firstClient.socket.emit('clientLeftQueue', client.userId)
+                    }
+                }
             }
         }
     }

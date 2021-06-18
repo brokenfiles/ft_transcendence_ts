@@ -67,10 +67,21 @@ export default class Queue extends Vue {
 
   @Socket("gameStarting")
   gameStartingEvent (players: UserInterface[]) {
-    this.$toast.info(`Match against ${players[0].display_name} and ${players[1].display_name} starting...`)
-    setTimeout(() => {
-      this.$router.push('/game')
-    }, 3000)
+    if (players.length === 2 && this.queued_players.length === 2) {
+      this.$toast.info(`Match against ${players[0].display_name} and ${players[1].display_name} starting...`)
+      setTimeout(() => {
+        this.$router.push('/game')
+      }, 3000)
+    }
+  }
+
+  @Socket("clientLeftQueue")
+  clientLeftQueueEvent (clientId: number) {
+    const idx = this.queued_players.map(u => u.id).indexOf(clientId)
+    if (idx !== -1) {
+      this.$toast.info(`${this.queued_players[idx].display_name} left the queue`)
+      this.queued_players.splice(idx, 1)
+    }
   }
 
 }

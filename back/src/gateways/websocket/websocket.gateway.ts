@@ -67,9 +67,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         this.websocketService.sendOnlineClientsToClient(client)
     }
 
-    handleDisconnect(client: Socket) {
+   async handleDisconnect(client: Socket) {
         let sub
         this.logger.log(`Client ${client.id} disconnected`);
+        await this.queueService.removeFromQueue(client)
         if ((sub = this.websocketService.removeClient(client.id, this.server)) !== -1) {
             this.logger.log(`User with id ${sub} is now offline`)
         }

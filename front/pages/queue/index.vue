@@ -11,7 +11,7 @@
         color="#EEEBDE"
       />
     </div>
-    <queue :user="this.$auth.user"/>
+    <queue v-if="isSocketConnected" :user="this.$auth.user"/>
   </div>
 </template>
 
@@ -27,6 +27,11 @@ import Queue from "~/components/Game/Queue/Queue.vue";
   middleware: ['auth']
 })
 export default class JoinQueue extends Vue {
+
+  /** Computed */
+  get isSocketConnected() : boolean {
+    return (process.client && this.$socket.connected)
+  }
 
 }
 </script>

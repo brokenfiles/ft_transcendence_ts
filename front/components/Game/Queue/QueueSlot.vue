@@ -86,9 +86,9 @@ export default class QueueSlot extends Vue {
   left: 0;
   right: 0;
   opacity: 0.4;
-  background: linear-gradient(-45deg, #848484, #616161, #848484, #404040);
+  background: linear-gradient(-45deg, #848484, #404040, #848484, #404040);
   background-size: 400% 400%;
-  animation: gradient 4s ease infinite;
+  animation: gradient 4s ease-in-out infinite;
 }
 
 @keyframes gradient {
