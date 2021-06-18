@@ -58,7 +58,7 @@ export default class Game extends Vue {
 			rightPad: this.rightPad,
 			leftPad: this.leftPad,
 			ball: this.ball
-		}, (data) => {
+		}, (data: any) => {
 			this.$toast.info(data.msg)
 		})
 
@@ -73,7 +73,7 @@ export default class Game extends Vue {
 
 	startGame()
 	{
-		this.$socket.client.emit("PlayerReady", this.stop === 0, (state) => {
+		this.$socket.client.emit("PlayerReady", this.stop === 0, (state: any) => {
 
 			if (this.context && state) {
 				this.stop = window.setInterval(() => this.loop(), 20)
