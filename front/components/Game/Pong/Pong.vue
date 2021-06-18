@@ -40,6 +40,8 @@ export default class Pong extends Vue {
     /* Event listeners */
     document.addEventListener('keydown', this.keyDownEvent)
     document.addEventListener('keyup', this.keyUpEvent)
+
+    this.updateGame()
   }
 
   beforeDestroy () {
@@ -80,8 +82,8 @@ export default class Pong extends Vue {
    * Update the game
    */
   updateGame () {
-    this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'white')
-    this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'white')
+    this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
+    this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
     this.printRectangle(this.match.ball.coordinates, 10, 10, 'white')
   }
 

@@ -67,6 +67,8 @@ export default class ChatMessage extends Vue {
       return ['speech-bubble-right-without-triangle pl-2 text-right pr-2 w-max ml-auto']
     else if (this.previousMessageOwnerID === this.message.owner.id && this.authenticatedId !== this.message.owner.id)
       return ['speech-bubble-left-without-triangle pl-2 w-max pr-2']
+    else
+      return []
   }
 
 }

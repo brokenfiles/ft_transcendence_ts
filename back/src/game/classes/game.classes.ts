@@ -46,7 +46,7 @@ export class Ball {
 
     constructor() {
         this.coordinates = {
-            x: 620 / 2 - 5,
+            x: 640 / 2 - 5,
             y: 480 / 2 - 5
         }
         this.w = 10
@@ -83,7 +83,7 @@ export class GameClass {
     constructor(uuid: string, players: User[]) {
         this.uuid = uuid
         this.gameHeight = 480
-        this.gameWith = 620
+        this.gameWith = 640
         this.ball = new Ball()
         this.rightPad = new Pad("right")
         this.leftPad = new Pad("left")
