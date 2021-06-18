@@ -20,7 +20,6 @@ import {Component, Prop} from 'nuxt-property-decorator'
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import QueueSlot from "~/components/Game/Queue/QueueSlot.vue";
 import {Socket} from "vue-socket.io-extended";
-import {ClientInterface} from "../../../../back/src/gateways/websocket/interfaces/client.interface";
 
 @Component({
   components: {
@@ -39,7 +38,7 @@ export default class Queue extends Vue {
     // add the player who rendering the component in the queued players
     this.queued_players.push(this.user)
     // when a client mount this component, we emit an event to avert the back
-    this.$socket.client.emit('clientJoinedQueue', this.user.id)
+    this.$socket.client.emit('clientJoinedQueue')
   }
 
   /**
@@ -60,10 +59,18 @@ export default class Queue extends Vue {
    * @param user
    */
   @Socket("clientJoinedQueue")
-  clientJoinedQueue (user: ClientInterface) {
+  clientJoinedQueue (user: UserInterface) {
     if (this.queued_players.length === 1) {
       this.queued_players.push(user)
     }
+  }
+
+  @Socket("gameStarting")
+  gameStartingEvent (players: UserInterface[]) {
+    this.$toast.info(`Match against ${players[0].display_name} and ${players[1].display_name} starting...`)
+    setTimeout(() => {
+      this.$router.push('/game')
+    }, 3000)
   }
 
 }

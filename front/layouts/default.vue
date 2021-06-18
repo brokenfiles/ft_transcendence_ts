@@ -90,21 +90,6 @@ export default class Default extends Vue {
   public setClients!: (clients: number[]) => void
 
   /**
-   * Send to the ws server that we are connected
-   **/
-  @Socket('connect')
-  connectEvent() {
-    if (process.client) {
-      if (this.$auth && this.$auth.loggedIn && this.$auth.user) {
-        // set set the token to socket.io client
-        this.$socket.client.emit('userOnline', {
-          userId: this.$auth.user.id
-        })
-      }
-    }
-  }
-
-  /**
    * When a client status changed to online -> offline or inverse
    *
    * This function update online clients in the store

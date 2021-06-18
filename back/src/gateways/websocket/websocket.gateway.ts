@@ -23,6 +23,7 @@ import {GameService} from "../../game/game.service";
 import {CreateGameInterface, PadInterface} from "../../game/interfaces/game.interfaces";
 import {QueueService} from "../../game/queue.service";
 import {UserInterface} from "../../game/interfaces/queue.iterfaces";
+import {JwtService} from "@nestjs/jwt";
 
 
 @WebSocketGateway(81,
@@ -34,7 +35,8 @@ import {UserInterface} from "../../game/interfaces/queue.iterfaces";
     })
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
-    constructor(private websocketService: WebsocketService,
+    constructor(private jwtService: JwtService,
+                private websocketService: WebsocketService,
                 private chatsService: ChatsService,
                 private gameService: GameService,
                 private queueService: QueueService) {
@@ -51,6 +53,17 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     handleConnection(client: Socket, ...args: any[]) {
         this.logger.log(`Client ${client.id} connected`);
+        if ("query" in (client.handshake as any)) {
+            const { token } = (client.handshake as any).query
+            try {
+                const content = this.jwtService.verify(token)
+                this.websocketService.addClient(client, content.sub, this.server)
+                this.logger.log(`Client ${content.sub} is now online!`)
+            } catch (e: any) {
+                this.logger.log(`Error when decoding token : ${e}`)
+            }
+
+        }
         this.websocketService.sendOnlineClientsToClient(client)
     }
 
@@ -59,17 +72,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         this.logger.log(`Client ${client.id} disconnected`);
         if ((sub = this.websocketService.removeClient(client.id, this.server)) !== -1) {
             this.logger.log(`User with id ${sub} is now offline`)
-        }
-    }
-
-    @UseGuards(WsJwtAuthGuard)
-    @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage("userOnline")
-    userOnlineEvent(client: Socket, payload: ClientInterface) {
-        const {sub} = (client.handshake as any).user
-        if (sub === payload.userId) {
-            this.websocketService.addClient(client, payload, this.server)
-            this.logger.log(`User with id ${sub} is now online`)
         }
     }
 
@@ -219,9 +221,9 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedQueue')
-    async joinQueue(client: Socket, payload: UserInterface)
+    async joinQueue(client: Socket)
     {
-        await this.queueService.addPlayerToQueue(client, payload)
+        await this.queueService.addPlayerToQueue(client)
     }
 
 

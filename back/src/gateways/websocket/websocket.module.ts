@@ -12,10 +12,18 @@ import {QueueService} from "../../game/queue.service";
 import {GameModule} from "../../game/game.module";
 import {ChatsModule} from "../../chat/chats.module";
 import {UsersModule} from "../../users/users.module";
+import {JwtModule} from "@nestjs/jwt";
+import {jwtConstants} from "../../auth/constants";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Channel, Message, User]),
+        JwtModule.register({
+            secret: jwtConstants.secret,
+            signOptions: {
+                expiresIn: jwtConstants.expiresIn
+            },
+        }),
         forwardRef(() => GameModule),
         forwardRef(() => ChatsModule),
         forwardRef(() => UsersModule)

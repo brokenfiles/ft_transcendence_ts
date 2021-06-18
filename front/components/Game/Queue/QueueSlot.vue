@@ -4,7 +4,7 @@
        :style="{backgroundColor: this.color}">
     <avatar class="w-24 h-24 mx-auto" :image-url="avatar"/>
     <p class="mt-4 p-2 rounded-lg font-semibold text-xl" :style="styleForElement(name, '')">
-      <span :class="{'opacity-0': !guild}" class="font-normal">[{{ guild }}] </span>
+      <span v-if="guild" :class="{'opacity-0': !guild}" class="font-normal">[{{ guild }}] </span>
       {{ name }}
     </p>
     <p class="mt-1 rounded-lg" :style="styleForElement(points, -1)">
