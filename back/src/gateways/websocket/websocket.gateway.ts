@@ -194,9 +194,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('CreateGame')
-    createGame(client: Socket, payload: CreateGameInterface)
-    {
-        this.gameService.createGame(payload)
+    async createGame(client: Socket, payload: CreateGameInterface) {
+        await this.gameService.createGame(payload)
         return {
             msg: "Game successfully created",
             type: "info"
