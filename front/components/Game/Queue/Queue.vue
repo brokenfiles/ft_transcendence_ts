@@ -21,6 +21,11 @@ import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import QueueSlot from "~/components/Game/Queue/QueueSlot.vue";
 import {Socket} from "vue-socket.io-extended";
 
+interface GameStartingInterface {
+  players: UserInterface[],
+  uuid: string
+}
+
 @Component({
   components: {
     QueueSlot
@@ -74,11 +79,11 @@ export default class Queue extends Vue {
   }
 
   @Socket("gameStarting")
-  gameStartingEvent (players: UserInterface[]) {
-    if (players.length === 2 && this.queued_players.length === 2) {
-      this.$toast.info(`Match against ${players[0].display_name} and ${players[1].display_name} starting...`)
+  gameStartingEvent (gameStartingOptions: GameStartingInterface) {
+    if (gameStartingOptions.players.length === 2 && this.queued_players.length === 2) {
+      this.$toast.info(`Match against ${gameStartingOptions.players[0].display_name} and ${gameStartingOptions.players[1].display_name} starting...`)
       setTimeout(() => {
-        this.$router.push('/game')
+        this.$router.push(`/game/${gameStartingOptions.uuid}`)
       }, 3000)
     }
   }

@@ -7,15 +7,30 @@ import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {Game} from "./entity/game.entity";
 import {UsersService} from "../users/users.service";
+import {User} from "../users/entities/user.entity";
+import {GameState} from "./enums/game-state.enum";
 
 @Injectable()
 export class GameService {
 
-    game: GameClass
+    games: GameClass[]
 
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
                 private schedulerRegistry: SchedulerRegistry,
                 private userService: UsersService) {}
+
+    /**
+     * Init the game and return the uuid
+     * @param {User[]} players
+     */
+    async initGame (players: User[]) : Promise<string> {
+        let game = this.gameRepository.create()
+        game.state = GameState.CREATING
+        game.player1 = players[0]
+        game.player2 = players[1]
+
+        return (await this.gameRepository.save(game)).uuid
+    }
 
     async createGame(payload: CreateGameInterface) {
 
@@ -28,11 +43,11 @@ export class GameService {
         game.player2 = p2
         game = await this.gameRepository.save(game)
 
-        this.game = new GameClass(payload)
+        this.games.push(new GameClass(payload))
     }
 
     updatePadCoordinates(padPayload: PadInterface) {
-        this.game.rightPad.setCoordinates(padPayload)
+        // this.game.rightPad.setCoordinates(padPayload)
     }
 
     userIsReady(client: Socket, state: boolean) : boolean {
@@ -40,10 +55,10 @@ export class GameService {
         if (state === true) {
             const interval = setInterval(() => {
 
-                if (this.game.ball.updatePosition(this.game))
-                {
-                    client.emit("BallHit", this.game.ball)
-                }
+                // if (this.game.ball.updatePosition(this.game))
+                // {
+                //     client.emit("BallHit", this.game.ball)
+                // }
             }, 20);
             this.schedulerRegistry.addInterval("game", interval);
         }

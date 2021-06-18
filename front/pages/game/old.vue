@@ -23,7 +23,7 @@ interface Keys {
 }
 
 @Component({})
-export default class Game extends Vue {
+export default class Old extends Vue {
 
 	context!: CanvasRenderingContext2D | null
 	canvas!: HTMLCanvasElement

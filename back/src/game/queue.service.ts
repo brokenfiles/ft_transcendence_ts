@@ -2,12 +2,14 @@ import {Injectable} from "@nestjs/common";
 import {Socket} from "socket.io";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
 import {UsersService} from "../users/users.service";
+import {GameService} from "./game.service";
 
 @Injectable()
 export class QueueService {
 
     constructor(private websocketService: WebsocketService,
-                private userService: UsersService) {
+                private userService: UsersService,
+                private gameService: GameService) {
     }
 
     queue: number[] = []
@@ -34,10 +36,13 @@ export class QueueService {
 
             if (this.queue.length === 2) {
                 const players = await Promise.all(this.queue.map(userId => this.userService.findOne(userId)))
+                const uuid = await this.gameService.initGame(players)
                 for (const clientId of this.queue) {
                     const client = this.websocketService.getClient(clientId)
                     if (client) {
-                        client.socket.emit('gameStarting', players)
+                        client.socket.emit('gameStarting', {
+                            players, uuid
+                        })
                     }
                 }
                 this.queue = []
