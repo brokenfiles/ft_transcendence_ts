@@ -69,7 +69,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         this.websocketService.sendOnlineClientsToClient(client)
     }
 
-   async handleDisconnect(client: Socket) {
+    async handleDisconnect(client: Socket) {
         let sub
         this.logger.log(`Client ${client.id} disconnected`);
         await this.queueService.removeFromQueue(client)
@@ -202,15 +202,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('clientReadyToPlay')
-    async clientReadyToPlay(client: Socket) {
-        const {sub} = (client.handshake as any).user
-        return this.gameService.PlayersAreReady(sub);
-    }
-
-
-    @UseGuards(WsJwtAuthGuard)
-    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedQueue')
     async joinQueue(client: Socket) {
         await this.queueService.addPlayerToQueue(client)
@@ -240,6 +231,5 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     }
 
 }
-
 
 

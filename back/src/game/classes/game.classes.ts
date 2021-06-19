@@ -92,6 +92,15 @@ export class GameClass {
         this.playersReady = []
     }
 
+    public resetGame()
+    {
+        this.ball = new Ball()
+        this.rightPad = new Pad("right")
+        this.leftPad = new Pad("left")
+        this.playersReady = []
+
+    }
+
     public addReady (player: User) {
         this.playersReady.push(player)
     }

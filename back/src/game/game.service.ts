@@ -59,6 +59,8 @@ export class GameService {
     async clientReadyToPlay(sub: number) {
         const game = this.getGameByUserId(sub)
         if (game) {
+
+
             let user = null
             if (game.players[0].id === sub)
                 user = game.players[0]
@@ -77,58 +79,52 @@ export class GameService {
     }
 
     private updateGame (game: GameClass) {
-        let ball = game.ball
         let updated = false
-        ball.coordinates.x += ball.xSpeed
-        ball.coordinates.y += ball.ySpeed
-        if (ball.coordinates.y <= 0 || ball.coordinates.y + 10 >= 480) {
-            ball.ySpeed *= -1
+        game.ball.coordinates.x += game.ball.xSpeed
+        game.ball.coordinates.y += game.ball.ySpeed
+        if (game.ball.coordinates.y <= 0 || game.ball.coordinates.y + 10 >= 480) {
+            game.ball.ySpeed *= -1
             updated = true
         }
-        if (ball.coordinates.x <= 0 || ball.coordinates.x + 10 >= 640) {
-            ball.xSpeed *= -1
+        if (game.ball.coordinates.x <= 0 || game.ball.coordinates.x + 10 >= 640) {
+            let winner
+            if (game.ball.coordinates.x <= 0)
+                winner = game.players[0]
+            else
+                winner = game.players[1]
+            game.ball.xSpeed *= -1
             updated = true
-            // remove xSpeed *= -1
-            // player won!
+            this.websocketService.getClient(game.players[0].id).socket.emit("GameStop", winner)
+            this.websocketService.getClient(game.players[1].id).socket.emit("GameStop", winner)
+            this.schedulerRegistry.deleteInterval(game.uuid);
+            game.resetGame()
         }
 
         //collisions with pad
-        // const pads = [game.leftPad, game.rightPad]
-        // for (const pad of pads) {
-        //     if (ball.coordinates.x >= pad.coordinates.x + pad.width && ball.coordinates.y >= pad.coordinates.y && ball.coordinates.y + pad.height <= pad.coordinates.y + pad.height) {
-        //         ball.xSpeed *= -1
-        //         updated = true
-        //     }
-        // }
+
+        if (game.ball.coordinates.x >= game.rightPad.coordinates.x - 10 && game.ball.coordinates.x <= game.rightPad.coordinates.x &&
+            game.ball.coordinates.y >= game.rightPad.coordinates.y && game.ball.coordinates.y <= game.rightPad.coordinates.y + 74)
+        {
+            updated = true
+            game.ball.xSpeed *= -1
+        }
+
+        if (game.ball.coordinates.x - 10 <= game.leftPad.coordinates.x && game.ball.coordinates.x >= game.leftPad.coordinates.x &&
+            game.ball.coordinates.y >= game.leftPad.coordinates.y && game.ball.coordinates.y <= game.leftPad.coordinates.y + 74)
+        {
+            updated = true
+            game.ball.xSpeed *= -1
+        }
 
         if (updated) {
             for (const player of game.players) {
-                // envoyer aux users la nouvelle position du pad
-                this.websocketService.getClient(player.id).socket.emit('ballUpdated', ball)
+                this.websocketService.getClient(player.id).socket.emit('ballUpdated', game.ball)
+                this.websocketService.getClient(player.id).socket.emit('padUpdated', {
+                    rightPad: game.rightPad,
+                    leftPad: game.leftPad
+                })
             }
         }
-    }
-
-
-    userIsReady(client: Socket, state: boolean) : boolean {
-
-        if (state === true) {
-            const interval = setInterval(() => {
-
-                // if (this.game.ball.updatePosition(this.game))
-                // {
-                //     client.emit("BallHit", this.game.ball)
-                // }
-            }, 20);
-            this.schedulerRegistry.addInterval("game", interval);
-        }
-        else
-        {
-            this.schedulerRegistry.deleteInterval("game");
-        }
-        const intervals = this.schedulerRegistry.getIntervals();
-        console.log(intervals)
-        return state
     }
 
     getGameByUUID(uuid: string) : GameClass
