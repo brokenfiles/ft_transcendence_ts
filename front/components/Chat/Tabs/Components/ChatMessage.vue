@@ -13,7 +13,7 @@
     <p :class="classes" @mouseover="showMessageSendingDate = true" @mouseleave="showMessageSendingDate = false">
       {{ message.text }}
     </p>
-    <span class="text-gray-500 text-sm absolute bg-primary block z-50 -mt-6" v-if="showMessageSendingDate">
+    <span :class="messageDateClasses" class="text-gray-500 text-sm absolute bg-primary block z-50 -mt-6" v-if="showMessageSendingDate">
       <client-only>
         <timeago :datetime="message.created_at">{{ message.created_at }}</timeago>
       </client-only>
@@ -60,13 +60,18 @@ export default class ChatMessage extends Vue {
 
   get classes(): string[] {
     if (this.previousMessageOwnerID !== this.message.owner.id && this.authenticatedId !== this.message.owner.id)
-      return ['speech-bubble-left pl-2 w-max pr-2 order-2 ml-2']
+      return ['speech-bubble-left pl-2 w-max pr-2 ml-2']
     else if (this.previousMessageOwnerID !== this.message.owner.id && this.authenticatedId === this.message.owner.id)
-      return ['speech-bubble-right text-right pl-2 pr-2 w-max ml-auto order-2 ml-2']
+      return ['speech-bubble-right text-right pl-2 pr-2 w-max ml-auto ml-2']
     else if (this.previousMessageOwnerID === this.message.owner.id && this.authenticatedId === this.message.owner.id)
       return ['speech-bubble-right-without-triangle pl-2 text-right pr-2 w-max ml-auto']
     else if (this.previousMessageOwnerID === this.message.owner.id && this.authenticatedId !== this.message.owner.id)
       return ['speech-bubble-left-without-triangle pl-2 w-max pr-2']
+  }
+
+  get messageDateClasses(): string[] {
+    if (this.authenticatedId !== this.message.owner.id)
+      return ['right-0']
   }
 
 }
