@@ -20,6 +20,7 @@ import {
 import {Socket} from "vue-socket.io-extended";
 import {BallInterface} from "~/utils/interfaces/game/ball.interface";
 import {GameState} from "~/utils/enums/game-state.enum";
+import {GameFinishedInterface} from "../../../../back/src/game/interfaces/game.interfaces";
 
 @Component({})
 export default class Pong extends Vue {
@@ -106,12 +107,7 @@ export default class Pong extends Vue {
 	}
 
   updateBallPosition() {
-    let ball = this.match.ball
-    // ball.coordinates.x += ball.xSpeed
-    // ball.coordinates.y += ball.ySpeed
-    // if (ball.coordinates.y <= 0 || ball.coordinates.y + 10 >= 480)
-    //   ball.ySpeed *= -1
-    this.printRectangle(ball.coordinates, 10, 10, "white")
+    this.printRectangle(this.match.ball.coordinates, 10, 10, "white")
   }
 
 	changePadPosition(way: string) {
@@ -206,6 +202,14 @@ export default class Pong extends Vue {
 	@Socket("stateUpdated")
   stateUpdatedEvent(newState: GameState) {
     this.game_state = newState
+  }
+
+  @Socket("gameFinished")
+  gameFinishedEvent(gameFinishedEvent: GameFinishedInterface) {
+    this.$toast.success(`${gameFinishedEvent.winner.display_name} won the game! gros jéjé`)
+    window.setTimeout(() => {
+      this.$router.push('/')
+    }, 2000)
   }
 
 	/** Computed */

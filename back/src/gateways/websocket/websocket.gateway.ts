@@ -72,12 +72,10 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         let sub
         this.logger.log(`Client ${client.id} disconnected`);
         await this.queueService.removeFromQueue(client)
-        this.gameService.clientLeave(client)
+        this.gameService.clientLeft(client)
         if ((sub = this.websocketService.removeClient(client.id, this.server)) !== -1) {
             this.logger.log(`User with id ${sub} is now offline`)
         }
-
-
     }
 
     /************************ CHAT EVENTS PART ************************/
@@ -222,6 +220,13 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     async clientReadyToPlay(client: Socket) {
         const {sub} = (client.handshake as any).user
         await this.gameService.clientReadyToPlay(sub)
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientLeftGame')
+    async clientLeft(client: Socket) {
+        this.gameService.clientLeft(client)
     }
 
     @UseGuards(WsJwtAuthGuard)

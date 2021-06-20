@@ -7,7 +7,7 @@ import {SchedulerRegistry} from "@nestjs/schedule";
 
 export const GAME_CONSTANTS = {
     tps: 20,
-    max_points: 500,
+    max_points: 1,
     window: {
         height: 480,
         width: 640
@@ -83,7 +83,6 @@ export class Ball {
         this.color = 0xfff
         this.xSpeed = Ball.randomIntFromInterval(3, 4) * xWay
         this.ySpeed = Ball.randomIntFromInterval(1, 3) * yWay
-        console.log(this)
     }
 
     public updatePosition(game: GameClass) {
@@ -100,7 +99,8 @@ export class Ball {
         this.coordinates.x += this.xSpeed
         this.coordinates.y += this.ySpeed
 
-        this.emitPosition(game)
+        if (game.state === GameState.IN_GAME)
+            this.emitPosition(game)
     }
 
     private yCollisions (coordinates: Coordinates) {
@@ -170,6 +170,7 @@ export class GameClass {
     rightPad: Pad
     leftPad: Pad
     players: User[]
+    spectators: User[]
     playersReady: User[]
     points: any
     websocketService: WebsocketService
@@ -189,6 +190,7 @@ export class GameClass {
         this.gameHeight = GAME_CONSTANTS.window.height
         this.gameWith = GAME_CONSTANTS.window.width
         this.players = players
+        this.spectators = []
         this.playersReady = []
         this.points = {}
     }
@@ -220,7 +222,8 @@ export class GameClass {
     }
 
     public stopGame (winner: User) {
-        this.schedulerRegistry.deleteInterval(this.uuid)
+        if (this.schedulerRegistry.getIntervals().includes(this.uuid))
+            this.schedulerRegistry.deleteInterval(this.uuid)
         this.setState(GameState.FINISHED)
         this.sendEventToPlayers(`gameFinished`, { winner, points: this.points })
     }
@@ -245,12 +248,13 @@ export class GameClass {
     /**
      * Mark a point
      * @param winner
+     * @param points
      */
-    public markPoint(winner: User) {
+    public markPoint(winner: User, points: number = 1) {
         this.setState(GameState.PAUSED)
         this.sendEventToPlayers('pointMarked', { winner, points: this.points[winner.id] })
         this.reset()
-        this.points[winner.id] ++
+        this.points[winner.id] += points
         if (this.points[winner.id] >= GAME_CONSTANTS.max_points) {
             // stop the game
             this.stopGame(winner)
@@ -274,6 +278,15 @@ export class GameClass {
             rightPad: this.rightPad,
             ball: this.ball
         })
+    }
+
+    public clientLeft (sub: number) {
+        const user = this.findUserById(sub)
+        // check if the player is one of the two players
+        if (user !== undefined && this.players.length === 2) {
+            const winner = this.players.filter((p) => p.id !== user.id)[0]
+            this.markPoint(winner, GAME_CONSTANTS.max_points - this.points[winner.id])
+        }
     }
 
     public setPlayerReady (sub: number) {
@@ -303,7 +316,8 @@ export class GameClass {
      * This function sends a event and payload to all clients
      */
     public sendEventToPlayers (event: string, payload: any = null, skipSub: number = -1) {
-        for (const player of this.players) {
+        const users = [...this.players, ...this.spectators]
+        for (const player of users) {
             const client = this.websocketService.getClient(player.id)
             if (client !== undefined && (skipSub === -1 || player.id !== skipSub)) {
                 client.socket.emit(event, payload)

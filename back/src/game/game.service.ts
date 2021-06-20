@@ -49,75 +49,6 @@ export class GameService {
         }
     }
 
-    private updateGame (game: GameClass) {
-        let updated = false
-        game.ball.coordinates.x += game.ball.xSpeed
-        game.ball.coordinates.y += game.ball.ySpeed
-        if (game.ball.coordinates.y <= 0 || game.ball.coordinates.y + 10 >= 480) {
-            game.ball.ySpeed *= -1
-            updated = true
-        }
-        if (game.ball.coordinates.x <= 0 || game.ball.coordinates.x + 10 >= 640) {
-            let winner
-            if (game.ball.coordinates.x <= 0)
-                winner = game.players[1]
-            else
-                winner = game.players[0]
-            game.ball.xSpeed *= -1
-            this.websocketService.getClient(game.players[0].id).socket.emit("GameStop", winner)
-            this.websocketService.getClient(game.players[1].id).socket.emit("GameStop", winner)
-            this.schedulerRegistry.deleteInterval(game.uuid);
-            // game.resetGame()
-            for (const player of game.players) {
-                this.websocketService.getClient(player.id).socket.emit('ballUpdated', game.ball)
-                this.websocketService.getClient(player.id).socket.emit('padUpdated', {
-                    rightPad: game.rightPad,
-                    leftPad: game.leftPad
-                })
-            }
-        }
-
-        //collisions with pad
-
-        if (game.ball.coordinates.x >= game.rightPad.coordinates.x - 10 && game.ball.coordinates.x <= game.rightPad.coordinates.x &&
-            game.ball.coordinates.y >= game.rightPad.coordinates.y && game.ball.coordinates.y <= game.rightPad.coordinates.y + 74)
-        {
-            game.ball.xSpeed *= -1
-            if (game.ball.xSpeed < 0) {
-                game.ball.xSpeed -= 0.3
-            } else {
-                game.ball.xSpeed += 0.3
-            }
-            if (game.ball.ySpeed < 0) {
-                game.ball.ySpeed -= 0.3
-            } else {
-                game.ball.ySpeed += 0.3
-            }
-        }
-
-        if (game.ball.coordinates.x - 10 <= game.leftPad.coordinates.x && game.ball.coordinates.x >= game.leftPad.coordinates.x &&
-            game.ball.coordinates.y >= game.leftPad.coordinates.y && game.ball.coordinates.y <= game.leftPad.coordinates.y + 74)
-        {
-            game.ball.xSpeed *= -1
-            if (game.ball.xSpeed < 0) {
-                game.ball.xSpeed -= 0.3
-            } else {
-                game.ball.xSpeed += 0.3
-            }
-            if (game.ball.ySpeed < 0) {
-                game.ball.ySpeed -= 0.3
-            } else {
-                game.ball.ySpeed += 0.3
-            }
-        }
-
-        // if (updated) {
-            for (const player of game.players) {
-                this.websocketService.getClient(player.id).socket.emit('ballUpdated', game.ball)
-            }
-        // }
-    }
-
     getGameByUUID(uuid: string) : GameClass | null
     {
         for (let game of this.games)
@@ -152,30 +83,15 @@ export class GameService {
             this.games.splice(index, 1)
     }
 
-    clientLeave(client: Socket) {
+    clientLeft(client: Socket) {
         const clientIdx = this.websocketService.clients.map(c => c.id).indexOf(client.id)
         if (clientIdx !== -1) {
             const client = this.websocketService.clients[clientIdx]
             const sub = client.userId
 
-            let game
-            if ((game = this.getGameByUserId(sub)))
-            {
-                let winner
-                if (game.players[0].id === sub)
-                    winner = game.players[1]
-                else
-                    winner = game.players[0]
-
-                this.websocketService.getClient(winner.id).socket.emit("GameStop", winner)
-                console.log(this.schedulerRegistry.getIntervals())
-                // this.schedulerRegistry.deleteInterval(game.uuid);
-                game.resetGame()
-                this.websocketService.getClient(winner.id).socket.emit('ballUpdated', game.ball)
-                this.websocketService.getClient(winner.id).socket.emit('padUpdated', {
-                    rightPad: game.rightPad,
-                    leftPad: game.leftPad
-                })
+            let game = this.getGameByUserId(sub)
+            if (game) {
+                game.clientLeft(sub)
                 this.removeGameFromGameArray(game.uuid)
             }
         }

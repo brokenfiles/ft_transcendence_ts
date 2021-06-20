@@ -35,3 +35,8 @@ export interface CreateGameInterface {
     leftPad: PadInterface
     ball: BallInterface
 }
+
+export interface GameFinishedInterface {
+    winner: User
+    points: any
+}
