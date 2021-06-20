@@ -9,7 +9,6 @@ import {
 import {Logger, UseFilters, UseGuards} from "@nestjs/common";
 import {Server, Socket} from 'socket.io'
 import {WebsocketService} from "./websocket.service";
-import {ClientInterface} from "./interfaces/client.interface";
 import {WsJwtAuthGuard} from "../../auth/ws-jwt-auth.guard";
 import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFilter";
 import {ChatsService} from "../../chat/chats.service";
@@ -20,9 +19,7 @@ import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
 import {GameService} from "../../game/game.service";
-import {CreateGameInterface, PadInterface} from "../../game/interfaces/game.interfaces";
 import {QueueService} from "../../game/queue.service";
-import {UserInterface} from "../../game/interfaces/queue.iterfaces";
 import {JwtService} from "@nestjs/jwt";
 import {ClientJoinMatchInterface} from "./interfaces/client-join-match.interface";
 import {Coordinates} from "../../game/classes/game.classes";
@@ -75,9 +72,12 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         let sub
         this.logger.log(`Client ${client.id} disconnected`);
         await this.queueService.removeFromQueue(client)
+        this.gameService.clientLeave(client)
         if ((sub = this.websocketService.removeClient(client.id, this.server)) !== -1) {
             this.logger.log(`User with id ${sub} is now offline`)
         }
+
+
     }
 
     /************************ CHAT EVENTS PART ************************/
@@ -105,7 +105,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
             }
         }
     }
-
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
@@ -199,7 +198,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientJoinedMatch')
     async ClientJoinGame(client: Socket, payload: ClientJoinMatchInterface) {
-        return this.gameService.clientJoinGame(client, payload);
+        return this.gameService.getGameBySocketAndUUID(client, payload);
     }
 
     @UseGuards(WsJwtAuthGuard)

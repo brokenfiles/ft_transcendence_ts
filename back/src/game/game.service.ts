@@ -39,12 +39,12 @@ export class GameService {
         const game = this.getGameByUserId(sub)
         if (game) {
             let pad = null
-            if (game.players[0].id === sub) {
+            if (game.players[0].id === sub)
                 pad = game.rightPad
-            } else if (game.players[1].id === sub) {
+            else if (game.players[1].id === sub)
                 pad = game.leftPad
-            }
-            if (pad) {
+            if (pad)
+            {
                 pad.setCoordinates(coordinates)
                 for (const player of game.players) {
                     if (player.id !== sub) {
@@ -64,7 +64,8 @@ export class GameService {
                 user = game.players[0]
             else if (game.players[1].id === sub)
                 user = game.players[1]
-            if (user) {
+            if (user)
+            {
                 if (!game.playersReady.includes(user)) {
                     game.addReady(user)
                     if (game.playersReady.length === 2) {
@@ -93,11 +94,17 @@ export class GameService {
             else
                 winner = game.players[0]
             game.ball.xSpeed *= -1
-            updated = true
             this.websocketService.getClient(game.players[0].id).socket.emit("GameStop", winner)
             this.websocketService.getClient(game.players[1].id).socket.emit("GameStop", winner)
             this.schedulerRegistry.deleteInterval(game.uuid);
             game.resetGame()
+            for (const player of game.players) {
+                this.websocketService.getClient(player.id).socket.emit('ballUpdated', game.ball)
+                this.websocketService.getClient(player.id).socket.emit('padUpdated', {
+                    rightPad: game.rightPad,
+                    leftPad: game.leftPad
+                })
+            }
         }
 
         //collisions with pad
@@ -116,15 +123,11 @@ export class GameService {
             game.ball.xSpeed *= -1
         }
 
-        if (updated) {
+        // if (updated) {
             for (const player of game.players) {
                 this.websocketService.getClient(player.id).socket.emit('ballUpdated', game.ball)
-                this.websocketService.getClient(player.id).socket.emit('padUpdated', {
-                    rightPad: game.rightPad,
-                    leftPad: game.leftPad
-                })
             }
-        }
+        // }
     }
 
     getGameByUUID(uuid: string) : GameClass
@@ -146,7 +149,45 @@ export class GameService {
         return null
     }
 
-    clientJoinGame(client: Socket, payload: ClientJoinMatchInterface): GameClass | null {
-        return this.getGameByUUID(payload.uuid)
+    getGameBySocketAndUUID(client: Socket, payload: ClientJoinMatchInterface): GameClass | null {
+        const {sub} = (client.handshake as any).user
+        const game = this.getGameByUUID(payload.uuid)
+
+        if (game && game.players.map((u) => u.id).includes(sub))
+        {
+            return game
+        }
+        return null
+    }
+
+    removeGameFromGameArray(uuid: string)
+    {
+        const index = this.games.map((game) => game.uuid).indexOf(uuid)
+        if (index !== -1)
+            this.games.splice(index, 1)
+    }
+
+    clientLeave(client: Socket) {
+        const {sub} = (client.handshake as any).user
+
+        let game
+        if ((game = this.getGameByUserId(sub)))
+        {
+            let winner
+            if (game.players[0].id === sub)
+                winner = game.players[1]
+            else
+                winner = game.players[0]
+
+            this.websocketService.getClient(winner.id).socket.emit("GameStop", winner)
+            this.schedulerRegistry.deleteInterval(game.uuid);
+            game.resetGame()
+            this.websocketService.getClient(winner.id).socket.emit('ballUpdated', game.ball)
+            this.websocketService.getClient(winner.id).socket.emit('padUpdated', {
+                rightPad: game.rightPad,
+                leftPad: game.leftPad
+            })
+            this.removeGameFromGameArray(game.uuid)
+        }
     }
 }

@@ -135,7 +135,7 @@ export default class Pong extends Vue {
 		this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
 
 		// if game is started
-		this.updateBallPosition()
+		// this.updateBallPosition()
 	}
 
 	/** Sockets */
