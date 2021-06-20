@@ -1,11 +1,9 @@
-import {BallInterface, CreateGameInterface, PadInterface} from "../interfaces/game.interfaces";
 import {User} from "../../users/entities/user.entity";
 
 export interface Coordinates {
     x: number
     y: number
 }
-
 
 export class Pad {
     coordinates: Coordinates
@@ -52,8 +50,8 @@ export class Ball {
         this.w = 10
         this.h = 10
         this.color = 0xfff
-        this.xSpeed = 3
-        this.ySpeed = -3
+        this.xSpeed = 4
+        this.ySpeed = -4
     }
 
     updatePosition(game: GameClass) : boolean {
@@ -98,7 +96,6 @@ export class GameClass {
         this.rightPad = new Pad("right")
         this.leftPad = new Pad("left")
         this.playersReady = []
-
     }
 
     public addReady (player: User) {
