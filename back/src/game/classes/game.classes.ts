@@ -8,6 +8,7 @@ import {SchedulerRegistry} from "@nestjs/schedule";
 export const GAME_CONSTANTS = {
     tps: 20,
     max_points: 10,
+    starting_time: 3000,
     window: {
         height: 480,
         width: 640
@@ -101,7 +102,7 @@ export class Ball {
         if (this.padsCollisions(nextCoordinates, game))
             // this.increaseBallSpeed()
 
-        this.coordinates.x += this.xSpeed
+            this.coordinates.x += this.xSpeed
         this.coordinates.y += this.ySpeed
 
         if (game.state === GameState.IN_GAME)
@@ -186,11 +187,11 @@ export class Ball {
 export class GameClass {
 
     /** Variables */
-    lastMarkedPoint: number
     state: GameState
     uuid: string
     gameWith: number
     gameHeight: number
+    lastMarkedPoint: number
     ball: Ball
     rightPad: Pad
     leftPad: Pad
@@ -242,7 +243,7 @@ export class GameClass {
      */
     public startGame () {
         this.sendEventToPlayers(`gameStarted`)
-        this.setState(GameState.IN_GAME)
+        setTimeout(() => this.setState(GameState.IN_GAME), GAME_CONSTANTS.starting_time + 1000)
         const intervalId = setInterval(() => this.gameLoop(this), GAME_CONSTANTS.tps)
         this.schedulerRegistry.addInterval(this.uuid, intervalId)
     }

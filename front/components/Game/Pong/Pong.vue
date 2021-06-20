@@ -54,6 +54,7 @@ export default class Pong extends Vue {
 		if (this.isAPlayer) {
 			document.addEventListener('keydown', this.keyDownEvent)
 			document.addEventListener('keyup', this.keyUpEvent)
+      document.addEventListener('mousemove', this.mouseMoveEvent)
 		}
 
 		// avert the backend that the player is ready to play
@@ -69,6 +70,27 @@ export default class Pong extends Vue {
 		}
 		clearInterval(this.loop_id)
 	}
+
+	mouseMoveEvent(event: MouseEvent) {
+	  if (this.game_state === GameState.IN_GAME) {
+      let match = this.match as any
+      let pad = match[this.userPad] as Pad
+      if (this.canvas) {
+        let rect = this.canvas.getBoundingClientRect();
+        const mouseCoordinates = {
+          y: event.clientY - rect.top
+        }
+        if (mouseCoordinates.y >= 0 && mouseCoordinates.y + pad.height <= this.match.gameHeight) {
+          this.clearRect(pad.coordinates, pad.width, pad.height)
+          pad.coordinates.y = mouseCoordinates.y
+          this.$socket.client.emit(`clientUpdatedPadPosition`, pad.coordinates)
+          this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
+          this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
+        }
+
+      }
+    }
+  }
 
 	/**
 	 * When a user press on a key
@@ -146,6 +168,13 @@ export default class Pong extends Vue {
 	/** Sockets */
   @Socket("gameStarted")
   gameStartedEvent () {
+    let seconds = 3
+    const countdown = window.setInterval(() => {
+      this.$toast.info(`Game staring in ${seconds --} seconds...`)
+      if (seconds === 0) {
+        window.clearInterval(countdown)
+      }
+    }, 1000)
     if (this.loop_id !== -1) {
       window.clearInterval(this.loop_id)
     }
