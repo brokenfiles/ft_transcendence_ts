@@ -2,7 +2,7 @@ import {Injectable} from "@nestjs/common";
 import {Coordinates, GameClass} from "./classes/game.classes";
 import {Socket} from "socket.io";
 import {SchedulerRegistry} from "@nestjs/schedule";
-import {CreateGameInterface, PadInterface} from "./interfaces/game.interfaces";
+import {CreateGameInterface, MatchInterface, PadInterface} from "./interfaces/game.interfaces";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {Game} from "./entity/game.entity";
@@ -27,55 +27,25 @@ export class GameService {
      * @param {User[]} players
      */
     async initGame (players: User[]) : Promise<string> {
-        let game = this.gameRepository.create()
-        game.state = GameState.CREATING
-        game.players = players
-        const currGame = await this.gameRepository.save(game)
-        this.games.push(new GameClass(currGame.uuid, game.players))
-        return currGame.uuid
-    }
-
-    updatePadCoordinates(sub: number, coordinates: Coordinates) {
-        const game = this.getGameByUserId(sub)
-        if (game) {
-            let pad = null
-            if (game.players[0].id === sub)
-                pad = game.rightPad
-            else if (game.players[1].id === sub)
-                pad = game.leftPad
-            if (pad)
-            {
-                pad.setCoordinates(coordinates)
-                for (const player of game.players) {
-                    if (player.id !== sub) {
-                        // envoyer aux users la nouvelle position du pad
-                        this.websocketService.getClient(player.id).socket.emit('otherPlayerPadUpdated', coordinates)
-                    }
-                }
-            }
-        }
+        const game = new GameClass(players, this.websocketService,
+            this.gameRepository, this.schedulerRegistry)
+        await game.init()
+        // save the game in the database to get the uuid
+        this.games.push(game)
+        return (game.uuid)
     }
 
     async clientReadyToPlay(sub: number) {
         const game = this.getGameByUserId(sub)
         if (game) {
-            let user = null
-            if (game.players[0].id === sub)
-                user = game.players[0]
-            else if (game.players[1].id === sub)
-                user = game.players[1]
-            if (user)
-            {
-                if (!game.playersReady.includes(user)) {
-                    game.addReady(user)
-                    if (game.playersReady.length === 2) {
-                        for (const player of game.players)
-                            this.websocketService.getClient(player.id).socket.emit('gameStarted')
-                        const interval = setInterval(() => this.updateGame(game), 20)
-                        this.schedulerRegistry.addInterval(game.uuid, interval);
-                    }
-                }
-            }
+            game.setPlayerReady(sub)
+        }
+    }
+
+    updatePadCoordinates(sub: number, coordinates: Coordinates) {
+        const game = this.getGameByUserId(sub)
+        if (game) {
+            game.updatePad(sub, coordinates)
         }
     }
 
@@ -97,7 +67,7 @@ export class GameService {
             this.websocketService.getClient(game.players[0].id).socket.emit("GameStop", winner)
             this.websocketService.getClient(game.players[1].id).socket.emit("GameStop", winner)
             this.schedulerRegistry.deleteInterval(game.uuid);
-            game.resetGame()
+            // game.resetGame()
             for (const player of game.players) {
                 this.websocketService.getClient(player.id).socket.emit('ballUpdated', game.ball)
                 this.websocketService.getClient(player.id).socket.emit('padUpdated', {
@@ -112,15 +82,33 @@ export class GameService {
         if (game.ball.coordinates.x >= game.rightPad.coordinates.x - 10 && game.ball.coordinates.x <= game.rightPad.coordinates.x &&
             game.ball.coordinates.y >= game.rightPad.coordinates.y && game.ball.coordinates.y <= game.rightPad.coordinates.y + 74)
         {
-            updated = true
             game.ball.xSpeed *= -1
+            if (game.ball.xSpeed < 0) {
+                game.ball.xSpeed -= 0.3
+            } else {
+                game.ball.xSpeed += 0.3
+            }
+            if (game.ball.ySpeed < 0) {
+                game.ball.ySpeed -= 0.3
+            } else {
+                game.ball.ySpeed += 0.3
+            }
         }
 
         if (game.ball.coordinates.x - 10 <= game.leftPad.coordinates.x && game.ball.coordinates.x >= game.leftPad.coordinates.x &&
             game.ball.coordinates.y >= game.leftPad.coordinates.y && game.ball.coordinates.y <= game.leftPad.coordinates.y + 74)
         {
-            updated = true
             game.ball.xSpeed *= -1
+            if (game.ball.xSpeed < 0) {
+                game.ball.xSpeed -= 0.3
+            } else {
+                game.ball.xSpeed += 0.3
+            }
+            if (game.ball.ySpeed < 0) {
+                game.ball.ySpeed -= 0.3
+            } else {
+                game.ball.ySpeed += 0.3
+            }
         }
 
         // if (updated) {
@@ -130,12 +118,13 @@ export class GameService {
         // }
     }
 
-    getGameByUUID(uuid: string) : GameClass
+    getGameByUUID(uuid: string) : GameClass | null
     {
         for (let game of this.games)
         {
-            if (game.uuid === uuid)
+            if (game.uuid === uuid) {
                 return game
+            }
         }
         return null
     }
@@ -149,15 +138,11 @@ export class GameService {
         return null
     }
 
-    getGameBySocketAndUUID(client: Socket, payload: ClientJoinMatchInterface): GameClass | null {
-        const {sub} = (client.handshake as any).user
+    getGameBySocketAndUUID(client: Socket, payload: ClientJoinMatchInterface): MatchInterface | null {
         const game = this.getGameByUUID(payload.uuid)
-
-        if (game && game.players.map((u) => u.id).includes(sub))
-        {
-            return game
-        }
-        return null
+        if (!game)
+            return null
+        return game.serialize()
     }
 
     removeGameFromGameArray(uuid: string)
@@ -168,26 +153,31 @@ export class GameService {
     }
 
     clientLeave(client: Socket) {
-        const {sub} = (client.handshake as any).user
+        const clientIdx = this.websocketService.clients.map(c => c.id).indexOf(client.id)
+        if (clientIdx !== -1) {
+            const client = this.websocketService.clients[clientIdx]
+            const sub = client.userId
 
-        let game
-        if ((game = this.getGameByUserId(sub)))
-        {
-            let winner
-            if (game.players[0].id === sub)
-                winner = game.players[1]
-            else
-                winner = game.players[0]
+            let game
+            if ((game = this.getGameByUserId(sub)))
+            {
+                let winner
+                if (game.players[0].id === sub)
+                    winner = game.players[1]
+                else
+                    winner = game.players[0]
 
-            this.websocketService.getClient(winner.id).socket.emit("GameStop", winner)
-            this.schedulerRegistry.deleteInterval(game.uuid);
-            game.resetGame()
-            this.websocketService.getClient(winner.id).socket.emit('ballUpdated', game.ball)
-            this.websocketService.getClient(winner.id).socket.emit('padUpdated', {
-                rightPad: game.rightPad,
-                leftPad: game.leftPad
-            })
-            this.removeGameFromGameArray(game.uuid)
+                this.websocketService.getClient(winner.id).socket.emit("GameStop", winner)
+                console.log(this.schedulerRegistry.getIntervals())
+                // this.schedulerRegistry.deleteInterval(game.uuid);
+                game.resetGame()
+                this.websocketService.getClient(winner.id).socket.emit('ballUpdated', game.ball)
+                this.websocketService.getClient(winner.id).socket.emit('padUpdated', {
+                    rightPad: game.rightPad,
+                    leftPad: game.leftPad
+                })
+                this.removeGameFromGameArray(game.uuid)
+            }
         }
     }
 }

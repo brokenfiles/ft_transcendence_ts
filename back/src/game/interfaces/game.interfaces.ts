@@ -1,9 +1,20 @@
-import {Coordinates} from "../classes/game.classes";
+import {Ball, Coordinates, Pad} from "../classes/game.classes";
+import {User} from "../../users/entities/user.entity";
 
 export interface PadInterface {
     coordinates: Coordinates
     w: number
     h: number
+}
+
+export interface MatchInterface {
+    uuid: string
+    gameWith: number
+    gameHeight: number
+    players: User[]
+    ball: Ball
+    rightPad: Pad
+    leftPad: Pad
 }
 
 export interface BallInterface {

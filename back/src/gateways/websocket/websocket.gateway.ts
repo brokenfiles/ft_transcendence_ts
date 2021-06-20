@@ -192,14 +192,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         await this.chatsService.changeChannelProperties(client, sub, payload)
     }
 
-    /************************ GAME EVENTS PART ************************/
 
-    @UseGuards(WsJwtAuthGuard)
-    @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('clientJoinedMatch')
-    async ClientJoinGame(client: Socket, payload: ClientJoinMatchInterface) {
-        return this.gameService.getGameBySocketAndUUID(client, payload);
-    }
+    /************************ GAME EVENTS PART ************************/
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
@@ -217,10 +211,9 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
-    @SubscribeMessage('clientUpdatedPadPosition')
-    async clientUpdatedPadPosition(client: Socket, coordinates: Coordinates) {
-        const {sub} = (client.handshake as any).user
-        await this.gameService.updatePadCoordinates(sub, coordinates)
+    @SubscribeMessage('getMatch')
+    async ClientJoinGame(client: Socket, payload: ClientJoinMatchInterface) {
+        return this.gameService.getGameBySocketAndUUID(client, payload);
     }
 
     @UseGuards(WsJwtAuthGuard)
@@ -230,6 +223,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         await this.gameService.clientReadyToPlay(sub)
     }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientUpdatedPadPosition')
+    async clientUpdatedPadPosition(client: Socket, coordinates: Coordinates) {
+        const {sub} = (client.handshake as any).user
+        await this.gameService.updatePadCoordinates(sub, coordinates)
+    }
+
 
 }
 

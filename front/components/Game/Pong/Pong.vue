@@ -9,10 +9,17 @@
 <script lang="ts">
 import Vue from 'vue'
 import {Component, Prop} from 'nuxt-property-decorator'
-import {Coordinates, Keys, MatchInterface, Pad} from "~/utils/interfaces/game/match.interface";
+import {
+  Coordinates,
+  Keys,
+  MatchInterface,
+  Pad,
+  PlayerMarkedInterface,
+  ResetCanvasInterface
+} from "~/utils/interfaces/game/match.interface";
 import {Socket} from "vue-socket.io-extended";
 import {BallInterface} from "~/utils/interfaces/game/ball.interface";
-import {UserInterface} from "~/utils/interfaces/users/user.interface";
+import {GameState} from "~/utils/enums/game-state.enum";
 
 @Component({})
 export default class Pong extends Vue {
@@ -26,6 +33,7 @@ export default class Pong extends Vue {
 	keys: Keys = {
 		pressed: []
 	}
+	game_state: GameState = GameState.WARMING
 	loop_id: number = -1
 
 	/** Methods */
@@ -85,6 +93,7 @@ export default class Pong extends Vue {
 	printRectangle(coordinates: Coordinates, w: number, h: number, color: string) {
 		if (this.context) {
 			// this.context.clearRect(coordinates.x, coordinates.y, w, h)
+      this.context.beginPath()
 			this.context.fillStyle = `${color}`
 			this.context.fillRect(coordinates.x, coordinates.y, w, h)
 		}
@@ -96,15 +105,14 @@ export default class Pong extends Vue {
 		}
 	}
 
-	updateBallPosition() {
-		let ball = this.match.ball
-		this.clearRect(ball.coordinates, 10, 10)
-		ball.coordinates.x += ball.xSpeed
-		ball.coordinates.y += ball.ySpeed
+  updateBallPosition() {
+    let ball = this.match.ball
+    // ball.coordinates.x += ball.xSpeed
+    // ball.coordinates.y += ball.ySpeed
     // if (ball.coordinates.y <= 0 || ball.coordinates.y + 10 >= 480)
     //   ball.ySpeed *= -1
-		this.printRectangle(ball.coordinates, 10, 10, "white")
-	}
+    this.printRectangle(ball.coordinates, 10, 10, "white")
+  }
 
 	changePadPosition(way: string) {
 		let match = this.match as any
@@ -127,6 +135,9 @@ export default class Pong extends Vue {
 	 * Update the game
 	 */
 	updateGame() {
+	  if (this.game_state !== GameState.IN_GAME)
+	    return ;
+
 		if (this.keys.pressed.includes('ArrowDown'))
 			this.changePadPosition("down")
 		if (this.keys.pressed.includes("ArrowUp"))
@@ -134,15 +145,11 @@ export default class Pong extends Vue {
 
 		this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
 		this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
-
-		// if game is started
-		// this.updateBallPosition()
 	}
 
 	/** Sockets */
   @Socket("gameStarted")
   gameStartedEvent () {
-    console.log(`time : ${new Date().getTime()}`)
     if (this.loop_id !== -1) {
       window.clearInterval(this.loop_id)
     }
@@ -160,25 +167,17 @@ export default class Pong extends Vue {
 
 	@Socket("ballUpdated")
 	ballUpdatedEvent(ball: BallInterface) {
-		this.clearRect(this.match.ball.coordinates, 10, 10)
+    this.clearRect({
+      x: this.match.ball.coordinates.x - 1,
+      y: this.match.ball.coordinates.y - 1
+    }, 12, 12)
 		this.match.ball = ball
 		this.updateBallPosition()
 	}
 
-	@Socket("padUpdated")
-	padUpdatedEvent(payload: any) {
-		// this.clearRect(this.match.ball.coordinates, 10, 10)
-		this.clearRect(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height)
-		this.clearRect(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height)
-		this.match.rightPad = payload.rightPad
-		this.match.leftPad = payload.leftPad
-		this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
-		this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
-	}
-
-	@Socket("GameStop")
-	stopGame(payload: UserInterface) {
-		this.$toast.info(`${payload.login} won!`)
+	@Socket("pointMarked")
+	stopGame(payload: PlayerMarkedInterface) {
+		this.$toast.info(`${payload.winner.login} marked a point!`)
 		clearInterval(this.loop_id)
 
 		let timeout = setTimeout(() => {
@@ -186,8 +185,28 @@ export default class Pong extends Vue {
 			clearTimeout(timeout)
 			this.loop_id = window.setInterval(this.updateGame, 20)
 		}, 3000)
-
 	}
+
+	@Socket("resetCanvas")
+  resetCanvasEvent(resetPayload: ResetCanvasInterface) {
+    this.clearRect({
+      x: this.match.ball.coordinates.x - 1,
+      y: this.match.ball.coordinates.y - 1
+    }, 12, 12)
+    this.match.ball = resetPayload.ball
+    this.updateBallPosition()
+    this.clearRect(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height)
+    this.clearRect(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height)
+    this.match.rightPad = resetPayload.rightPad
+    this.match.leftPad = resetPayload.leftPad
+    this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
+    this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
+  }
+
+	@Socket("stateUpdated")
+  stateUpdatedEvent(newState: GameState) {
+    this.game_state = newState
+  }
 
 	/** Computed */
 	get isAPlayer(): boolean {

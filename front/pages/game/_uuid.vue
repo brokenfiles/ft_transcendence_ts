@@ -26,7 +26,7 @@ export default class Game extends Vue {
   /** Methods */
 
   mounted () {
-    this.$socket.client.emit(`clientJoinedMatch`, {
+    this.$socket.client.emit(`getMatch`, {
       uuid: this.$route.params.uuid
     }, (match: MatchInterface | undefined) => {
       console.log('match', match)

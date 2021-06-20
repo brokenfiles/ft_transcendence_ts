@@ -1,7 +1,8 @@
 export enum GameState {
 
-    CREATING = "creating",
-    IN_GAME  = "in game",
+    WARMING = "warming",
+    IN_GAME = "in game",
+    PAUSED = "paused",
     FINISHED = "finished"
 
 }

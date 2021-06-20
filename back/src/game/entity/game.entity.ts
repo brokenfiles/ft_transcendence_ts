@@ -20,9 +20,6 @@ export class Game {
     @JoinTable()
     players: User[]
 
-    @Column()
-    state: string
-
     @CreateDateColumn()
     created_at: Date
 

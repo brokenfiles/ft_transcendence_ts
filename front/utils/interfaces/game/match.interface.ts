@@ -25,7 +25,6 @@ export interface Pad {
 }
 
 export interface MatchInterface {
-
   uuid: string
   gameWith: number
   gameHeight: number
@@ -33,4 +32,15 @@ export interface MatchInterface {
   ball: Ball
   rightPad: Pad
   leftPad: Pad
+}
+
+export interface PlayerMarkedInterface {
+  winner: UserInterface,
+  points: number
+}
+
+export interface ResetCanvasInterface {
+  leftPad: Pad,
+  rightPad: Pad,
+  ball: Ball
 }
