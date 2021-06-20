@@ -7,7 +7,7 @@ import {SchedulerRegistry} from "@nestjs/schedule";
 
 export const GAME_CONSTANTS = {
     tps: 20,
-    max_points: 1,
+    max_points: 10,
     window: {
         height: 480,
         width: 640
@@ -70,9 +70,9 @@ export class Ball {
         return Math.random() * (max - min + 1) + min
     }
 
-    constructor() {
-        const xWay = Math.floor(Ball.randomIntFromInterval(0, 1)) === 1 ? 1 : -1
-        const yWay = Math.floor(Ball.randomIntFromInterval(0, 1)) === 1 ? 1 : -1
+    constructor(game: GameClass) {
+        // const xWay = Math.floor(Ball.randomIntFromInterval(0, 1)) === 1 ? 1 : -1
+        // const yWay = Math.floor(Ball.randomIntFromInterval(0, 1)) === 1 ? 1 : -1
 
         this.coordinates = {
             x: GAME_CONSTANTS.window.width / 2 - (GAME_CONSTANTS.ball.width / 2),
@@ -81,9 +81,14 @@ export class Ball {
         this.w = GAME_CONSTANTS.ball.width
         this.h = GAME_CONSTANTS.ball.height
         this.color = 0xfff
-        this.xSpeed = Ball.randomIntFromInterval(3, 4) * xWay
-        this.ySpeed = Ball.randomIntFromInterval(1, 3) * yWay
+
+        this.xSpeed = 5.80
+        this.ySpeed = 0.20
+
+        if (game.lastMarkedPoint === 1)
+            this.xSpeed *= -1
     }
+
 
     public updatePosition(game: GameClass) {
         const nextCoordinates = {
@@ -130,14 +135,33 @@ export class Ball {
      */
     private padsCollisions (coordinates: Coordinates, game: GameClass): boolean {
         const previousXSpeed = this.xSpeed
+
+        let yHit
+        let heightHit = -9
+
         if (coordinates.x >= game.rightPad.coordinates.x - GAME_CONSTANTS.ball.width && coordinates.x <= game.rightPad.coordinates.x &&
-            coordinates.y >= game.rightPad.coordinates.y && coordinates.y <= game.rightPad.coordinates.y + GAME_CONSTANTS.pad.height) {
+            coordinates.y + GAME_CONSTANTS.ball.height >= game.rightPad.coordinates.y && coordinates.y <= game.rightPad.coordinates.y + GAME_CONSTANTS.pad.height) {
             this.xSpeed *= -1
+
+            yHit = coordinates.y - game.rightPad.coordinates.y
+            heightHit = yHit / GAME_CONSTANTS.pad.height - 0.5
+
+
         }
         if (coordinates.x - GAME_CONSTANTS.ball.width <= game.leftPad.coordinates.x && coordinates.x >= game.leftPad.coordinates.x &&
-            coordinates.y >= game.leftPad.coordinates.y && coordinates.y <= game.leftPad.coordinates.y + GAME_CONSTANTS.pad.height) {
+            coordinates.y + GAME_CONSTANTS.ball.height >= game.leftPad.coordinates.y && coordinates.y <= game.leftPad.coordinates.y + GAME_CONSTANTS.pad.height) {
             this.xSpeed *= -1
+            yHit = coordinates.y - game.leftPad.coordinates.y
+            heightHit = yHit / GAME_CONSTANTS.pad.height - 0.5
+
         }
+
+        if (heightHit !== -9) {
+            if (heightHit <= 0.15 && heightHit >= -0.15)
+                return true
+            this.ySpeed += heightHit * 6
+        }
+
         return previousXSpeed !== this.xSpeed
     }
 
@@ -162,6 +186,7 @@ export class Ball {
 export class GameClass {
 
     /** Variables */
+    lastMarkedPoint: number
     state: GameState
     uuid: string
     gameWith: number
@@ -186,13 +211,14 @@ export class GameClass {
         this.state = GameState.WARMING
         this.rightPad = new Pad("right")
         this.leftPad = new Pad("left")
-        this.ball = new Ball()
+        this.ball = new Ball(this)
         this.gameHeight = GAME_CONSTANTS.window.height
         this.gameWith = GAME_CONSTANTS.window.width
         this.players = players
         this.spectators = []
         this.playersReady = []
         this.points = {}
+        this.lastMarkedPoint = 0
     }
 
     /**
@@ -255,6 +281,7 @@ export class GameClass {
         this.sendEventToPlayers('pointMarked', { winner, points: this.points[winner.id] })
         this.reset()
         this.points[winner.id] += points
+        this.lastMarkedPoint = winner.id === this.players[0].id ? 0 : 1
         if (this.points[winner.id] >= GAME_CONSTANTS.max_points) {
             // stop the game
             this.stopGame(winner)
@@ -270,7 +297,7 @@ export class GameClass {
      * Set the game to default state
      */
     public reset () {
-        this.ball = new Ball()
+        this.ball = new Ball(this)
         this.rightPad = new Pad("right")
         this.leftPad = new Pad("left")
         this.sendEventToPlayers('resetCanvas', {
