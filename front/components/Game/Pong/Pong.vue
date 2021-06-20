@@ -56,6 +56,7 @@ export default class Pong extends Vue {
 		if (this.isAPlayer) {
 			document.removeEventListener('keydown', this.keyDownEvent)
 			document.removeEventListener('keyup', this.keyUpEvent)
+      this.$socket.client.emit(`clientLeftGame`)
 		}
 		clearInterval(this.loop_id)
 	}

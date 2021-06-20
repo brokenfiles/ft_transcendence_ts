@@ -80,6 +80,7 @@ export default class ChatMessage extends Vue {
   position: relative;
   background: #2F5D76;
   border-radius: .4em;
+  margin-left: 10px;
   margin-top: 10px;
 }
 
@@ -99,6 +100,7 @@ export default class ChatMessage extends Vue {
 }
 
 .speech-bubble-right {
+  margin-right: 10px;
   position: relative;
   background: #FBBF24;
   border-radius: .4em;
@@ -122,6 +124,7 @@ export default class ChatMessage extends Vue {
 }
 
 .speech-bubble-right-without-triangle {
+  margin-right: 10px;
   position: relative;
   background: #FBBF24;
   color: black;
@@ -130,6 +133,7 @@ export default class ChatMessage extends Vue {
 }
 
 .speech-bubble-left-without-triangle {
+  margin-left: 10px;
   position: relative;
   background: #2F5D76;
   border-radius: .4em;
