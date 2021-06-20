@@ -59,8 +59,6 @@ export class GameService {
     async clientReadyToPlay(sub: number) {
         const game = this.getGameByUserId(sub)
         if (game) {
-
-
             let user = null
             if (game.players[0].id === sub)
                 user = game.players[0]
@@ -70,6 +68,8 @@ export class GameService {
                 if (!game.playersReady.includes(user)) {
                     game.addReady(user)
                     if (game.playersReady.length === 2) {
+                        for (const player of game.players)
+                            this.websocketService.getClient(player.id).socket.emit('gameStarted')
                         const interval = setInterval(() => this.updateGame(game), 20)
                         this.schedulerRegistry.addInterval(game.uuid, interval);
                     }
@@ -89,9 +89,9 @@ export class GameService {
         if (game.ball.coordinates.x <= 0 || game.ball.coordinates.x + 10 >= 640) {
             let winner
             if (game.ball.coordinates.x <= 0)
-                winner = game.players[0]
-            else
                 winner = game.players[1]
+            else
+                winner = game.players[0]
             game.ball.xSpeed *= -1
             updated = true
             this.websocketService.getClient(game.players[0].id).socket.emit("GameStop", winner)

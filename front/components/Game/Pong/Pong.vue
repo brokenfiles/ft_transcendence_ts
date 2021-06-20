@@ -47,7 +47,6 @@ export default class Pong extends Vue {
 			document.addEventListener('keyup', this.keyUpEvent)
 		}
 
-		this.loop_id = window.setInterval(this.updateGame, 20)
 		// avert the backend that the player is ready to play
 		this.$socket.client.emit(`clientReadyToPlay`)
 	}
@@ -101,6 +100,8 @@ export default class Pong extends Vue {
 		this.clearRect(ball.coordinates, 10, 10)
 		ball.coordinates.x += ball.xSpeed
 		ball.coordinates.y += ball.ySpeed
+    // if (ball.coordinates.y <= 0 || ball.coordinates.y + 10 >= 480)
+    //   ball.ySpeed *= -1
 		this.printRectangle(ball.coordinates, 10, 10, "white")
 	}
 
@@ -138,6 +139,15 @@ export default class Pong extends Vue {
 	}
 
 	/** Sockets */
+  @Socket("gameStarted")
+  gameStartedEvent () {
+    console.log(`time : ${new Date().getTime()}`)
+    if (this.loop_id !== -1) {
+      window.clearInterval(this.loop_id)
+    }
+    this.loop_id = window.setInterval(this.updateGame, 20)
+  }
+
 	@Socket("otherPlayerPadUpdated")
 	otherPlayerPadUpdatedEvent(coordinates: Coordinates) {
 		let match = this.match as any

@@ -46,10 +46,13 @@ export class WebsocketService {
             channelId: -1,
             userId: sub
         }
-        if (this._clients.filter(client => client.userId == payload.userId).length == 0) {
-            this._clients.push(payload)
-            this.broadcastOnlineClients(server)
+        const idx = this._clients.map(client => client.userId).indexOf(sub)
+        if (idx !== -1) {
+            this._clients[idx].socket.disconnect()
+            this._clients.splice(idx, 1)
         }
+        this._clients.push(payload)
+        this.broadcastOnlineClients(server)
     }
 
     public removeClient(clientUid: string, server: Server): number {

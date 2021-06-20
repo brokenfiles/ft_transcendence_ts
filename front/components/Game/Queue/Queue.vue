@@ -81,7 +81,7 @@ export default class Queue extends Vue {
   @Socket("gameStarting")
   gameStartingEvent (gameStartingOptions: GameStartingInterface) {
     if (gameStartingOptions.players.length === 2 && this.queued_players.length === 2) {
-      this.$toast.info(`Match against ${gameStartingOptions.players[0].display_name} and ${gameStartingOptions.players[1].display_name} starting...`)
+      this.$toast.info(`Match ${gameStartingOptions.players[0].display_name} VS ${gameStartingOptions.players[1].display_name} starting...`)
       setTimeout(() => {
         this.$router.push(`/game/${gameStartingOptions.uuid}`)
       }, 3000)

@@ -57,12 +57,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         this.logger.log(`Client ${client.id} connected`);
         if ("query" in (client.handshake as any)) {
             const { token } = (client.handshake as any).query
-            try {
-                const content = this.jwtService.verify(token)
-                this.websocketService.addClient(client, content.sub, this.server)
-                this.logger.log(`Client ${content.sub} is now online!`)
-            } catch (e: any) {
-                this.logger.log(`Error when decoding token : ${e}`)
+            if (token) {
+                try {
+                    const content = this.jwtService.verify(token)
+                    this.websocketService.addClient(client, content.sub, this.server)
+                    this.logger.log(`Client ${content.sub} is now online!`)
+                } catch (e: any) {
+                    this.logger.log(`Error when decoding token : ${e}`)
+                }
             }
 
         }

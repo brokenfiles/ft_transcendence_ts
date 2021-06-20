@@ -4,12 +4,14 @@
       <h1 class="text-5xl font-semibold text-center text-cream">
         Searching a battle
       </h1>
-      <hollow-dots-spinner
-        :animation-duration="1000"
-        :dot-size="15"
-        :dots-num="3"
-        color="#EEEBDE"
-      />
+      <client-only>
+        <hollow-dots-spinner
+          :animation-duration="1000"
+          :dot-size="15"
+          :dots-num="3"
+          color="#EEEBDE"
+        />
+      </client-only>
     </div>
     <queue v-if="isSocketConnected" :user="this.$auth.user"/>
   </div>
