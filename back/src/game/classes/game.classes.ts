@@ -37,25 +37,22 @@ export class Pad {
 
     constructor(side: string) {
         if (side === "left")
-          this.setCoordinates({
+          this.coordinates = {
               x: GAME_CONSTANTS.pad.margin,
               y: GAME_CONSTANTS.window.height / 2 - GAME_CONSTANTS.pad.height / 2
-          })
+          }
         else if (side === "right")
-            this.setCoordinates({
+            this.coordinates = {
                 x: GAME_CONSTANTS.window.width - GAME_CONSTANTS.pad.width - GAME_CONSTANTS.pad.margin,
                 y: GAME_CONSTANTS.window.height / 2 - GAME_CONSTANTS.pad.height / 2
-            })
+            }
         this.width = GAME_CONSTANTS.pad.width
         this.height = GAME_CONSTANTS.pad.height
     }
 
     public setCoordinates(coordinates: Coordinates)
     {
-        this.coordinates = {
-            x: this.coordinates.x,
-            y: coordinates.y
-        }
+        this.coordinates.y = coordinates.y
     }
 }
 
