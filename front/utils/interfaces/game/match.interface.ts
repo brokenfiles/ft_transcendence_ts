@@ -44,3 +44,8 @@ export interface ResetCanvasInterface {
   rightPad: Pad,
   ball: Ball
 }
+
+export interface GameFinishedInterface {
+  winner: UserInterface
+  points: any
+}

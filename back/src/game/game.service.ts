@@ -1,8 +1,8 @@
-import {Injectable} from "@nestjs/common";
+import {HttpException, HttpStatus, Injectable} from "@nestjs/common";
 import {Coordinates, GameClass} from "./classes/game.classes";
 import {Socket} from "socket.io";
 import {SchedulerRegistry} from "@nestjs/schedule";
-import {CreateGameInterface, MatchInterface, PadInterface} from "./interfaces/game.interfaces";
+import {MatchInterface} from "./interfaces/game.interfaces";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {Game} from "./entity/game.entity";
@@ -20,7 +20,28 @@ export class GameService {
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
                 private schedulerRegistry: SchedulerRegistry,
                 private userService: UsersService,
-                private websocketService: WebsocketService) {}
+                private websocketService: WebsocketService) {
+        const interval_id = setInterval(() => this.checkGames(), 1000)
+        this.schedulerRegistry.addInterval('checkGames', interval_id)
+    }
+
+    async findAll () : Promise<Game[]> {
+        return this.gameRepository.find({
+            where: { state: GameState.FINISHED },
+            relations: ['winner', 'looser']
+        })
+    }
+
+    async findOne (uuid: string) : Promise<Game> {
+        return this.gameRepository.findOneOrFail({
+            where: { uuid, state: GameState.FINISHED },
+            relations: ['winner', 'looser', 'players']
+        }).catch(e => {
+            throw new HttpException({
+                message: [e.message]
+            }, HttpStatus.BAD_REQUEST)
+        })
+    }
 
     /**
      * Init the game and return the uuid
@@ -35,10 +56,22 @@ export class GameService {
         return (game.uuid)
     }
 
+    async checkGames () {
+        for (const game of this.games) {
+            if (game.state === GameState.FINISHED) {
+                let gameEntity = game.game
+                let winner = gameEntity.winner
+                winner.points += gameEntity.winner_points * 2.5
+                await this.userService.updatePoints(winner.id, winner.points)
+                this.removeGameFromGameArray(game.uuid)
+            }
+        }
+    }
+
     async clientReadyToPlay(sub: number) {
         const game = this.getGameByUserId(sub)
         if (game) {
-            game.setPlayerReady(sub)
+            await game.setPlayerReady(sub)
         }
     }
 
@@ -94,6 +127,16 @@ export class GameService {
                 game.clientLeft(sub)
                 this.removeGameFromGameArray(game.uuid)
             }
+        }
+    }
+
+    async clientJoinedSpectator(sub: number, uuid: string) {
+        let game = this.getGameByUUID(uuid)
+        if (game !== null) {
+            try {
+                const spectator = await this.userService.findOne(sub)
+                game.addSpectator(spectator)
+            } catch {}
         }
     }
 }

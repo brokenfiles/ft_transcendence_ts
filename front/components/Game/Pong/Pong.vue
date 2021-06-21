@@ -1,7 +1,15 @@
 <template>
 	<div>
+    <p class="flex w-full mt-12 text-2xl">
+      <span class="flex-1 text-left">
+        {{ match.players[1].display_name }} - {{ player_1_points }}
+      </span>
+      <span class="flex-1 text-right">
+        {{ player_0_points }} - {{ match.players[0].display_name }}
+      </span>
+    </p>
 		<canvas ref="game" :width="this.match.gameWith" :height="this.match.gameHeight"
-				class="bg-primary mt-12 border border-primary">
+				class="bg-primary border border-primary">
 		</canvas>
 	</div>
 </template>
@@ -10,7 +18,7 @@
 import Vue from 'vue'
 import {Component, Prop} from 'nuxt-property-decorator'
 import {
-  Coordinates,
+  Coordinates, GameFinishedInterface,
   Keys,
   MatchInterface,
   Pad,
@@ -20,7 +28,6 @@ import {
 import {Socket} from "vue-socket.io-extended";
 import {BallInterface} from "~/utils/interfaces/game/ball.interface";
 import {GameState} from "~/utils/enums/game-state.enum";
-import {GameFinishedInterface} from "../../../../back/src/game/interfaces/game.interfaces";
 
 @Component({})
 export default class Pong extends Vue {
@@ -31,6 +38,8 @@ export default class Pong extends Vue {
 	/** Variables */
 	context?: CanvasRenderingContext2D | null
 	canvas?: HTMLCanvasElement
+  player_0_points: number = 0
+  player_1_points: number = 0
 	keys: Keys = {
 		pressed: []
 	}
@@ -50,15 +59,21 @@ export default class Pong extends Vue {
 			this.$router.push('/')
 		}
 
+		this.player_0_points = 0
+		this.player_1_points = 0
 		/* Event listeners */
 		if (this.isAPlayer) {
 			document.addEventListener('keydown', this.keyDownEvent)
 			document.addEventListener('keyup', this.keyUpEvent)
       document.addEventListener('mousemove', this.mouseMoveEvent)
-		}
-
-		// avert the backend that the player is ready to play
-		this.$socket.client.emit(`clientReadyToPlay`)
+      // avert the backend that the player is ready to play
+      this.$socket.client.emit(`clientReadyToPlay`)
+		} else {
+		  this.game_state = GameState.IN_GAME
+      // avert the backend that the player is ready to play
+      this.$socket.client.emit(`clientJoinedSpectator`, this.match.uuid)
+    }
+		this.printScene()
 	}
 
 	beforeDestroy() {
@@ -80,13 +95,16 @@ export default class Pong extends Vue {
         const mouseCoordinates = {
           y: event.clientY - rect.top
         }
-        if (mouseCoordinates.y >= 0 && mouseCoordinates.y + pad.height <= this.match.gameHeight) {
-          this.clearRect(pad.coordinates, pad.width, pad.height)
-          pad.coordinates.y = mouseCoordinates.y
-          this.$socket.client.emit(`clientUpdatedPadPosition`, pad.coordinates)
-          this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
-          this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
+        if (mouseCoordinates.y - pad.height / 2 <= 0) {
+          mouseCoordinates.y = pad.height / 2
+        } else if (mouseCoordinates.y + pad.height / 2 >= this.match.gameHeight) {
+          mouseCoordinates.y = this.match.gameHeight - pad.height / 2
         }
+        this.clearRect(pad.coordinates, pad.width, pad.height)
+        pad.coordinates.y = mouseCoordinates.y - pad.height / 2
+        this.$socket.client.emit(`clientUpdatedPadPosition`, pad.coordinates)
+        this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
+        this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
 
       }
     }
@@ -161,9 +179,31 @@ export default class Pong extends Vue {
 		if (this.keys.pressed.includes("ArrowUp"))
 			this.changePadPosition("up")
 
-		this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
-		this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
+		this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height,
+      'red')
+		this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height,
+      'red')
+    this.printScene()
 	}
+
+	printScene () {
+	  if (this.canvas && this.context) {
+	    this.context.beginPath()
+      this.context.setLineDash([5, 15])
+      this.context.moveTo(this.match.gameWith / 2, 0)
+      this.context.lineTo(this.match.gameWith / 2, this.match.gameHeight)
+      this.context.strokeStyle = 'white'
+      this.context.stroke()
+    }
+  }
+
+  setPoints (playerId: number, points: number) {
+    const map = this.match.players.map(u => u.id)
+    if (map[0] === playerId)
+      this.player_0_points = points
+    else if (map[1] === playerId)
+      this.player_1_points = points
+  }
 
 	/** Sockets */
   @Socket("gameStarted")
@@ -203,13 +243,7 @@ export default class Pong extends Vue {
 	@Socket("pointMarked")
 	stopGame(payload: PlayerMarkedInterface) {
 		this.$toast.info(`${payload.winner.login} marked a point!`)
-		clearInterval(this.loop_id)
-
-		let timeout = setTimeout(() => {
-			this.$socket.client.emit(`clientReadyToPlay`)
-			clearTimeout(timeout)
-			this.loop_id = window.setInterval(this.updateGame, 20)
-		}, 3000)
+    this.setPoints(payload.winner.id, payload.points)
 	}
 
 	@Socket("resetCanvas")
@@ -237,7 +271,7 @@ export default class Pong extends Vue {
   gameFinishedEvent(gameFinishedEvent: GameFinishedInterface) {
     this.$toast.success(`${gameFinishedEvent.winner.display_name} won the game! gros jéjé`)
     window.setTimeout(() => {
-      this.$router.push('/')
+      this.$router.push(`/game/records/${this.match.uuid}`)
     }, 2000)
   }
 

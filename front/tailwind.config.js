@@ -8,6 +8,7 @@ module.exports = {
         secondary: '#141F31',
         cream: '#EEEBDE',
         yellow: '#FFDA18',
+        matchWon: '#fcffad',
         ftgray: '#1d242c',
         fortytwo: '#00babc',
         // online status colors

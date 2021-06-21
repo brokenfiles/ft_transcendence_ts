@@ -224,6 +224,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('clientJoinedSpectator')
+    async clientJoinedSpectator(client: Socket, uuid: string) {
+        const {sub} = (client.handshake as any).user
+        await this.gameService.clientJoinedSpectator(sub, uuid)
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientLeftGame')
     async clientLeft(client: Socket) {
         this.gameService.clientLeft(client)

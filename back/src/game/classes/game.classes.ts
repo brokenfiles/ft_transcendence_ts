@@ -4,6 +4,7 @@ import {GameState} from "../enums/game-state.enum";
 import {Repository} from "typeorm";
 import {Game} from "../entity/game.entity";
 import {SchedulerRegistry} from "@nestjs/schedule";
+import {UsersService} from "../../users/users.service";
 
 export const GAME_CONSTANTS = {
     tps: 20,
@@ -52,7 +53,7 @@ export class Pad {
     public setCoordinates(coordinates: Coordinates)
     {
         this.coordinates = {
-            x: coordinates.x,
+            x: this.coordinates.x,
             y: coordinates.y
         }
     }
@@ -67,14 +68,7 @@ export class Ball {
     xSpeed: number
     ySpeed: number
 
-    private static randomIntFromInterval(min, max) { // min and max included
-        return Math.random() * (max - min + 1) + min
-    }
-
     constructor(game: GameClass) {
-        // const xWay = Math.floor(Ball.randomIntFromInterval(0, 1)) === 1 ? 1 : -1
-        // const yWay = Math.floor(Ball.randomIntFromInterval(0, 1)) === 1 ? 1 : -1
-
         this.coordinates = {
             x: GAME_CONSTANTS.window.width / 2 - (GAME_CONSTANTS.ball.width / 2),
             y: GAME_CONSTANTS.window.height / 2 - (GAME_CONSTANTS.ball.height / 2)
@@ -86,8 +80,10 @@ export class Ball {
         this.xSpeed = 5.80
         this.ySpeed = 0.20
 
-        if (game.lastMarkedPoint === 1)
-            this.xSpeed *= -1
+        if (game.players && game.players.length === 2) {
+            if (game.lastMarkedPoint === game.players[0].id)
+                this.xSpeed *= -1
+        }
     }
 
 
@@ -99,10 +95,9 @@ export class Ball {
 
         this.yCollisions(nextCoordinates)
         this.xCollisions(nextCoordinates, game)
-        if (this.padsCollisions(nextCoordinates, game))
-            // this.increaseBallSpeed()
+        this.padsCollisions(nextCoordinates, game)
 
-            this.coordinates.x += this.xSpeed
+        // this.coordinates.x += this.xSpeed
         this.coordinates.y += this.ySpeed
 
         if (game.state === GameState.IN_GAME)
@@ -118,10 +113,10 @@ export class Ball {
     private xCollisions (coordinates: Coordinates, game: GameClass) {
         if (coordinates.x <= 0 || coordinates.x + GAME_CONSTANTS.ball.width >= GAME_CONSTANTS.window.width) {
             let winner
-            if (game.ball.coordinates.x <= 0)
-                winner = game.players[1]
-            else
+            if (coordinates.x <= 0)
                 winner = game.players[0]
+            else
+                winner = game.players[1]
             this.xSpeed *= -1
             game.markPoint(winner)
         }
@@ -164,19 +159,6 @@ export class Ball {
         }
 
         return previousXSpeed !== this.xSpeed
-    }
-
-    private increaseBallSpeed() {
-        if (this.xSpeed < 0) {
-            this.xSpeed -= 0.3
-        } else {
-            this.xSpeed += 0.3
-        }
-        if (this.ySpeed < 0) {
-            this.ySpeed -= 0.3
-        } else {
-            this.ySpeed += 0.3
-        }
     }
 
     public emitPosition (game: GameClass) {
@@ -249,10 +231,19 @@ export class GameClass {
     }
 
     public stopGame (winner: User) {
+        const looser = this.players.filter(u => u.id !== winner.id)[0]
         if (this.schedulerRegistry.getIntervals().includes(this.uuid))
             this.schedulerRegistry.deleteInterval(this.uuid)
         this.setState(GameState.FINISHED)
-        this.sendEventToPlayers(`gameFinished`, { winner, points: this.points })
+        this.game.winner = winner
+        this.game.looser = looser
+        this.game.winner_points = this.points[winner.id]
+        this.game.looser_points = this.points[looser.id]
+        this.game.state = this.state
+        this.repository.save(this.game)
+            .then(() => {
+                this.sendEventToPlayers(`gameFinished`, { winner, points: this.points })
+            })
     }
 
     /**
@@ -279,10 +270,10 @@ export class GameClass {
      */
     public markPoint(winner: User, points: number = 1) {
         this.setState(GameState.PAUSED)
-        this.sendEventToPlayers('pointMarked', { winner, points: this.points[winner.id] })
+        this.lastMarkedPoint = winner.id
         this.reset()
         this.points[winner.id] += points
-        this.lastMarkedPoint = winner.id === this.players[0].id ? 0 : 1
+        this.sendEventToPlayers('pointMarked', { winner, points: this.points[winner.id] })
         if (this.points[winner.id] >= GAME_CONSTANTS.max_points) {
             // stop the game
             this.stopGame(winner)
@@ -315,9 +306,13 @@ export class GameClass {
             const winner = this.players.filter((p) => p.id !== user.id)[0]
             this.markPoint(winner, GAME_CONSTANTS.max_points - this.points[winner.id])
         }
+        const spectator = this.findSpectatorById(sub)
+        if (spectator !== undefined) {
+            this.spectators.splice(this.spectators.indexOf(spectator), 1)
+        }
     }
 
-    public setPlayerReady (sub: number) {
+    public async setPlayerReady (sub: number) : Promise<void> {
         const user = this.findUserById(sub)
         if (user !== undefined && !this.playersReady.includes(user)) {
             this.playersReady.push(user)
@@ -327,8 +322,21 @@ export class GameClass {
         }
     }
 
+    public addSpectator (user: User) {
+        if (!this.spectators.includes(user))
+            this.spectators.push(user)
+    }
+
     public findUserById (sub: number) : User | undefined {
         for (const user of this.players) {
+            if (user.id === sub)
+                return user
+        }
+        return undefined
+    }
+
+    public findSpectatorById (sub: number) : User | undefined {
+        for (const user of this.spectators) {
             if (user.id === sub)
                 return user
         }

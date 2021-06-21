@@ -84,6 +84,12 @@ export class UsersService {
             })
     }
 
+    async updatePoints(id: number, points: number) {
+        let user = await this.findOne(id)
+        user.points = points
+        return this.usersRepository.save(user)
+    }
+
     async findUsersByIds(users_id: number[]): Promise<User[]>
     {
         let users = await this.usersRepository.find({
