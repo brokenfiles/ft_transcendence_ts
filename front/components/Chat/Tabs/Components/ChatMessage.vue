@@ -10,10 +10,10 @@
         :class="{'ml-2': authenticatedId !== message.owner.id}">
       </p>
     </nuxt-link>
-    <p :class="classes" @mouseover="showMessageSendingDate = true" @mouseleave="showMessageSendingDate = false">
+    <p :class="classes" @mouseover="showMessageSendingDate = true" @mouseleave="showMessageSendingDate = false" class="break-words max-w-xs">
       {{ message.text }}
     </p>
-    <span class="text-gray-500 text-sm absolute bg-primary block z-50 -mt-6" v-if="showMessageSendingDate">
+    <span :class="messageDateClasses" class="text-gray-500 text-sm absolute bg-primary block z-50 -mt-6 rounded-md px-2" v-if="showMessageSendingDate">
       <client-only>
         <timeago :datetime="message.created_at">{{ message.created_at }}</timeago>
       </client-only>
@@ -71,6 +71,13 @@ export default class ChatMessage extends Vue {
       return []
   }
 
+  get messageDateClasses(): string[] {
+    if (this.authenticatedId !== this.message.owner.id)
+      return ['right-0']
+    else
+      return []
+  }
+
 }
 </script>
 
@@ -81,6 +88,7 @@ export default class ChatMessage extends Vue {
   background: #2F5D76;
   border-radius: .4em;
   margin-left: 10px;
+  color: #EEEBDE;
   margin-top: 10px;
 }
 
@@ -104,7 +112,7 @@ export default class ChatMessage extends Vue {
   position: relative;
   background: #FBBF24;
   border-radius: .4em;
-  color: black;
+  color: #111927;
   margin-top: 10px;
 }
 
@@ -127,7 +135,6 @@ export default class ChatMessage extends Vue {
   margin-right: 10px;
   position: relative;
   background: #FBBF24;
-  color: black;
   border-radius: .4em;
   margin-top: -4px;
 }
