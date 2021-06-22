@@ -136,6 +136,7 @@ export default class ChatMessage extends Vue {
   position: relative;
   background: #FBBF24;
   border-radius: .4em;
+  color: #111927;
   margin-top: -4px;
 }
 
@@ -144,6 +145,7 @@ export default class ChatMessage extends Vue {
   position: relative;
   background: #2F5D76;
   border-radius: .4em;
+  color: #EEEBDE;
   margin-top: -4px;
 }
 

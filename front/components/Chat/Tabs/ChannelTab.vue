@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="curr_channel" class="relative">
-      <div class="fixed bg-primary z-50 w-2/5">
+      <div class="absolute bg-primary z-50 w-full">
         <div class="items-stretch flex">
           <back-button @back="goBack" class="left-0 w-full">Back to channels</back-button>
           <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="focus:outline-none text-cream">
