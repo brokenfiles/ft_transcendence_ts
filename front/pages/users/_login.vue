@@ -25,8 +25,8 @@
       <level-bar class="my-4" :points="user.points"/>
       <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
         <!--statistics-->
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" value="643"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="wins"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" :value="loses"/>
         <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="tournaments wins" value="54"/>
         <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
         <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
@@ -35,6 +35,10 @@
         <!--achievements-->
         <achievement v-for="(achievement, index) in user.achievements" :key="`achievement-${index}`"
         :name="achievement.name" :description="achievement.description" :color="achievement.color"/>
+      </div>
+      <div class="flex flex-wrap items-center">
+        <single-game v-for="(game, index) in games" :key="`game-${index}`" :user="$auth.user"
+                     :is-full-display="false" :game="game" class="w-full md:w-1/2"/>
       </div>
     </div>
   </div>
@@ -57,6 +61,8 @@ import {Context} from "@nuxt/types";
 import AdminButton from "~/components/User/Admin/AdminButton.vue";
 import {Role} from "~/utils/enums/role.enum";
 import ImageUploader from "~/components/User/Profile/ImageUploader.vue";
+import SingleGame from "~/components/Game/Records/SingleGame.vue";
+import {GameInterface} from "~/utils/interfaces/game/game.interface";
 
 const onlineClients = namespace('onlineClients')
 
@@ -75,7 +81,8 @@ interface ImageInterface {
     EditableField,
     FriendButton,
     AdminButton,
-    ImageUploader
+    ImageUploader,
+    SingleGame
   },
 })
 export default class Account extends Vue {
@@ -83,6 +90,8 @@ export default class Account extends Vue {
   /** Variables */
   guild: any = null
   user: any = null
+  games: GameInterface[] = []
+  gamePage: number = 0
   connected: boolean = false
   friendRequests: any[] = []
 
@@ -98,6 +107,25 @@ export default class Account extends Vue {
   mounted() {
     if (this.$auth.loggedIn)
       this.$auth.fetchUser()
+    document.addEventListener('scroll', this.scrollEvent)
+  }
+
+  beforeDestroy () {
+    document.removeEventListener('scroll', this.scrollEvent)
+  }
+
+  async scrollEvent () {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+      if (this.$fetchState.pending)
+        return ;
+      this.gamePage ++
+      const newGames = await this.$axios.$get(`games/users/${this.user.id}?page=${this.gamePage}`, {
+        progress: false
+      })
+      for (const game of newGames) {
+        this.games.push(game)
+      }
+    }
   }
 
   async asyncData({app, params, error}: Context) {
@@ -113,7 +141,8 @@ export default class Account extends Vue {
 
   async fetch() {
     if (this.user.guild)
-      this.guild = await this.$axios.$get(`/guilds/${this.user.guild.id}`)
+      this.guild = await this.$axios.$get(`guilds/${this.user.guild.id}`)
+    this.games = await this.$axios.$get(`games/users/${this.user.id}?page=${this.gamePage}`)
     if (this.$auth.loggedIn)
       await this.fetchRequests()
   }
@@ -233,6 +262,14 @@ export default class Account extends Vue {
     if (this.$auth.user && this.$auth.user.id === this.user.id)
       return false
     return (this.$auth.user && this.$auth.user.role !== Role.User)
+  }
+
+  get wins () : number {
+    return this.games.filter(g => g.winner.id === this.user.id).length
+  }
+
+  get loses () : number {
+    return this.games.filter(g => g.looser.id === this.user.id).length
   }
 
   /**

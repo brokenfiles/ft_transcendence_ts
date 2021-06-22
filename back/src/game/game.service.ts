@@ -4,13 +4,14 @@ import {Socket} from "socket.io";
 import {SchedulerRegistry} from "@nestjs/schedule";
 import {MatchInterface} from "./interfaces/game.interfaces";
 import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
+import {In, Repository} from "typeorm";
 import {Game} from "./entity/game.entity";
 import {UsersService} from "../users/users.service";
 import {User} from "../users/entities/user.entity";
 import {GameState} from "./enums/game-state.enum";
 import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-join-match.interface";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
+import {Contains} from "class-validator";
 
 @Injectable()
 export class GameService {
@@ -25,10 +26,29 @@ export class GameService {
         this.schedulerRegistry.addInterval('checkGames', interval_id)
     }
 
-    async findAll () : Promise<Game[]> {
+    async findAll() : Promise<Game[]> {
         return this.gameRepository.find({
             where: { state: GameState.FINISHED },
             relations: ['winner', 'looser']
+        })
+    }
+
+    findAllFromUser(id: number, page: number) {
+        return this.gameRepository.find({
+            where: [
+                {
+                    state: GameState.FINISHED,
+                    looser: id,
+                },
+                {
+                    state: GameState.FINISHED,
+                    winner: id,
+                },
+            ],
+            skip: 10 * page,
+            take: 10,
+            order: { created_at: "DESC" },
+            relations: ['winner', 'looser'],
         })
     }
 
