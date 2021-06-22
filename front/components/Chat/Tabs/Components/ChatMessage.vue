@@ -74,6 +74,7 @@ export default class ChatMessage extends Vue {
   get messageDateClasses(): string[] {
     if (this.authenticatedId !== this.message.owner.id)
       return ['right-0']
+    return []
   }
 
 }
