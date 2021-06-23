@@ -41,6 +41,11 @@ export class ChatsController {
 
         await this.userRepository.save(curr_user)
 
+        console.log("noooo")
+        console.log(curr_user.users_blocked)
+        console.log(ban_user.users_blocked)
+        console.log("noooo")
+
         return res.status(HttpStatus.OK).json({
             blocked
         })

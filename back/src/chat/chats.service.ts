@@ -23,13 +23,13 @@ export class ChatsService {
                 private readonly websocketService: WebsocketService) {
     }
 
-    findAllMessages(): Promise<Message[]> {
-        return this.messageRepository.find({}).catch((err) => {
-            throw new HttpException({
-                error: err.message
-            }, HttpStatus.BAD_REQUEST)
-        })
-    }
+    // findAllMessages(): Promise<Message[]> {
+    //     return this.messageRepository.find({}).catch((err) => {
+    //         throw new HttpException({
+    //             error: err.message
+    //         }, HttpStatus.BAD_REQUEST)
+    //     })
+    // }
 
     async findAllChannel(user_id: number): Promise<Channel[]> {
 
@@ -108,9 +108,17 @@ export class ChatsService {
                 })
 
 
-                messages.map((msg) => {
-                    msg.owner.users_blocked.map((u) => u.id).includes(sub) ? msg.text = BLOCKED_MSG : 0
-                })
+                let user
+                await Promise.all(messages.map(async (msg) => {
+                    if (msg.owner.id !== sub)
+                        user = await this.usersService.findOne(msg.owner.id)
+                    else
+                        user = null
+                    if (user && user.users_blocked.length && user.users_blocked.map((u) => u.id).includes(sub)) {
+                        msg.text = BLOCKED_MSG
+                    }
+                    return msg
+                }))
                 return messages
             }
         } catch (e) {
