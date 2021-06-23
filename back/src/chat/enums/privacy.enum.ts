@@ -5,3 +5,5 @@ export enum PrivacyEnum {
     PRIVATE = "private",
 
 }
+
+export const BLOCKED_MSG = "\<USER_BLOCKED\>"

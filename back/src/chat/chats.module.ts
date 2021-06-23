@@ -6,10 +6,11 @@ import {Message} from "./entities/message.entity";
 import {Channel} from "./entities/channel.entity";
 import {UsersModule} from "../users/users.module";
 import {WebsocketModule} from "../gateways/websocket/websocket.module";
+import {User} from "../users/entities/user.entity";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Message, Channel]),
+        TypeOrmModule.forFeature([Message, Channel, User]),
         forwardRef(() => UsersModule),
         forwardRef(() => WebsocketModule)
     ],
