@@ -6,7 +6,7 @@ import {Channel} from "./entities/channel.entity";
 import {CreateChannelDto} from "./dto/create-channel.dto";
 import {UsersService} from "../users/users.service";
 import {SendMessageDto} from "./dto/send-message.dto";
-import {PrivacyEnum} from "./enums/privacy.enum";
+import {BLOCKED_MSG, PrivacyEnum} from "./enums/privacy.enum";
 import {WsException} from "@nestjs/websockets";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
 import {ChangeChannelPropertyInterface} from "../gateways/websocket/interfaces/change-channel-property.interface";
@@ -93,12 +93,12 @@ export class ChatsService {
         }
     }
 
-    async getMessageFromChannel(id: number): Promise<Message[]> {
+    async getMessageFromChannel(sub: number, id: number): Promise<Message[]> {
         try {
             const channel = await this.channelRepository.findOne(id)
             if (channel) {
-                return this.messageRepository.find({
-                    relations: ['owner'],
+                let messages = await this.messageRepository.find({
+                    relations: ['owner', 'owner.users_blocked'],
                     where: {
                         channel
                     },
@@ -106,6 +106,12 @@ export class ChatsService {
                         created_at: "ASC"
                     }
                 })
+
+
+                messages.map((msg) => {
+                    msg.owner.users_blocked.map((u) => u.id).includes(sub) ? msg.text = BLOCKED_MSG : 0
+                })
+                return messages
             }
         } catch (e) {
             throw new WsException({
@@ -113,6 +119,8 @@ export class ChatsService {
             })
         }
     }
+
+
 
     async pushMsgInChannel(sendMessageDto: SendMessageDto) {
         try {

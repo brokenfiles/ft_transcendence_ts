@@ -14,7 +14,7 @@ import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFil
 import {ChatsService} from "../../chat/chats.service";
 import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
-import {PrivacyEnum} from "../../chat/enums/privacy.enum";
+import {BLOCKED_MSG, PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
@@ -80,6 +80,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     /************************ CHAT EVENTS PART ************************/
 
+
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('msgToServer')
@@ -98,7 +99,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 users_id = channel.users.map((u) => u.id)
 
             const users_in_channel = this.websocketService.clients.filter((u) => users_id.includes(u.userId))
+            const real_text = message.text
             for (const user of users_in_channel) {
+
+                if (message.owner && message.owner.users_blocked.map((u) => u.id).includes(user.userId) && user.userId !== sub)
+                    message.text = BLOCKED_MSG
+                else
+                    message.text = real_text
+
                 user.socket.emit('SendLastMessagesToClient', message)
             }
         }
@@ -160,13 +168,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
             if ((channel.privacy === PrivacyEnum.PUBLIC) ||
                 (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel)) ||
                 (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password)) {
-                messages = await this.chatsService.getMessageFromChannel(payload.channel_id)
+                messages = await this.chatsService.getMessageFromChannel(sub, payload.channel_id)
             } else {
                 return {
                     error: "Invalid password"
                 }
             }
         }
+        console.log(messages)
         return { messages: messages }
         // client.emit('SendMessagesToClient', messages)
     }

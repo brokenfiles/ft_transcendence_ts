@@ -54,6 +54,10 @@ export class User {
     })
     channels: Channel[]
 
+    @ManyToMany(() => User, user => user.users_blocked, {})
+    @JoinTable()
+    users_blocked: Channel[]
+
     @ManyToMany(() => Game, game => game.players, {
         cascade: true,
         onDelete: "SET NULL"
@@ -65,6 +69,7 @@ export class User {
 
     @ManyToMany(() => Channel, channel => channel.administrators)
     channels_admin: Channel[]
+
 
     @ManyToMany(() => Achievement, achievement => achievement.users, {
         cascade: true
