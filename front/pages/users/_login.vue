@@ -28,15 +28,15 @@
         <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="statistics.wins"/>
         <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" :value="statistics.loses"/>
         <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="matchs" :value="statistics.finished"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="ratio" :value="(statistics.wins / statistics.loses).toFixed(2)"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="ratio" :value="ratio.toFixed(2)"/>
       </div>
       <div class="flex flex-wrap items-center justify-center space-x-2">
         <!--achievements-->
         <achievement v-for="(achievement, index) in user.achievements" :key="`achievement-${index}`"
         :name="achievement.name" :description="achievement.description" :color="achievement.color"/>
       </div>
-      <div class="flex flex-wrap items-center">
-        <single-game v-for="(game, index) in games" :key="`game-${index}`" :user="$auth.user"
+      <div class="flex flex-wrap items-center w-full">
+        <single-game v-for="(game, index) in games" :key="`game-${index}`" :user="user"
                      :is-full-display="false" :game="game" class="w-full md:w-1/2"/>
       </div>
     </div>
@@ -271,6 +271,12 @@ export default class Account extends Vue {
 
   get loses () : number {
     return this.games.filter(g => g.looser.id === this.user.id).length
+  }
+
+  get ratio () : number {
+    if (this.loses === 0 || this.wins === 0)
+      return 0
+    return this.wins / this.loses
   }
 
   /**
