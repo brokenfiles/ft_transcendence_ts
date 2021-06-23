@@ -5,7 +5,12 @@
          v-if="!previous_message || previous_message.owner.id !== message.owner.id">
       <avatar class="z-40 h-8 w-8"
               :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
-              :image-url="message.owner.avatar"/>
+              :image-url="message.owner.avatar" @mouseover="showUserName = true" @mouseleave="showUserName = false"/>
+      <span :class="userNameClasses" class="text-gray-400 text-md absolute bg-secondary block z-50 -mt-6 px-2" v-if="showUserName">
+        <client-only>
+          <p>{{ message.owner.display_name }}</p>
+        </client-only>
+      </span>
       <p class="flex-1"
         :class="{'ml-2': authenticatedId !== message.owner.id}">
       </p>
@@ -40,6 +45,7 @@ export default class ChatMessage extends Vue {
 
   /** Variables */
   showMessageSendingDate: boolean = false
+  showUserName: boolean = false
 
   /** Computed */
   get authenticatedId(): number {
@@ -76,6 +82,13 @@ export default class ChatMessage extends Vue {
       return ['right-0']
     else
       return []
+  }
+
+  get userNameClasses(): string[] {
+    if (this.authenticatedId !== this.message.owner.id)
+      return []
+    else
+      return ['right-0']
   }
 
 }
