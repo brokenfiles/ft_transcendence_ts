@@ -11,14 +11,6 @@
             <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/queue">Join a queue</nuxt-link>
             </div>
-            <div class="item-link my-2">
-              <div class="flex border-2 items-center rounded py-2 px-4">
-                <input type="text" class="flex-1 outline-none bg-transparent" placeholder="Enter a code">
-                <button class="focus:outline-none play-button">
-                  <font-awesome-icon :icon="['fas', 'play']"></font-awesome-icon>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </li>

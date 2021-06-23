@@ -121,6 +121,7 @@ export class GameService {
                 const difference = gameEntity.winner_points - gameEntity.looser_points
                 winner.points += Math.floor(difference * 2)
                 await this.userService.updatePoints(winner.id, winner.points)
+                await this.userService.checkAchievements([winner.id, gameEntity.looser.id])
                 await this.gameRepository.save(gameEntity)
                 this.removeGameFromGameArray(game.uuid)
             }

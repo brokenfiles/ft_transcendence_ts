@@ -96,6 +96,15 @@ export class UsersService {
         return this.usersRepository.save(user)
     }
 
+    async checkAchievements(playersId: number[]) {
+        let players = await Promise.all(playersId.map((p) => this.findOne(p)))
+        for (const player of players) {
+            let achievements = player.achievements
+            // if (player.games.length >= 30)
+            //     achievements.push()
+        }
+    }
+
     async findUsersByIds(users_id: number[]): Promise<User[]>
     {
         let users = await this.usersRepository.find({
