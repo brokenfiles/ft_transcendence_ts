@@ -18,6 +18,7 @@
       <div v-if="user.role !== 'user'">
         <p>ft_transcendence's {{ user.role }}</p>
       </div>
+      <p>elo : {{ user.elo }}</p>
       <friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
                      class="mt-2 text-sm block md:absolute top-0 right-0"
                      :friend-state="friendState"/>
@@ -274,8 +275,8 @@ export default class Account extends Vue {
   }
 
   get ratio () : number {
-    if (this.loses === 0 || this.wins === 0)
-      return 0
+    if (this.loses === 0)
+      return this.wins
     return this.wins / this.loses
   }
 

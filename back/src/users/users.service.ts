@@ -26,13 +26,13 @@ export class UsersService {
         })
     }
 
-    findAllOrderedByPoints(): Promise<User[]> {
+    findAllOrderedByElo(): Promise<User[]> {
         return this.usersRepository.find({
             relations: [
                 'guild'
             ],
             order: {
-                points: "DESC"
+                elo: "DESC"
             },
             take: 15
         })
@@ -87,6 +87,12 @@ export class UsersService {
     async updatePoints(id: number, points: number) {
         let user = await this.findOne(id)
         user.points = points
+        return this.usersRepository.save(user)
+    }
+
+    async updateElo(id: number, elo: number) {
+        let user = await this.findOne(id)
+        user.elo = elo
         return this.usersRepository.save(user)
     }
 

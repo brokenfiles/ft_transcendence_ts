@@ -9,6 +9,9 @@ export interface GameInterface {
   looser: UserInterface
   winner_points: number
   looser_points: number
+  save_winner_elo: number
+  save_looser_elo: number
+  elo: number
   created_at: Date
   updated_at: Date
 }

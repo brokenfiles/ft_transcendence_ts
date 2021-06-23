@@ -32,7 +32,7 @@
                       {{ user.login }}
                     </span>
             </nuxt-link>
-            <p>{{ user.points }} points</p>
+            <p>{{ user.elo }} elo</p>
           </div>
         </div>
         <div v-if="tab === 'guilds'">
@@ -102,7 +102,7 @@ export default class Leaderboard extends Vue {
 
   get sortedUsers () : UserInterface[] {
     return this.users.sort((a, b) => {
-      return (a.points < b.points ? 1 : -1)
+      return (a.elo < b.elo ? 1 : -1)
     })
   }
 

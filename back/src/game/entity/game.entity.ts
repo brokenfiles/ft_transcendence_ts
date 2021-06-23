@@ -33,10 +33,19 @@ export class Game {
     looser: User
 
     @Column({default: 0})
+    save_winner_elo: number
+
+    @Column({default: 0})
+    save_looser_elo: number
+
+    @Column({default: 0})
     winner_points: number
 
     @Column({default: 0})
     looser_points: number
+
+    @Column({default: 0, type: "float"})
+    elo: number
 
     @CreateDateColumn()
     created_at: Date

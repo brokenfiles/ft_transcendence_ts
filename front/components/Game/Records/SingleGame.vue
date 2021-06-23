@@ -46,9 +46,9 @@
                 {{ game.winner.display_name }}
               </p>
               <p>
-                {{game.winner.points}}
-                <span class="text-green-400">(+ {{game.winner_points * 2.5}} ↑)</span>
-                points
+                {{game.save_winner_elo}}
+                <span class="text-green-400">(+ {{game.elo}} ↑)</span>
+                elo
               </p>
             </div>
             <div :class="{'py-8': isFullDisplay, 'py-2': !isFullDisplay}" class="w-1/2 h-full relative">
@@ -58,7 +58,9 @@
                 {{ game.looser.display_name }}
               </p>
               <p>
-                {{game.looser.points}} points
+                {{game.save_looser_elo}}
+                <span class="text-red-400">(- {{game.elo}} ↓)</span>
+                elo
               </p>
             </div>
             <div class="absolute right-1/2 top-1/2 text-2xl transform translate-x-1/2">

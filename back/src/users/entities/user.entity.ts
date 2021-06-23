@@ -85,8 +85,11 @@ export class User {
     @Column({default: Role.User})
     role: string
 
-    @Column({default: 0})
+    @Column({default: 0.0, type: "float"})
     points: number
+
+    @Column({default: 1100})
+    elo: number
 
     @Column({default: null})
     avatar: string

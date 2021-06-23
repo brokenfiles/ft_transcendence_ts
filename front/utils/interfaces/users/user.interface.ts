@@ -10,6 +10,7 @@ export interface UserInterface {
   login: string
   role: string
   points: number
+  elo: number
   avatar: string
   double_auth: boolean
   banned: string

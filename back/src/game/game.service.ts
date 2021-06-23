@@ -11,7 +11,6 @@ import {User} from "../users/entities/user.entity";
 import {GameState} from "./enums/game-state.enum";
 import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-join-match.interface";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
-import {Contains} from "class-validator";
 import {GuildsService} from "../guilds/guilds.service";
 
 @Injectable()
@@ -109,15 +108,27 @@ export class GameService {
     }
 
     async checkGames () {
-        for (const game of this.games) {
+        for (let game of this.games) {
             if (game.state === GameState.FINISHED) {
                 let gameEntity = game.game
                 let winner = gameEntity.winner
-                winner.points += gameEntity.winner_points * 2.5
+                const elo = this.calculateElo(gameEntity.winner.elo, gameEntity.looser.elo)
+                await this.userService.updateElo(winner.id, winner.elo + elo)
+                await this.userService.updateElo(gameEntity.looser.id, gameEntity.looser.elo - elo)
+                gameEntity.save_looser_elo = gameEntity.looser.elo - elo
+                gameEntity.save_winner_elo = gameEntity.winner.elo + elo
+                gameEntity.elo = elo
+                const difference = gameEntity.winner_points - gameEntity.looser_points
+                winner.points += Math.floor(difference * 2)
                 await this.userService.updatePoints(winner.id, winner.points)
+                await this.gameRepository.save(gameEntity)
                 this.removeGameFromGameArray(game.uuid)
             }
         }
+    }
+
+    calculateElo (winner_elo: number, looser_elo: number) : number {
+        return Math.floor(1.0 / (1.0 + Math.pow(10.0,(winner_elo - looser_elo) / 400)) * 30) + 1
     }
 
     async clientReadyToPlay(sub: number) {

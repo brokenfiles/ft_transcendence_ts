@@ -45,7 +45,7 @@ export class UsersController {
       return user
     }
     if (req.query.order) {
-      return this.usersService.findAllOrderedByPoints()
+      return this.usersService.findAllOrderedByElo()
     }
     return this.usersService.findAll();
   }

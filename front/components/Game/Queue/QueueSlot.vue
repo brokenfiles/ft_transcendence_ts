@@ -7,10 +7,10 @@
       <span v-if="guild" :class="{'opacity-0': !guild}" class="font-normal">[{{ guild }}] </span>
       {{ name }}
     </p>
-    <p class="mt-1 rounded-lg" :style="styleForElement(points, -1)">
-      <font-awesome-icon :class="{'opacity-0': points === -1}" :icon="['fas', 'trophy']"/>
-      <span v-if="points !== -1">
-        {{ points }} points
+    <p class="mt-1 rounded-lg" :style="styleForElement(elo, -1)">
+      <font-awesome-icon :class="{'opacity-0': elo === -1}" :icon="['fas', 'trophy']"/>
+      <span v-if="elo !== -1">
+        {{ elo }} elo
       </span>
     </p>
   </div>
@@ -66,9 +66,9 @@ export default class QueueSlot extends Vue {
     return false
   }
 
-  get points () : number {
+  get elo () : number {
     if (this.player) {
-      return this.player.points
+      return this.player.elo
     }
     return -1
   }
