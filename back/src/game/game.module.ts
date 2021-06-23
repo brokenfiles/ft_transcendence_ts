@@ -6,12 +6,14 @@ import {GameController} from "./game.controller";
 import {GameService} from "./game.service";
 import {Game} from "./entity/game.entity";
 import {QueueService} from "./queue.service";
+import {GuildsModule} from "../guilds/guilds.module";
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([Game]),
         forwardRef(() => UsersModule),
-        forwardRef(() => WebsocketModule)
+        forwardRef(() => WebsocketModule),
+        forwardRef(() => GuildsModule)
     ],
     controllers: [GameController],
     providers: [GameService, QueueService],

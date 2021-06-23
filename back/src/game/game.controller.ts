@@ -25,6 +25,17 @@ export class GameController {
         return this.gameService.findAllFromUser(id, page)
     }
 
+    @Get('guilds/:id')
+    async findAllFromGuild (@Req() request, @Param('id', ParseIntPipe) id: number) {
+        const page = request.query.page || 0
+        return this.gameService.findAllFromGuild(id, page)
+    }
+
+    @Get('statistics/:id')
+    async findStatistics (@Param('id', ParseIntPipe) id: number) {
+        return this.gameService.findStatistics(id)
+    }
+
     @Get(':uuid')
     findOne (@Param('uuid') uuid: string) : Promise<Game> {
         return this.gameService.findOne(uuid)

@@ -12,6 +12,7 @@ import {GameState} from "./enums/game-state.enum";
 import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-join-match.interface";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
 import {Contains} from "class-validator";
+import {GuildsService} from "../guilds/guilds.service";
 
 @Injectable()
 export class GameService {
@@ -21,6 +22,7 @@ export class GameService {
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
                 private schedulerRegistry: SchedulerRegistry,
                 private userService: UsersService,
+                private guildsService: GuildsService,
                 private websocketService: WebsocketService) {
         const interval_id = setInterval(() => this.checkGames(), 1000)
         this.schedulerRegistry.addInterval('checkGames', interval_id)
@@ -33,8 +35,8 @@ export class GameService {
         })
     }
 
-    findAllFromUser(id: number, page: number) {
-        return this.gameRepository.find({
+    findAllFromUser(id: number, page: number, take: number = 10) {
+        return this.gameRepository.find( {
             where: [
                 {
                     state: GameState.FINISHED,
@@ -43,6 +45,27 @@ export class GameService {
                 {
                     state: GameState.FINISHED,
                     winner: id,
+                },
+            ],
+            skip: 10 * page,
+            take: take === -1 ? undefined : take,
+            order: { created_at: "DESC" },
+            relations: ['winner', 'looser'],
+        })
+    }
+
+    async findAllFromGuild(id: number, page: number) {
+        const guild = await this.guildsService.findOne(id)
+        const users = guild.users.map(u => u.id)
+        return this.gameRepository.find( {
+            where: [
+                {
+                    state: GameState.FINISHED,
+                    looser: In(users),
+                },
+                {
+                    state: GameState.FINISHED,
+                    winner: In(users),
                 },
             ],
             skip: 10 * page,
@@ -61,6 +84,15 @@ export class GameService {
                 message: [e.message]
             }, HttpStatus.BAD_REQUEST)
         })
+    }
+
+    async findStatistics(id: number) {
+        const games = await this.findAllFromUser(id, 0, -1)
+        return {
+            wins: games.filter((g) => g.winner.id === id).length,
+            loses: games.filter((g) => g.looser.id === id).length,
+            finished: games.length,
+        }
     }
 
     /**

@@ -39,7 +39,7 @@
                    :style="{backgroundColor}"
                    class="h-full block">
           <div class="h-full flex flex-wrap items-center justify-center text-center relative">
-            <div class="w-1/2 h-full relative py-8">
+            <div :class="{'py-8': isFullDisplay, 'py-2': !isFullDisplay}" class="w-1/2 h-full relative">
               <avatar class="w-20 h-20 mx-auto" :image-url="game.winner.avatar"/>
               <p class="mt-12 md:mt-4 p-2 font-semibold text-xl">
                 <span v-if="game.winner.guild" :class="{'opacity-0': !game.winner.guild}" class="font-normal">[{{ game.winner.guild.name }}] </span>
@@ -51,7 +51,7 @@
                 points
               </p>
             </div>
-            <div class="w-1/2 h-full relative py-8">
+            <div :class="{'py-8': isFullDisplay, 'py-2': !isFullDisplay}" class="w-1/2 h-full relative">
               <avatar class="w-20 h-20 mx-auto" :image-url="game.looser.avatar"/>
               <p class="mt-12 md:mt-4 p-2 font-semibold text-xl">
                 <span v-if="game.looser.guild" :class="{'opacity-0': !game.looser.guild}" class="font-normal">[{{ game.looser.guild.name }}] </span>

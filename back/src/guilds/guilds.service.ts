@@ -26,16 +26,10 @@ export class GuildsService {
         return guilds
     }
 
-    findAllOrderedByPoints(): Promise<Guild[]> {
-        return this.guildRepository.find({
-            relations: [
-                'users'
-            ],
-            order: {
-                points: "DESC"
-            },
-            take: 15
-        })
+    async findAllOrderedByPoints(): Promise<Guild[]> {
+        let guilds = await this.findAll()
+        guilds.sort((a, b) => a.points > b.points ? 1 : -1)
+        return guilds.slice(0, 15)
     }
 
     async findOne(id: number) : Promise<Guild> {

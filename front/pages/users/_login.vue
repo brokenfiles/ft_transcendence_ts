@@ -23,13 +23,12 @@
                      :friend-state="friendState"/>
       <admin-button :user="user" v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0" @adminActionPerformed="refetchUser"/>
       <level-bar class="my-4" :points="user.points"/>
-      <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
+      <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3" v-if="statistics">
         <!--statistics-->
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="wins"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" :value="loses"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="tournaments wins" value="54"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="statistics.wins"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" :value="statistics.loses"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="matchs" :value="statistics.finished"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="ratio" :value="(statistics.wins / statistics.loses).toFixed(2)"/>
       </div>
       <div class="flex flex-wrap items-center justify-center space-x-2">
         <!--achievements-->
@@ -90,6 +89,7 @@ export default class Account extends Vue {
   /** Variables */
   guild: any = null
   user: any = null
+  statistics: any = null
   games: GameInterface[] = []
   gamePage: number = 0
   connected: boolean = false
@@ -143,6 +143,7 @@ export default class Account extends Vue {
     if (this.user.guild)
       this.guild = await this.$axios.$get(`guilds/${this.user.guild.id}`)
     this.games = await this.$axios.$get(`games/users/${this.user.id}?page=${this.gamePage}`)
+    this.statistics = await this.$axios.$get(`games/statistics/${this.user.id}`)
     if (this.$auth.loggedIn)
       await this.fetchRequests()
   }

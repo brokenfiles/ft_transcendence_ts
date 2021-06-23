@@ -136,6 +136,10 @@
                 </div>
               </div>
             </div>
+            <div class="max-h-80 overflow-y-auto" v-if="tab === 'battles'">
+              <single-game v-for="(game, index) in games" :key="`game-${index}`" :user="$auth.user"
+                           :is-full-display="false" :game="game" class="w-full"/>
+            </div>
           </div>
         </div>
       </div>
@@ -151,11 +155,14 @@ import {Context} from "@nuxt/types";
 import Avatar from "~/components/User/Profile/Avatar.vue";
 import {UserInterface} from "~/utils/interfaces/users/user.interface";
 import EditableField from "~/components/Core/Editable/EditableField.vue";
+import {GameInterface} from "~/utils/interfaces/game/game.interface";
+import SingleGame from "~/components/Game/Records/SingleGame.vue";
 
 @Component({
   components: {
     Avatar,
-    EditableField
+    EditableField,
+    SingleGame
   }
 })
 export default class SingleGuild extends Vue {
@@ -166,6 +173,7 @@ export default class SingleGuild extends Vue {
   /** Variables */
   guild?: GuildInterface
   tab: string = 'members'
+  games: GameInterface[] = []
 
   /** Methods */
   validate({params}: Context) {
@@ -182,6 +190,11 @@ export default class SingleGuild extends Vue {
         })
       })
     return {guild, isGuildOpen: guild.open}
+  }
+
+  async fetch () {
+    if (this.guild)
+      this.games = await this.$axios.$get(`games/guilds/${this.guild.id}`)
   }
 
   leaveOrDestroyGuild() {
@@ -236,7 +249,7 @@ export default class SingleGuild extends Vue {
    * @param user
    */
   kickUserFromGuild(user: UserInterface) {
-    if (confirm(`Are you sure ?`)) {
+    if (confirm(`Are you sure you want to kick this user ?`)) {
       this.$axios.delete(`guilds/mine/user`, {
         data: {
           user: {

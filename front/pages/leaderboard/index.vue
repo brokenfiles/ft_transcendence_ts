@@ -47,7 +47,7 @@
               <span class="mr-2 hidden md:block">members :</span>
               <span class="font-light text-center block">{{ guild.users.length }}/{{guild.max_users}}</span>
             </div>
-            <p>{{ guild.war_points }} war points</p>
+            <p>{{ guild.points }} points</p>
           </div>
         </div>
       </div>
