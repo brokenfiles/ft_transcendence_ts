@@ -330,7 +330,8 @@ export default class SingleGuild extends Vue {
   }
 
   get guildUsersId(): number[] | undefined {
-    return this.guildUsers?.map(u => u.id)
+    if (this.guildUsers)
+      return this.guildUsers.map(u => u.id)
   }
 
 }
