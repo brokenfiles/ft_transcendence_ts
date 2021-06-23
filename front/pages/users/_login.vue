@@ -18,26 +18,28 @@
       <div v-if="user.role !== 'user'">
         <p>ft_transcendence's {{ user.role }}</p>
       </div>
+      <p>
+        elo : {{ user.elo }}
+      </p>
       <friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
                      class="mt-2 text-sm block md:absolute top-0 right-0"
                      :friend-state="friendState"/>
       <admin-button :user="user" v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0" @adminActionPerformed="refetchUser"/>
       <level-bar class="my-4" :points="user.points"/>
-      <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3">
+      <div v-if="this.$auth.loggedIn">
+        <button class="bg-primary text-yellow py-2 px-4 " @click="blockUser">block {{ this.user.display_name }}</button>
+      </div>
+      <div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3" v-if="statistics">
         <!--statistics-->
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="wins"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" :value="loses"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="tournaments wins" value="54"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
-        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" value="4"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="statistics.wins"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="loses" :value="statistics.loses"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="matchs" :value="statistics.finished"/>
+        <statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="ratio" :value="ratio.toFixed(2)"/>
       </div>
       <div class="flex flex-wrap items-center justify-center space-x-2">
         <!--achievements-->
         <achievement v-for="(achievement, index) in user.achievements" :key="`achievement-${index}`"
         :name="achievement.name" :description="achievement.description" :color="achievement.color"/>
-      </div>
-      <div v-if="this.$auth.loggedIn">
-        <button class="flex bg-black bold p-4" style="color: yellow" @click="blockUser">{{ `Block ${this.user.display_name}` }}</button>
       </div>
       <div class="flex flex-wrap items-center">
         <single-game v-for="(game, index) in games" :key="`game-${index}`" :user="$auth.user"
@@ -283,18 +285,14 @@ export default class Account extends Vue {
     return (this.$auth.user && this.$auth.user.role !== Role.User)
   }
 
-  get wins () : number {
-    return this.games.filter(g => g.winner.id === this.user.id).length
-  }
-
-  get loses () : number {
-    return this.games.filter(g => g.looser.id === this.user.id).length
-  }
-
   get ratio () : number {
-    if (this.loses === 0)
-      return this.wins
-    return this.wins / this.loses
+    if (this.statistics) {
+      const stats = this.statistics as any
+      if (stats.loses === 0 || stats.wins === 0)
+        return 0
+      return stats.wins / stats.loses
+    }
+    return 0
   }
 
   /**
