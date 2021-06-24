@@ -47,7 +47,7 @@
 							 :name="achievement.name" :description="achievement.description"
 							 :color="achievement.color"/>
 			</div>
-			<div class="flex flex-wrap items-center">
+			<div class="w-full flex flex-wrap items-center">
 				<single-game v-for="(game, index) in games" :key="`game-${index}`" :user="$auth.user"
 							 :is-full-display="false" :game="game" class="w-full md:w-1/2"/>
 			</div>
