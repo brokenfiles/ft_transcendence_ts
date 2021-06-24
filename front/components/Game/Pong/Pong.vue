@@ -321,8 +321,7 @@ export default class Pong extends Vue {
       "https://image.freepik.com/free-vector/battle-screen-versus-vs-background-template-design_1017-27090.jpg",
       "https://image.freepik.com/free-vector/red-blue-light-sparkle-versus-vs-screen_1017-26145.jpg"
     ]
-    console.log(uuid.charCodeAt(0) % (images.length) - 1)
-    return images[uuid.charCodeAt(0) % (images.length) - 1]
+    return images[uuid.charCodeAt(0) % images.length]
   }
 
   get opponent(): UserInterface {
