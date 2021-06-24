@@ -8,7 +8,7 @@ import {UsersService} from "../../users/users.service";
 
 export const GAME_CONSTANTS = {
     tps: 20,
-    max_points: 1,
+    max_points: 500,
     starting_time: 3000,
     window: {
         height: 480,

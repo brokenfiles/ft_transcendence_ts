@@ -1,11 +1,14 @@
 <template>
 	<div>
-    <p class="flex w-full mt-12 text-2xl">
-      <span class="flex-1 text-left">
-        {{ match.players[1].display_name }} - {{ player_1_points }}
+    <p class="flex w-full mt-12 text-2xl bg-primary">
+      <span class="flex-1 text-left ml-8">
+        {{ match.players[1].display_name }}
       </span>
-      <span class="flex-1 text-right">
-        {{ player_0_points }} - {{ match.players[0].display_name }}
+      <span class="flex text-center">
+        {{ player_1_points }} - {{ player_0_points }}
+      </span>
+      <span class="flex-1 text-right mr-8">
+        {{ match.players[0].display_name }}
       </span>
     </p>
 		<canvas ref="game" :width="this.match.gameWith" :height="this.match.gameHeight"
