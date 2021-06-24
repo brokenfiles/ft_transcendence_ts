@@ -29,6 +29,11 @@ export class User {
     })
     email: string
 
+    @Column({
+        nullable: true
+    })
+    double_auth_token: string
+
     @Column({ default: null })
     first_name: string
 
@@ -71,10 +76,8 @@ export class User {
     @ManyToMany(() => Channel, channel => channel.administrators)
     channels_admin: Channel[]
 
-
     @Column("int", { array: true, nullable: true, default: '{}' })
     users_id_blocked: number[]
-
 
     @ManyToMany(() => Achievement, achievement => achievement.users, {
         cascade: true

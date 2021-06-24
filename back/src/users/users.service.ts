@@ -10,8 +10,14 @@ import {Guild} from "../guilds/entities/guild.entity";
 
 @Injectable()
 export class UsersService {
+
+    mailjet: any = null
+
     constructor(@InjectRepository(User) private usersRepository: Repository<User>,
-                private chatService: WebsocketService) {}
+                private chatService: WebsocketService) {
+        this.mailjet = require ('node-mailjet')
+            .connect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_SECRET)
+    }
 
     create(createUser: CreateUserDto): Promise<User> {
         const newUser = this.usersRepository.create(createUser)
@@ -71,6 +77,13 @@ export class UsersService {
     findByLogin(login) : Promise<User | undefined> {
         return this.usersRepository.findOne({
             where: {login: login},
+            relations: ['guild', 'achievements']
+        })
+    }
+
+    findByDoubleAuthCode(double_auth_code: string) {
+        return this.usersRepository.findOne({
+            where: {double_auth_token: double_auth_code},
             relations: ['guild', 'achievements']
         })
     }
@@ -189,6 +202,43 @@ export class UsersService {
                 ]
             }, HttpStatus.BAD_REQUEST)
         user.guild_request = null
+        return this.usersRepository.save(user)
+    }
+
+    async sendAuthMail (user: User, token: string) {
+        this.mailjet
+            .post("send", {'version': 'v3.1'})
+            .request({
+                "Messages":[{
+                    "From": {
+                        "Email": "noreply@fenyx-mc.fr",
+                        "Name": "ft_transcendence"
+                    },
+                    "To": [{
+                        "Email": user.email,
+                        "Name": user.display_name
+                    }],
+                    "Subject": "Your 2fa code",
+                    "TextPart": `Hi ${user.display_name}, there is your 2 factor authentication code: ${token}`,
+                }]
+            })
+    }
+
+    /**
+     * Set the double auth token
+     * @param id
+     * @param token
+     */
+    async setDoubleAuthToken(id: number, token: string) : Promise<User> {
+        let user = await this.findOne(id)
+        user.double_auth_token = token
+        await this.sendAuthMail(user, token)
+        return this.usersRepository.save(user)
+    }
+
+    async removeDoubleAuthToken(id: number) {
+        let user = await this.findOne(id)
+        user.double_auth_token = ''
         return this.usersRepository.save(user)
     }
 }

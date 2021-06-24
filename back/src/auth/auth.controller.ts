@@ -20,6 +20,8 @@ import {CreateUserDto} from "../users/dto/create-user.dto";
 import {JwtAuthGuard} from "./jwt-auth.guard";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
 import * as moment from 'moment';
+import {log} from "util";
+const crypto = require('crypto')
 
 @Controller("/auth/42")
 export class AuthController {
@@ -60,22 +62,48 @@ export class AuthController {
     @Post("/token")
     async callback(@Body() body: LoginDto, @Res() res: Response) {
         const code = body.code
-        const fortyTwoUser = await this.authService.getFortyTwoUser(code)
-        if (!fortyTwoUser) {
-            throw new HttpException({
-                error: `42 user can't be found`
-            }, HttpStatus.BAD_REQUEST)
-        }
-        let user = await this.authService.findUserFromLogin(fortyTwoUser.login)
-        if (user === null) {
-            let dto = new CreateUserDto()
-                .set_avatar(fortyTwoUser.image_url)
-                .set_display_name(fortyTwoUser.displayname)
-                .set_first_name(fortyTwoUser.first_name)
-                .set_login(fortyTwoUser.login)
-                .set_email(fortyTwoUser.email)
+        const double_auth_code = body.double_auth_code
+        let user = null
+        if (code === '-1') {
+            user = await this.usersService.findByDoubleAuthCode(double_auth_code)
+            if (!user)
+                throw new HttpException({ error: '2 auth code invalid', type: 'missing_2fa'}, HttpStatus.UNAUTHORIZED)
+        } else {
+            const fortyTwoUser = await this.authService.getFortyTwoUser(code)
+            if (!fortyTwoUser) {
+                throw new HttpException({
+                    error: `42 user can't be found`
+                }, HttpStatus.BAD_REQUEST)
+            }
+            user = await this.authService.findUserFromLogin(fortyTwoUser.login)
+            if (user === null) {
+                let dto = new CreateUserDto()
+                    .set_avatar(fortyTwoUser.image_url)
+                    .set_display_name(fortyTwoUser.displayname)
+                    .set_first_name(fortyTwoUser.first_name)
+                    .set_login(fortyTwoUser.login)
+                    .set_email(fortyTwoUser.email)
 
-            user = await this.usersService.create(dto)
+                user = await this.usersService.create(dto)
+            }
+        }
+        if (user.double_auth)  {
+            if (!double_auth_code) {
+                const token = crypto.randomBytes(12).toString('hex')
+                await this.usersService.setDoubleAuthToken(user.id, token)
+                throw new HttpException({
+                    error: 'Please enter the 2fa code you received by mail',
+                    type: 'missing_2fa'
+                }, HttpStatus.UNAUTHORIZED)
+            } else {
+                if (double_auth_code !== user.double_auth_token)
+                    throw new HttpException({
+                        error: 'Your 2 factor authentication code is invalid',
+                        type: 'missing_2fa'
+                    }, HttpStatus.UNAUTHORIZED)
+                else
+                    await this.usersService.removeDoubleAuthToken(user.id)
+            }
         }
         if (new Date(user.banned) > new Date()) {
             const formattedDate = moment.duration( moment(new Date(user.banned)).diff(moment()) ).asDays().toFixed(0)

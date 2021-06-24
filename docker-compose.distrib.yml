@@ -12,9 +12,11 @@ services:
       - "81:81"
     environment:
       PORT: 4000
-      FORTYTWO_OAUTH_UID: 9579ba21d5e3c7f60d648235ee834440791768c01c27bb6063addd5044e3accc
-      FORTYTWO_OAUTH_SECRET: 02b1bdb90613c0e669129fca48f8a6f1eed40a3a45c6ec5490b090352c11ff69
-      JWT_SECRET: "SALUTLESAMIGO"
+      FORTYTWO_OAUTH_UID: <FORTYTWO_OAUTH_UID>
+      FORTYTWO_OAUTH_SECRET: <FORTYTWO_OAUTH_SECRET>
+      JWT_SECRET: <JWT_SECRET>
+      MJ_APIKEY_PUBLIC: <MJ_APIKEY_PUBLIC>
+      MJ_APIKEY_SECRET: <MJ_APIKEY_SECRET>
     command: "yarn start:dev"
     depends_on:
       - db
@@ -30,7 +32,7 @@ services:
       BASE_URL: "http://localhost:4000"
       SSR_BACKEND_BASE_URL: "http://back:4000"
       OAUTH_REDIRECT_URL: "http://localhost:3000/auth/42"
-      FORTYTWO_OAUTH_UID: 9579ba21d5e3c7f60d648235ee834440791768c01c27bb6063addd5044e3accc
+      FORTYTWO_OAUTH_UID: <FORTYTWO_OAUTH_UID>
     command: "yarn dev"
     depends_on:
       - back
