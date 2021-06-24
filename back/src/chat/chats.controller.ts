@@ -16,7 +16,7 @@ export class ChatsController {
 
     @Get("block/:id")
     @UseGuards(JwtAuthGuard)
-    async banOne(@Param('id') id: number, @Req() request, @Res() res: Response) {
+    async blockOne(@Param('id') id: number, @Req() request, @Res() res: Response) {
 
         let curr_user
         let ban_user
@@ -25,30 +25,42 @@ export class ChatsController {
 
         let blocked: boolean
 
-        if (ban_user.id === request.user.sub) {
-            throw new HttpException('Not modified', HttpStatus.BAD_REQUEST);
-        }
+        if (curr_user && ban_user)
+        {
+            if (ban_user.id === request.user.sub) {
+                throw new HttpException('Not modified', HttpStatus.BAD_REQUEST);
+            }
 
-        if (curr_user.users_blocked.map((u) => u.id).includes(ban_user.id)) {
-            curr_user.users_blocked = curr_user.users_blocked.filter((u) => u.id !== ban_user.id)
-            blocked = false
+            if (!curr_user.users_id_blocked.includes(ban_user.id)) {
+                blocked = true
+                curr_user.users_id_blocked.push(ban_user.id)
+            }
+            else {
+                blocked = false
+                curr_user.users_id_blocked = curr_user.users_id_blocked.filter((u) => u !== ban_user.id)
+            }
+            await this.userRepository.save(curr_user)
         }
         else
-        {
-            curr_user.users_blocked.push(ban_user)
-            blocked = true
-        }
-
-        await this.userRepository.save(curr_user)
-
-        console.log("noooo")
-        console.log(curr_user.users_blocked)
-        console.log(ban_user.users_blocked)
-        console.log("noooo")
+            throw new HttpException('Bad Users', HttpStatus.BAD_REQUEST);
 
         return res.status(HttpStatus.OK).json({
             blocked
         })
     }
 
+    @Get("isblocked/:id")
+    @UseGuards(JwtAuthGuard)
+    async isBlocked(@Param('id') id: number, @Req() request, @Res() res: Response) {
+
+        let curr_user
+        let ban_user
+        curr_user = await this.userService.findOne(request.user.sub)
+        ban_user = await this.userService.findOne(id)
+
+        const state = (curr_user && curr_user.users_id_blocked.length && curr_user.users_id_blocked.includes(ban_user.id));
+        return res.status(HttpStatus.OK).json({
+            blocked: state
+        })
+    }
 }

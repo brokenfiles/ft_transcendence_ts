@@ -15,7 +15,7 @@ export class UsersService {
 
     create(createUser: CreateUserDto): Promise<User> {
         const newUser = this.usersRepository.create(createUser)
-        // newUser.users_banned = []
+        newUser.users_id_blocked = []
         return this.usersRepository.save(newUser)
     }
 
@@ -53,19 +53,6 @@ export class UsersService {
             [id],
         );
 
-        const users_blocked = await this.usersRepository.query(
-            `SELECT *
-              FROM Users U
-              WHERE U.id <> $1
-                AND EXISTS(
-                      SELECT 1
-                      FROM users_users_blocked_users F
-                      WHERE (F."usersId_1" = $1 AND F."usersId_2" = U.id)
-                         OR (F."usersId_2" = $1 AND F."usersId_1" = U.id)
-                  );`,
-            [id],
-        );
-
         let user = await this.usersRepository.findOneOrFail(id, {
             relations: [
                 'guild', 'achievements', 'guild_request', 'channels_owned', 'channels_admin', ...relations
@@ -76,14 +63,15 @@ export class UsersService {
             }, HttpStatus.BAD_REQUEST)
         })
         user.friends = friends
-        user.users_blocked = users_blocked
+        // user.self_users_blocked = self_users_blocked
+        // user.others_users_blocked = others_users_blocked
         return Promise.resolve(user)
     }
 
     findByLogin(login) : Promise<User | undefined> {
         return this.usersRepository.findOne({
             where: {login: login},
-            relations: ['guild', 'achievements', 'users_blocked']
+            relations: ['guild', 'achievements']
         })
     }
 

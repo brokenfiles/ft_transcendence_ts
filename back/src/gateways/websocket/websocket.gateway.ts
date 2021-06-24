@@ -23,6 +23,7 @@ import {QueueService} from "../../game/queue.service";
 import {JwtService} from "@nestjs/jwt";
 import {ClientJoinMatchInterface} from "./interfaces/client-join-match.interface";
 import {Coordinates} from "../../game/classes/game.classes";
+import {UsersService} from "../../users/users.service";
 
 
 @WebSocketGateway(81,
@@ -38,7 +39,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 private websocketService: WebsocketService,
                 private chatsService: ChatsService,
                 private gameService: GameService,
-                private queueService: QueueService) {
+                private queueService: QueueService,
+                private userService: UsersService) {
     }
 
     @WebSocketServer() server: Server
@@ -100,10 +102,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
             const users_in_channel = this.websocketService.clients.filter((u) => users_id.includes(u.userId))
             const real_text = message.text
+            const curr_user = await this.userService.findOne(sub)
             for (const user of users_in_channel) {
 
-                if (message.owner && message.owner.users_blocked.map((u) => u.id).includes(user.userId) && user.userId !== sub)
+                const tmp_user = await this.userService.findOne(user.userId)
+
+                if (tmp_user.users_id_blocked.includes(sub) || curr_user.users_id_blocked.includes(tmp_user.id)) {
                     message.text = BLOCKED_MSG
+                }
                 else
                     message.text = real_text
 

@@ -96,9 +96,10 @@ export class ChatsService {
     async getMessageFromChannel(sub: number, id: number): Promise<Message[]> {
         try {
             const channel = await this.channelRepository.findOne(id)
+            const curr_user = await this.usersService.findOne(sub)
             if (channel) {
                 let messages = await this.messageRepository.find({
-                    relations: ['owner', 'owner.users_blocked'],
+                    relations: ['owner'],
                     where: {
                         channel
                     },
@@ -107,19 +108,24 @@ export class ChatsService {
                     }
                 })
 
+                if (messages && curr_user)
+                {
+                    let user
+                    await Promise.all(messages.map(async (msg) => {
 
-                let user
-                await Promise.all(messages.map(async (msg) => {
-                    if (msg.owner.id !== sub)
-                        user = await this.usersService.findOne(msg.owner.id)
-                    else
-                        user = null
-                    if (user && user.users_blocked.length && user.users_blocked.map((u) => u.id).includes(sub)) {
-                        msg.text = BLOCKED_MSG
-                    }
-                    return msg
-                }))
-                return messages
+                        if (msg.owner.id !== sub) {
+                            user = await this.usersService.findOne(msg.owner.id)
+                        }
+                        else
+                            user = null
+                        if (user && (user.users_id_blocked.length || curr_user.users_id_blocked.length) &&
+                            (user.users_id_blocked.includes(sub) || curr_user.users_id_blocked.includes(user.id))) {
+                            msg.text = BLOCKED_MSG
+                        }
+                        return msg
+                    }))
+                    return messages
+                }
             }
         } catch (e) {
             throw new WsException({
