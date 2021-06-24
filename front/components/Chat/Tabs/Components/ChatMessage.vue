@@ -1,16 +1,16 @@
 <template>
   <div class="w-full">
-    <nuxt-link :to="`/users/${message.owner.login}`" class="flex flex-wrap items-center"
+    <nuxt-link :to="`/users/${message.owner.login}`" class="flex flex-wrap items-center mt-8"
          :class="{'text-right': authenticatedId === message.owner.id}"
          v-if="!previous_message || previous_message.owner.id !== message.owner.id">
-      <avatar class="z-40 h-8 w-8"
-              :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
-              :image-url="message.owner.avatar" @mouseover="showUserName = true" @mouseleave="showUserName = false"/>
-      <span :class="userNameClasses" class="text-gray-400 text-md absolute bg-secondary block z-50 -mt-6 px-2" v-if="showUserName">
+      <span :class="userNameClasses" class="text-gray-400 text-xs font-light block absolute -mt-16 pt-4">
         <client-only>
           <p>{{ message.owner.display_name }}</p>
         </client-only>
       </span>
+      <avatar class="z-40 h-8 w-8"
+              :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
+              :image-url="message.owner.avatar" @mouseover="showUserName = true" @mouseleave="showUserName = false"/>
       <p class="flex-1"
         :class="{'ml-2': authenticatedId !== message.owner.id}">
       </p>
