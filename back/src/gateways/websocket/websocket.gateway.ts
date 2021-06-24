@@ -17,7 +17,10 @@ import {SendMessageDto} from "../../chat/dto/send-message.dto";
 import {BLOCKED_MSG, PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
-import {BanUsersFromChannelInterface} from "./interfaces/ban-users-from-channel.interface";
+import {
+    BanUsersFromChannelInterface,
+    MuteUsersFromChannelInterface
+} from "./interfaces/ban-users-from-channel.interface";
 import {GameService} from "../../game/game.service";
 import {QueueService} from "../../game/queue.service";
 import {JwtService} from "@nestjs/jwt";
@@ -86,12 +89,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('msgToServer')
-    async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<void> {
+    async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<any> {
         const message = await this.chatsService.pushMsgInChannel(payload)
         const channel = await this.chatsService.findOneChannel(payload.channel_id)
         const {sub} = (client.handshake as any).user
 
         let user_validate = channel.users.filter((user) => user.id === sub)
+
+        if (channel && channel.muted_users.map((u) => u.id).includes(sub))
+            return { error: "You are muted !!" }
 
         if (channel && message) {
             let users_id = []
@@ -196,6 +202,19 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         const banned_state = await this.chatsService.banUserFromChannel(sub, payload)
         return {banned: banned_state}
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('toggleMuteUserFromChannel')
+    async muteUserFromChannel(client: Socket, payload: MuteUsersFromChannelInterface)
+    {
+        const {sub} = (client.handshake as any).user
+        const mute_state = await this.chatsService.muteUserFromChannel(sub, payload)
+        console.log(mute_state)
+        return {
+            muted: mute_state
+        }
     }
 
 

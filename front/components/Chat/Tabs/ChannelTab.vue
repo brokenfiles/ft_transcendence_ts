@@ -79,7 +79,10 @@ export default class ChannelTab extends Vue {
         channel_id: this.curr_channel.id,
         message: this.model_message,
         user_id: (this.$auth.user as any).id
-      })
+      }, (data: any) => {
+      	if (data.error)
+			this.$toast.error(data.error)
+	  })
       this.model_message = ''
     }
   }

@@ -12,7 +12,10 @@ import {WebsocketService} from "../gateways/websocket/websocket.service";
 import {ChangeChannelPropertyInterface} from "../gateways/websocket/interfaces/change-channel-property.interface";
 import {User} from "../users/entities/user.entity";
 import {Socket} from "socket.io";
-import {BanUsersFromChannelInterface} from "../gateways/websocket/interfaces/ban-users-from-channel.interface";
+import {
+    BanUsersFromChannelInterface,
+    MuteUsersFromChannelInterface
+} from "../gateways/websocket/interfaces/ban-users-from-channel.interface";
 import {chmod} from "fs";
 
 @Injectable()
@@ -203,7 +206,7 @@ export class ChatsService {
 
     async findOneChannel(id: number) {
         return this.channelRepository.findOne({
-            relations: ['users', 'administrators', 'banned_users', 'owner'],
+            relations: ['users', 'administrators', 'banned_users', 'owner', 'muted_users'],
             where: {
                 id
             }
@@ -379,6 +382,33 @@ export class ChatsService {
         for (const user_id of this.websocketService.onlineClients) {
             if (this.userIsConnectedAndInCurrentChannel(user_id, curr_channel) && user_id !== sub)
                 this.emitClientToHome(user_id, curr_channel, message)
+        }
+    }
+
+    async muteUserFromChannel(sub: any, payload: MuteUsersFromChannelInterface) {
+        let curr_channel = await this.findOneChannel(payload.channel_id)
+        const current_admin_user = await this.usersService.findOne(sub)
+        let state
+        if (curr_channel && this.isUserAdministrator(current_admin_user, curr_channel)) {
+
+            if (curr_channel.muted_users.map((u) => u.id).includes(payload.toggle_mute_user_id)) {
+                curr_channel.muted_users = curr_channel.muted_users.filter((u) => u.id != payload.toggle_mute_user_id)
+                state = false
+            } else {
+                const user_to_mute = await this.usersService.findOne(payload.toggle_mute_user_id)
+
+                if (user_to_mute) {
+                    curr_channel.muted_users.push(user_to_mute)
+
+                    await this.websocketService.notify([user_to_mute.id], {
+                        fetchClient: false,
+                        message: `You've been muted from ${curr_channel.name} channel`,
+                    })
+                    state = true
+                }
+            }
+            await this.channelRepository.save(curr_channel)
+            return state
         }
     }
 }
