@@ -10,7 +10,7 @@
       </span>
       <avatar class="z-40 h-8 w-8"
               :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
-              :image-url="message.owner.avatar" @mouseover="showUserName = true" @mouseleave="showUserName = false"/>
+              :image-url="message.owner.avatar"/>
       <p class="flex-1"
         :class="{'ml-2': authenticatedId !== message.owner.id}">
       </p>
@@ -45,7 +45,6 @@ export default class ChatMessage extends Vue {
 
   /** Variables */
   showMessageSendingDate: boolean = false
-  showUserName: boolean = false
 
   /** Computed */
   get authenticatedId(): number {
