@@ -313,7 +313,7 @@ export default class Pong extends Vue {
   }
 
   get background(): string {
-    const character = this.match.uuid[0]
+    const uuid = this.match.uuid
     const images = [
       "https://image.freepik.com/free-vector/battle-versus-vs-background-sports-game_1017-23766.jpg",
       "https://image.freepik.com/free-vector/versus-vs-screen-banner-battle-comparision_1017-26142.jpg",
@@ -321,7 +321,8 @@ export default class Pong extends Vue {
       "https://image.freepik.com/free-vector/battle-screen-versus-vs-background-template-design_1017-27090.jpg",
       "https://image.freepik.com/free-vector/red-blue-light-sparkle-versus-vs-screen_1017-26145.jpg"
     ]
-    return images[parseInt(character) % (images.length - 1)]
+    console.log(uuid.charCodeAt(0) % (images.length) - 1)
+    return images[uuid.charCodeAt(0) % (images.length) - 1]
   }
 
   get opponent(): UserInterface {
