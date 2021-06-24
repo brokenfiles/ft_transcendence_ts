@@ -204,16 +204,28 @@ export default class Account extends Vue {
 
 	inviteToChat()
 	{
-		this.$socket.client.emit('createChannel', {
-			name: "privatechannel",
-			privacy: "private",
-			users: [this.user.id],
-			password: false
-		})
-		this.$toast.success(`You created the channel privatechannel`)
-		this.$emit('createdChannel', {
-			channel: "privatechannel"
-		})
+		if (this.$auth.loggedIn && this.$auth.user)
+		{
+			const curr_channel = `mp: ${this.user.login} ${this.$auth.user.login}`
+			this.$socket.client.emit('createDirectChannel', {
+				name: "",
+				privacy: "private",
+				users: [this.user.id],
+				password: false,
+				requester: this.$auth.user.login,
+				receiver: this.user.login
+			}, (data: any) => {
+				if (data.error)
+					this.$toast.error(data.error)
+				else
+				{
+					this.$toast.success(data.success)
+					this.$emit('createdChannel', {
+						channel: curr_channel
+					})
+				}
+			})
+		}
 	}
 
 	/**

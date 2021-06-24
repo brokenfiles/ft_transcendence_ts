@@ -80,11 +80,16 @@ export default class ChannelCreation extends Vue {
         privacy: this.model_privacy,
         users: this.added_users.length > 0 ? this.added_users.map(u => u.id) : false,
         password: this.model_password ? this.model_password : false
-      })
-      this.$toast.success(`You created the channel ${this.model_channel}`)
-      this.$emit('createdChannel', {
-        channel: this.model_channel
-      })
+      }, (data: any) => {
+      	if (data.error)
+			this.$toast.error(data.error)
+      	else {
+			this.$toast.success(`You created the channel ${this.model_channel}`)
+			this.$emit('createdChannel', {
+				channel: this.model_channel
+			})
+		}
+	  })
     }
   }
 

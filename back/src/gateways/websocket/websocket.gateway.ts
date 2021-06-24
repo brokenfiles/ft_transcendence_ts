@@ -12,7 +12,7 @@ import {WebsocketService} from "./websocket.service";
 import {WsJwtAuthGuard} from "../../auth/ws-jwt-auth.guard";
 import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFilter";
 import {ChatsService} from "../../chat/chats.service";
-import {CreateChannelDto} from "../../chat/dto/create-channel.dto";
+import {CreateChannelDto, CreateDirectChannelDto} from "../../chat/dto/create-channel.dto";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
 import {BLOCKED_MSG, PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
@@ -118,34 +118,37 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         }
     }
 
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('createDirectChannel')
+    async createDirectChannel(client: Socket, payload: CreateDirectChannelDto): Promise<any> {
+        const {sub} = (client.handshake as any).user
+        payload.name = `mp: ${payload.requester} ${payload.receiver}`
+        if (!await this.chatsService.findChannelByName(payload.name)) {
+            this.chatsService.createChannelTemplate(payload, sub)
+            return ({
+                success: `direct channel ${payload.name} created`
+            })
+        }
+        return ({
+            error: `direct channel ${payload.name} already exists`
+        })
+    }
+
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('createChannel')
-    createChannelEvent(client: Socket, payload: CreateChannelDto): void {
+    createChannelEvent(client: Socket, payload: CreateChannelDto): any {
         const {sub} = (client.handshake as any).user
-        this.chatsService.createChannel(payload, sub).then((res) => {
+        if (payload.name.search("mp:") !== -1)
+            return ({
+                error: "You cannot create channel with \'mp:\' ban word",
+            })
 
-            if (res.privacy === PrivacyEnum.PUBLIC || res.privacy === PrivacyEnum.PASSWORD) {
-                for (let u of this.websocketService.onlineClients)
-                {
-                    const i = this.websocketService.onlineClients.indexOf(u)
-                    if (i !== -1) {
-                        this.chatsService.findAllChannel(u).then((channels) => {
-                            this.websocketService.clients[i].socket.emit('getChannels', channels)
-                        })
-                    }
-                }
-            } else {
-                let users_id = res.users.map((u) => u.id)
-                for (const user of users_id) {
-                    const index = this.websocketService.onlineClients.indexOf(user)
-                    if (index !== -1) {
-                        this.chatsService.findAllChannel(user).then((channels) => {
-                            this.websocketService.clients[index].socket.emit('getChannels', channels)
-                        })
-                    }
-                }
-            }
+        this.chatsService.createChannelTemplate(payload, sub)
+        return ({
+            success: `Channel ${payload.name} created !`,
         })
     }
 
