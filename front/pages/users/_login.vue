@@ -36,19 +36,14 @@
 					</button>
 				</div>
 				<div v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id">
-					<button @click="blockUser" class="relative bg-red-300 text-red-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full">
-						<div v-if="!this.userIsBlocked">
-							Block {{ this.user.display_name }}
-							<span class="text-xxs block">(click to block)</span>
-						</div>
-						<div v-if="this.userIsBlocked">
-							Unblock {{ this.user.display_name }}
-							<span class="text-xxs block">(click to unblock)</span>
-						</div>
+					<button @click="blockUser" class="relative bg-red-300 text-red-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full mb-4">
+            <span>
+              {{ this.userIsBlocked ? 'Unblock' : 'Block' }} {{ this.user.display_name }}
+            </span>
 					</button>
 				</div>
 				<div v-if="(this.$auth.loggedIn && this.$auth.user.id !== user.id)">
-					<button @click="inviteToChat" class="relative bg-green-300 text-green-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none">
+					<button @click="inviteToChat" class="relative bg-green-300 text-green-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full">
 						Chat with {{ this.user.display_name }}
 					</button>
 				</div>
@@ -222,11 +217,11 @@ export default class Account extends Vue {
 	}
 
 	/**
-	 * Launch a match between the logged user and the user he challenged
-	 */
+   * Launch a match between the logged user and the user he challenged
+   */
 	challengeUser() {
 
-	}
+  }
 
 	/**
 	 * Event when the user saves the display name
