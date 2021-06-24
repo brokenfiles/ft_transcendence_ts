@@ -34,10 +34,10 @@ export class ChatsService {
     async findAllChannel(user_id: number): Promise<Channel[]> {
 
         let user = await this.usersService.findOne(user_id,
-            ['channels', 'channels.banned_users', 'channels.administrators', 'channels.users', 'channels.owner'])
+            ['channels', 'channels.banned_users', 'channels.muted_users', 'channels.administrators', 'channels.users', 'channels.owner'])
 
         let publicChannels = await this.channelRepository.find({
-            relations: ['banned_users', 'administrators', 'users', 'owner'],
+            relations: ['banned_users', 'administrators', 'users', 'owner', 'muted_users'],
             where: [
                 {privacy: PrivacyEnum.PUBLIC},
                 {privacy: PrivacyEnum.PASSWORD}

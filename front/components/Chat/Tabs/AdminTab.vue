@@ -40,6 +40,11 @@
             <span v-if="channel.banned_users.map(u => u.id).includes(user.id)">🕊</span>
             <span v-else>🔨</span>
           </button>
+          <button @click="toggleUserMute(user)" v-if="user.id !== channel.owner.id"
+                  class="focus:outline-none p-1 text-red-800 text-center">
+            <span v-if="channel.muted_users.map(u => u.id).includes(user.id)">🔈</span>
+            <span v-else>🔇</span>
+          </button>
           <button @click="removeUser(user)" v-if="user.id !== channel.owner.id"
                   class="focus:outline-none p-1 text-red-800 text-center">❌
           </button>
@@ -65,6 +70,10 @@ import Avatar from "~/components/User/Profile/Avatar.vue";
 
 interface ToggleBanInterface {
   banned: boolean
+}
+
+interface ToggleMuteInterface {
+  muted: boolean
 }
 
 @Component({
@@ -122,6 +131,34 @@ export default class AdminTab extends Vue {
         } else {
           this.channel.banned_users.push(user)
           this.$toast.success(`Banned user ${user.display_name}`)
+        }
+        this.$emit('channelSaved', this.channel, false)
+      })
+    }
+  }
+
+  toggleUserMute (user: UserInterface) : void {
+    let confirmed
+    if (this.channel.muted_users.includes(user)) {
+      // unban
+      confirmed = confirm(`Are you sure you want to unmute ${user.display_name} from the channel ?`)
+    } else {
+      // ban
+      confirmed = confirm(`Are you sure you want to mute ${user.display_name} from the channel ?`)
+    }
+    if (confirmed) {
+      this.$socket.client.emit('toggleMuteUserFromChannel', {
+        toggle_mute_user_id: user.id,
+        channel_id: this.channel.id
+      }, (data: ToggleMuteInterface) => {
+        if (!data.muted) {
+          const index = this.channel.muted_users.map(u => u.id).indexOf(user.id)
+          if (index !== -1)
+            this.channel.muted_users.splice(index, 1)
+          this.$toast.success(`Unmuted user ${user.display_name}`)
+        } else {
+          this.channel.muted_users.push(user)
+          this.$toast.success(`Muted user ${user.display_name}`)
         }
         this.$emit('channelSaved', this.channel, false)
       })

@@ -42,6 +42,10 @@ export class Channel {
     @JoinTable()
     banned_users: User[]
 
+    @ManyToMany(() => User)
+    @JoinTable()
+    muted_users: User[]
+
     @ManyToMany(() => User, user => user.channels_admin)
     @JoinTable()
     administrators: User[]

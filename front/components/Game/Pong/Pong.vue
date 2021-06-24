@@ -2,7 +2,7 @@
   <div>
     <p class="flex w-full mt-12 text-2xl bg-primary">
       <span class="flex-1 text-left">
-        <span class="text-yellow">
+        <span class="text-yellow" v-if="match.players[1].guild">
           [{{ match.players[1].guild.anagram }}]
         </span>
         <span class="font-light">
@@ -13,7 +13,7 @@
         {{ player_1_points }} - {{ player_0_points }}
       </span>
       <span class="flex-1 text-right">
-        <span class="text-yellow">
+        <span class="text-yellow" v-if="match.players[0].guild">
           [{{ match.players[0].guild.anagram }}]
         </span>
         <span class="font-light">

@@ -14,6 +14,7 @@ export interface ChannelInterface {
   privacy: PrivacyEnum
   messages: MessageInterface[]
   banned_users: UserInterface[]
+  muted_users: UserInterface[]
   administrators: UserInterface[]
   password?: string
 
