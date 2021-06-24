@@ -22,32 +22,37 @@
 			<p>
 				elo : {{ user.elo }}
 			</p>
-      <admin-button :user="user" v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0"
-                    @adminActionPerformed="refetchUser"/>
-      <level-bar class="my-4" :points="user.points"/>
-      <div class="absolute top-0 right-0">
-        <friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
-                 class="mt-2 text-sm block relative mb-4"
-                 :friend-state="friendState"/>
-        <div v-if="(this.$auth.loggedIn && this.$auth.user.id !== user.id) && this.clients.includes(this.user.id)">
-          <button @click="challengeUser" class="relative bg-blue-300 text-blue-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none mb-4">
-            Challenge {{ this.user.display_name }}
-            <span class="text-xxs block">(click to challenge)</span>
-          </button>
-        </div>
-        <div v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id">
-          <button @click="blockUser" class="relative bg-red-300 text-red-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full">
-            <div v-if="!this.userIsBlocked">
-              Block {{ this.user.display_name }}
-              <span class="text-xxs block">(click to block)</span>
-            </div>
-            <div v-if="this.userIsBlocked">
-              Unblock {{ this.user.display_name }}
-              <span class="text-xxs block">(click to unblock)</span>
-            </div>
-          </button>
-        </div>
-      </div>
+			<admin-button :user="user" v-if="isNotUser" class="mt-2 text-sm block md:absolute top-0 left-0"
+						  @adminActionPerformed="refetchUser"/>
+			<level-bar class="my-4" :points="user.points"/>
+			<div class="absolute top-0 right-0">
+				<friend-button v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id" @update="updateFriend"
+							   class="mt-2 text-sm block relative mb-4"
+							   :friend-state="friendState"/>
+				<div v-if="(this.$auth.loggedIn && this.$auth.user.id !== user.id) && this.clients.includes(this.user.id)">
+					<button @click="challengeUser" class="relative bg-blue-300 text-blue-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none mb-4">
+						Challenge {{ this.user.display_name }}
+						<span class="text-xxs block">(click to challenge)</span>
+					</button>
+				</div>
+				<div v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id">
+					<button @click="blockUser" class="relative bg-red-300 text-red-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full">
+						<div v-if="!this.userIsBlocked">
+							Block {{ this.user.display_name }}
+							<span class="text-xxs block">(click to block)</span>
+						</div>
+						<div v-if="this.userIsBlocked">
+							Unblock {{ this.user.display_name }}
+							<span class="text-xxs block">(click to unblock)</span>
+						</div>
+					</button>
+				</div>
+				<div v-if="(this.$auth.loggedIn && this.$auth.user.id !== user.id)">
+					<button @click="inviteToChat" class="relative bg-green-300 text-green-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none">
+						Chat with {{ this.user.display_name }}
+					</button>
+				</div>
+			</div>
 			<div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3" v-if="statistics">
 				<!--statistics-->
 				<statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="statistics.wins"/>
@@ -171,7 +176,8 @@ export default class Account extends Vue {
 			this.guild = await this.$axios.$get(`guilds/${this.user.guild.id}`)
 		this.games = await this.$axios.$get(`games/users/${this.user.id}?page=${this.gamePage}`)
 		this.statistics = await this.$axios.$get(`games/statistics/${this.user.id}`)
-		this.userIsBlocked = await this.$axios.$get(`chat/isblocked/${this.user.id}`).then((e) => (e.blocked))
+		if (this.$auth.loggedIn)
+			this.userIsBlocked = await this.$axios.$get(`chat/isblocked/${this.user.id}`).then((e) => (e.blocked))
 		if (this.$auth.loggedIn)
 			await this.fetchRequests()
 	}
@@ -199,15 +205,28 @@ export default class Account extends Vue {
 		}).catch((e) => {
 			this.$toast.error(`Cannot block user ${this.user.display_name}`)
 		})
+	}
 
+	inviteToChat()
+	{
+		this.$socket.client.emit('createChannel', {
+			name: "privatechannel",
+			privacy: "private",
+			users: [this.user.id],
+			password: false
+		})
+		this.$toast.success(`You created the channel privatechannel`)
+		this.$emit('createdChannel', {
+			channel: "privatechannel"
+		})
 	}
 
 	/**
-   * Launch a match between the logged user and the user he challenged
-   */
+	 * Launch a match between the logged user and the user he challenged
+	 */
 	challengeUser() {
 
-  }
+	}
 
 	/**
 	 * Event when the user saves the display name
