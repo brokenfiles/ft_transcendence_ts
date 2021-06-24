@@ -27,6 +27,9 @@ export class ChatsController {
 
         if (curr_user && ban_user)
         {
+            if (!curr_user.users_id_blocked)
+                curr_user.users_id_blocked = []
+
             if (ban_user.id === request.user.sub) {
                 throw new HttpException('Not modified', HttpStatus.BAD_REQUEST);
             }
@@ -58,7 +61,9 @@ export class ChatsController {
         curr_user = await this.userService.findOne(request.user.sub)
         ban_user = await this.userService.findOne(id)
 
-        const state = (curr_user && curr_user.users_id_blocked.length && curr_user.users_id_blocked.includes(ban_user.id));
+        let state = false
+        if (curr_user.users_id_blocked)
+            state = (curr_user && curr_user.users_id_blocked.length && curr_user.users_id_blocked.includes(ban_user.id));
         return res.status(HttpStatus.OK).json({
             blocked: state
         })

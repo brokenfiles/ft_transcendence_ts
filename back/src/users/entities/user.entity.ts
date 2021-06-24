@@ -67,7 +67,7 @@ export class User {
     channels_admin: Channel[]
 
 
-    @Column("int", { array: true })
+    @Column("int", { array: true, nullable: true })
     users_id_blocked: number[]
 
 
