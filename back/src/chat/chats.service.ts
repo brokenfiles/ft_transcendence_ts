@@ -3,7 +3,7 @@ import {Message} from "./entities/message.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {Channel} from "./entities/channel.entity";
-import {CreateChannelDto} from "./dto/create-channel.dto";
+import {CreateChannelDto, CreateDirectChannelDto} from "./dto/create-channel.dto";
 import {UsersService} from "../users/users.service";
 import {SendMessageDto} from "./dto/send-message.dto";
 import {BLOCKED_MSG, PrivacyEnum} from "./enums/privacy.enum";
@@ -13,6 +13,7 @@ import {ChangeChannelPropertyInterface} from "../gateways/websocket/interfaces/c
 import {User} from "../users/entities/user.entity";
 import {Socket} from "socket.io";
 import {BanUsersFromChannelInterface} from "../gateways/websocket/interfaces/ban-users-from-channel.interface";
+import {chmod} from "fs";
 
 @Injectable()
 export class ChatsService {
@@ -56,6 +57,43 @@ export class ChatsService {
 
     isUserInChannel(user_id: number, channel: Channel): boolean {
         return channel.users.map(u => u.id).includes(user_id);
+    }
+
+    findChannelByName(name: string)
+    {
+        return this.channelRepository.findOne({
+            where: {
+                name
+            }
+        })
+    }
+
+    createChannelTemplate(createChannel: CreateChannelDto | CreateDirectChannelDto, sub: number)
+    {
+        this.createChannel(createChannel, sub).then((res) => {
+
+            if (res.privacy === PrivacyEnum.PUBLIC || res.privacy === PrivacyEnum.PASSWORD) {
+                for (let u of this.websocketService.onlineClients)
+                {
+                    const i = this.websocketService.onlineClients.indexOf(u)
+                    if (i !== -1) {
+                        this.findAllChannel(u).then((channels) => {
+                            this.websocketService.clients[i].socket.emit('getChannels', channels)
+                        })
+                    }
+                }
+            } else {
+                let users_id = res.users.map((u) => u.id)
+                for (const user of users_id) {
+                    const index = this.websocketService.onlineClients.indexOf(user)
+                    if (index !== -1) {
+                        this.findAllChannel(user).then((channels) => {
+                            this.websocketService.clients[index].socket.emit('getChannels', channels)
+                        })
+                    }
+                }
+            }
+        })
     }
 
     async createChannel(ChannelDto: CreateChannelDto, sub: number) {
