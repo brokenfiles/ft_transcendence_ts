@@ -37,17 +37,19 @@
         </div>
         <div v-if="this.$auth.loggedIn && this.$auth.user.id !== user.id">
           <button @click="blockUser" class="relative bg-red-300 text-red-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full">
-            <div v-if="!this.userIsBlocked">
+            <span v-if="!this.userIsBlocked">
               Block {{ this.user.display_name }}
               <span class="text-xxs block">(click to block)</span>
-            </div>
-            <div v-if="this.userIsBlocked">
+            </span>
+            <span v-if="this.userIsBlocked">
               Unblock {{ this.user.display_name }}
               <span class="text-xxs block">(click to unblock)</span>
-            </div>
+            </span>
           </button>
-        </div>
-      </div>
+		</div>
+<!--		  <button class="relative bg-red-300 text-red-800 text-sm px-10 py-3 text-center uppercase font-bold rounded-md focus:outline-none w-full" @click="inviteToChat">Invite to Chat</button>-->
+
+	  </div>
 			<div class="flex flex-wrap justify-center my-2 mb-4 w-full md:w-2/3" v-if="statistics">
 				<!--statistics-->
 				<statistic class="w-1/3 md:w-1/3 lg:w-1/5 xl:w-1/6" unity="wins" :value="statistics.wins"/>
@@ -202,12 +204,19 @@ export default class Account extends Vue {
 
 	}
 
-	/**
-   * Launch a match between the logged user and the user he challenged
-   */
-	challengeUser() {
-
-  }
+	inviteToChat()
+	{
+		this.$socket.client.emit('createChannel', {
+			name: "privatechannel",
+			privacy: "private",
+			users: [this.user.id],
+			password: false
+		})
+		this.$toast.success(`You created the channel privatechannel`)
+		this.$emit('createdChannel', {
+			channel: "privatechannel"
+		})
+	}
 
 	/**
 	 * Event when the user saves the display name
