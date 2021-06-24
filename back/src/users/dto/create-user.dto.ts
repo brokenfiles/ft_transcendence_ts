@@ -19,6 +19,9 @@ export class CreateUserDto {
     @IsNotEmpty()
     login: string
 
+    @IsNotEmpty()
+    email: string
+
     @IsOptional()
     double_auth: boolean
 
@@ -49,6 +52,11 @@ export class CreateUserDto {
 
     set_double_auth(value: boolean) {
         this.double_auth = value
+        return this
+    }
+
+    set_email(value: string) {
+        this.email = value
         return this
     }
 

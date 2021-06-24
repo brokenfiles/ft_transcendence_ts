@@ -6,7 +6,7 @@
     <div class="bg-secondary text-cream p-4 w-full md:mx-auto md:w-2/3 w-full">
       <form action="#" @submit.prevent="saveSettings">
         <div class="flex flex-wrap items-center w-full">
-          <label for="double_auth" class="flex-1">2 factor authentication (google authenticator)</label>
+          <label for="double_auth" class="flex-1">2 factor authentication (mail to {{ $auth.user.email }})</label>
           <input id="double_auth" v-model="twoFactorAuth" type="checkbox">
         </div>
         <button type="submit" class="bg-yellow text-primary px-4 py-2 mt-4 w-full">Save</button>

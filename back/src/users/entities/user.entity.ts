@@ -24,6 +24,11 @@ export class User {
     })
     display_name: string
 
+    @Column({
+        nullable: true
+    })
+    email: string
+
     @Column({ default: null })
     first_name: string
 
@@ -67,7 +72,7 @@ export class User {
     channels_admin: Channel[]
 
 
-    @Column("int", { array: true, nullable: true })
+    @Column("int", { array: true, nullable: true, default: '{}' })
     users_id_blocked: number[]
 
 

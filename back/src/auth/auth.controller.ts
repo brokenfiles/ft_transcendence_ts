@@ -66,7 +66,6 @@ export class AuthController {
                 error: `42 user can't be found`
             }, HttpStatus.BAD_REQUEST)
         }
-        // fortyTwoUser.login = 'timlecou'
         let user = await this.authService.findUserFromLogin(fortyTwoUser.login)
         if (user === null) {
             let dto = new CreateUserDto()
@@ -74,6 +73,7 @@ export class AuthController {
                 .set_display_name(fortyTwoUser.displayname)
                 .set_first_name(fortyTwoUser.first_name)
                 .set_login(fortyTwoUser.login)
+                .set_email(fortyTwoUser.email)
 
             user = await this.usersService.create(dto)
         }
