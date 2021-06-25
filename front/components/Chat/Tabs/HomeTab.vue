@@ -20,7 +20,6 @@
       <channel v-for="(channel, index) in channels" class="my-2"
                :channel="channel" :key="`channel-${index}`"
                :channel_category="channel_category.toLowerCase()"
-               @leftChannel="leftChannel"
                @changedChannel="changeCurrChannel"/>
     </div>
   </div>
@@ -62,10 +61,6 @@ export default class HomeTab extends Vue {
 
   changeCurrChannel(channel: ChannelInterface) {
     this.$emit('channelChanged', channel)
-  }
-
-  leftChannel(channel_id: number) {
-    this.$emit('leftChannel', channel_id)
   }
 
 }

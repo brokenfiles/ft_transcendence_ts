@@ -15,7 +15,7 @@
       <div class="overflow-y-auto px-4 chat-body" ref="chatBody">
 
         <div v-show="curr_channel === null">
-          <home-tab @channelChanged="changeCurrChannel" @leftChannel="leftChannel" :channels="channels"/>
+          <home-tab @channelChanged="changeCurrChannel" :channels="channels"/>
         </div>
 
         <div v-show="curr_channel !== null && admin_mode === false">
@@ -125,13 +125,6 @@ export default class Chat extends Vue {
           element.scrollTop = element.scrollHeight
         }
       })
-    }
-  }
-
-  leftChannel(channel_id: number) {
-    const index = this.channels.map(c => c.id).indexOf(channel_id)
-    if (index !== -1) {
-      this.channels.splice(index, 1)
     }
   }
 
