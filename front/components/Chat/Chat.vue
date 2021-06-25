@@ -1,9 +1,9 @@
 <template>
   <div class="w-full md:w-96 fixed bottom-0 right-0 bg-red-500 md:mr-10 bg-primary text-cream z-40"
        :class="{'closed': !isChatOpen, 'open': isChatOpen}" id="chat-rooms">
-    <div class="flex py-2 px-4 md:px-32 items-center cursor-pointer w-full" @click="isChatOpen = !isChatOpen"
+    <div class="flex py-2 px-4 md:px-32 items-center cursor-pointer w-full md:justify-center" @click="isChatOpen = !isChatOpen"
          id="chat-header">
-      <h2 class="text-white flex-1 font-semibold">Chat</h2>
+      <h2 class="text-white flex-1 md:flex-none font-semibold">Chat</h2>
       <svg id="chatroom-icon" class="mx-2 h-5 w-5 transition duration-150 ease-in-out"
            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fill-rule="evenodd"
