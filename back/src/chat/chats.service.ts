@@ -87,6 +87,10 @@ export class ChatsService {
                 }
             } else {
                 let users_id = res.users.map((u) => u.id)
+                this.websocketService.notify(users_id.filter((u) => u !== sub), {
+                    fetchClient: false,
+                    message: `You've been added to ${res.name} channel`,
+                })
                 for (const user of users_id) {
                     const index = this.websocketService.onlineClients.indexOf(user)
                     if (index !== -1) {
