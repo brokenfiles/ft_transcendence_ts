@@ -11,6 +11,9 @@
             <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/queue">Join a queue</nuxt-link>
             </div>
+            <div class="item-link my-2 text-xl" @click="extended = false">
+              <nuxt-link to="/rules">See the rules</nuxt-link>
+            </div>
           </div>
         </div>
       </li>
