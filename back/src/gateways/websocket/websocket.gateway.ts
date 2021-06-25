@@ -27,6 +27,7 @@ import {JwtService} from "@nestjs/jwt";
 import {ClientJoinMatchInterface} from "./interfaces/client-join-match.interface";
 import {Coordinates} from "../../game/classes/game.classes";
 import {UsersService} from "../../users/users.service";
+import {RemoveChannelInterface} from "./interfaces/remove-channel.interface";
 
 
 @WebSocketGateway(81,
@@ -160,6 +161,15 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('removeChannel')
+    async removeChannelEvent(client: Socket, payload: RemoveChannelInterface): Promise<any> {
+        const {sub} = (client.handshake as any).user
+        return await this.chatsService.removeChannel(payload, sub)
+    }
+
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('getChannels')
     getChannelsEvent(client: Socket): void {
         const {sub} = (client.handshake as any).user
@@ -177,12 +187,11 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         this.websocketService.changeCurrentChannel(client, payload)
         const channel = await this.chatsService.findOneChannel(payload.channel_id)
         if (channel) {
-
             if (this.chatsService.isUserBannedFromChannel(sub, channel))
-                return { error: "You're banned from this channel" }
+                return {error: "You're banned from this channel"}
             if ((channel.privacy === PrivacyEnum.PUBLIC) ||
-                (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel)) ||
-                (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password)) {
+                (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel) ||
+                (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password))) {
                 messages = await this.chatsService.getMessageFromChannel(sub, payload.channel_id)
             } else {
                 return {

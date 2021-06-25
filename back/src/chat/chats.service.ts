@@ -17,6 +17,8 @@ import {
     MuteUsersFromChannelInterface
 } from "../gateways/websocket/interfaces/ban-users-from-channel.interface";
 import {chmod} from "fs";
+import {RemoveChannelInterface} from "../gateways/websocket/interfaces/remove-channel.interface";
+import {Role} from "../auth/roles/enums/role.enum";
 
 @Injectable()
 export class ChatsService {
@@ -87,6 +89,10 @@ export class ChatsService {
                 }
             } else {
                 let users_id = res.users.map((u) => u.id)
+                this.websocketService.notify(users_id.filter((u) => u !== sub), {
+                    fetchClient: false,
+                    message: `You've been added to ${res.name} channel`,
+                })
                 for (const user of users_id) {
                     const index = this.websocketService.onlineClients.indexOf(user)
                     if (index !== -1) {
@@ -206,7 +212,7 @@ export class ChatsService {
 
     async findOneChannel(id: number) {
         return this.channelRepository.findOne({
-            relations: ['users', 'administrators', 'banned_users', 'owner', 'muted_users'],
+            relations: ['users', 'administrators', 'banned_users', 'owner', 'muted_users', 'messages'],
             where: {
                 id
             }
@@ -409,6 +415,42 @@ export class ChatsService {
             }
             await this.channelRepository.save(curr_channel)
             return state
+        }
+    }
+
+    async removeChannel(payload: RemoveChannelInterface, sub: number): Promise<any> {
+        try {
+
+            let channel = await this.findOneChannel(payload.channel_id)
+            if (channel && channel.owner.id === sub)
+            {
+                this.emitAllBackToHome(-1, channel, "Channel removed!")
+                if (channel.messages.length)
+                {
+                    const msg = await this.messageRepository.find({
+                        where: {
+                            channel
+                        }
+                    })
+                    await this.messageRepository.remove(msg)
+                }
+                await this.channelRepository.remove(channel)
+                await this.emitAllChannelForUserConcernedByChannelChanged(null, null)
+                return {
+                    success: `Channel ${channel.name} removed`
+                }
+            }
+            else
+                return {
+                    error: "You cannot remove this channel"
+                }
+        }
+        catch (e)
+        {
+            console.log(e.message)
+            return {
+                error: "error: You cannot remove this channel"
+            }
         }
     }
 }
