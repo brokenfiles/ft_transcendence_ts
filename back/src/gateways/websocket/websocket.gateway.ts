@@ -151,6 +151,31 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('getLazyMessages')
+    async getLazyMessagesEvent (client: Socket, payload: ChangeChannelInterface): Promise<any> {
+        const {sub} = (client.handshake as any).user
+        let messages = []
+        this.websocketService.changeCurrentChannel(client, payload)
+        const channel = await this.chatsService.findOneChannel(payload.channel_id)
+        if (channel) {
+            if (this.chatsService.isUserBannedFromChannel(sub, channel))
+                return {error: "You're banned from this channel"}
+            if ((channel.privacy === PrivacyEnum.PUBLIC) ||
+                (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel) ||
+                    (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password))) {
+                messages = await this.chatsService.getMessageFromChannel(sub, payload.channel_id, payload.page)
+            } else {
+                return {
+                    error: "Invalid password"
+                }
+            }
+        }
+        return { messages: messages }
+    }
+
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('channelChanged')
     async changeChannel(client: Socket, payload: ChangeChannelInterface): Promise<any> {
         const {sub} = (client.handshake as any).user
