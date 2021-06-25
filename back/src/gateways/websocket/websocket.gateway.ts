@@ -28,6 +28,7 @@ import {ClientJoinMatchInterface} from "./interfaces/client-join-match.interface
 import {Coordinates} from "../../game/classes/game.classes";
 import {UsersService} from "../../users/users.service";
 import {RemoveChannelInterface} from "./interfaces/remove-channel.interface";
+import {LeaveChannelInterface} from "./interfaces/leave-channel.interface";
 
 
 @WebSocketGateway(81,
@@ -233,6 +234,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     async changeChannelProperty(client: Socket, payload: ChangeChannelPropertyInterface): Promise<void> {
         const {sub} = (client.handshake as any).user
         await this.chatsService.changeChannelProperties(client, sub, payload)
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('leaveChannel')
+    async leaveChannelEvent(client: Socket, payload: LeaveChannelInterface): Promise<any> {
+        const {sub} = (client.handshake as any).user
+        return await this.chatsService.leaveChannel(sub, payload)
     }
 
 

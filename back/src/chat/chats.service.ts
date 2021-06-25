@@ -19,6 +19,7 @@ import {
 import {chmod} from "fs";
 import {RemoveChannelInterface} from "../gateways/websocket/interfaces/remove-channel.interface";
 import {Role} from "../auth/roles/enums/role.enum";
+import {LeaveChannelInterface} from "../gateways/websocket/interfaces/leave-channel.interface";
 
 @Injectable()
 export class ChatsService {
@@ -452,5 +453,30 @@ export class ChatsService {
                 error: "error: You cannot remove this channel"
             }
         }
+    }
+
+    async leaveChannel(sub: number, payload: LeaveChannelInterface) {
+
+        const channel = await this.findOneChannel(payload.channel_id)
+        if (channel && channel.privacy === PrivacyEnum.PRIVATE && this.isUserInChannel(sub, channel))
+        {
+            if (channel.owner.id === sub)
+                return { error: "Owner can't leave channel"}
+
+            channel.users = channel.users.filter((u) => u.id !== sub)
+
+            if (channel.administrators.map((u) => u.id).includes(sub))
+                channel.administrators = channel.administrators.filter((u) => u.id !== sub)
+
+            await this.channelRepository.save(channel)
+            await this.emitAllChannelForUserConcernedByChannelChanged(null, null)
+            return { success: `You left ${channel.name}`}
+        }
+        else
+        {
+            return { error: "Cant find channel" }
+        }
+
+
     }
 }
