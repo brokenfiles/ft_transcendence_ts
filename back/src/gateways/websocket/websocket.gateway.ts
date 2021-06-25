@@ -34,7 +34,7 @@ import {LeaveChannelInterface} from "./interfaces/leave-channel.interface";
 @WebSocketGateway(81,
     {
         cors: {
-            origin: "http://localhost:3000",
+            origin: process.env.FRONT_URI,
             credentials: true
         }
     })

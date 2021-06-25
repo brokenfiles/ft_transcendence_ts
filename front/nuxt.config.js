@@ -152,7 +152,8 @@ export default {
   },
 
   env: {
-    baseUrl: process.env.BASE_URL || 'localhost:4000'
+    baseUrl: process.env.BASE_URL || 'localhost:4000',
+    socketIOUrl: process.env.SOCKET_IO_URL || 'http://localhost:81'
   },
 
   axios: {
