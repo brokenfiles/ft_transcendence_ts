@@ -1,6 +1,6 @@
 <template>
   <div class="mt-8 w-full">
-    <div class="mx-auto w-1/3">
+    <div class="mx-auto w-full md:w-1/3">
       <span class="text-4xl text-center">
         Game rules
       </span><br><br>

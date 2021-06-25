@@ -93,7 +93,7 @@ export default class Chat extends Vue {
   }
 
   scrollEvent (element: HTMLElement) {
-    if (element.scrollTop === 0 && this.page !== -1 && this.curr_channel) {
+    if (element.scrollTop <= 20 && this.page !== -1 && this.curr_channel) {
       this.$socket.client.emit(`getLazyMessages`, {
         channel_id: this.curr_channel.id,
         password: this.curr_channel.password,
@@ -118,6 +118,7 @@ export default class Chat extends Vue {
   }
 
   changeCurrChannel(channel: ChannelInterface) {
+    this.page = 0
     this.$socket.client.emit('channelChanged', {
       channel_id: channel.id,
       password: channel.password,
@@ -131,7 +132,7 @@ export default class Chat extends Vue {
         if (data.messages) {
           this.curr_channel = channel
           this.messages = data.messages
-          this.page = 1
+          this.page ++
           this.scrollToBottom(true)
           if (channel.password && process.client) {
             localStorage.setItem(`channel-password-${channel.id}`, channel.password)
