@@ -69,9 +69,17 @@ export class UsersService {
             }, HttpStatus.BAD_REQUEST)
         })
         user.friends = friends
-        // user.self_users_blocked = self_users_blocked
-        // user.others_users_blocked = others_users_blocked
         return Promise.resolve(user)
+    }
+
+    async findOneWithoutRelations (sub: number, relations: string[] = []) : Promise<User> {
+        return this.usersRepository.findOneOrFail(sub, {
+            relations
+        }).catch((err) => {
+            throw new HttpException({
+                error: err.message
+            }, HttpStatus.BAD_REQUEST)
+        })
     }
 
     findByLogin(login) : Promise<User | undefined> {

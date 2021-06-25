@@ -20,7 +20,7 @@
 
         <div v-show="curr_channel !== null && admin_mode === false">
           <channel-tab @back="closedChannel" @adminPanelOpened="admin_mode = true"
-                       :messages="messages" :curr_channel="curr_channel"/>
+                       :messages="sortedMessages" :curr_channel="curr_channel"/>
         </div>
 
         <div v-if="admin_mode === true && curr_channel">
@@ -76,6 +76,11 @@ export default class Chat extends Vue {
       await this.$auth.fetchUser()
       await this.$socket.client.emit('getChannels')
       this.$root.$on('receivedMessage', this.scrollToBottom)
+      const $refs = this.$refs as any
+      const element = $refs.chatBody as HTMLElement
+      if (element) {
+        element.addEventListener('scroll', () => console.log('behaviour to define (WAIT FOR ME.)'))
+      }
     }
   }
 
@@ -143,6 +148,10 @@ export default class Chat extends Vue {
     })
     this.curr_channel = null
     this.admin_mode = false
+  }
+
+  get sortedMessages () : MessageInterface[] {
+    return this.messages.sort((a, b) => new Date(a.created_at) > new Date(b.created_at) ? 1 : -1)
   }
 
 }

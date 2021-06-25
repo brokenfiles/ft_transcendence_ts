@@ -92,38 +92,8 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('msgToServer')
     async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<any> {
-        const message = await this.chatsService.pushMsgInChannel(payload)
-        const channel = await this.chatsService.findOneChannel(payload.channel_id)
         const {sub} = (client.handshake as any).user
-
-        let user_validate = channel.users.filter((user) => user.id === sub)
-
-        if (channel && channel.muted_users.map((u) => u.id).includes(sub))
-            return { error: "You are muted !!" }
-
-        if (channel && message) {
-            let users_id = []
-            if (channel.privacy === PrivacyEnum.PUBLIC || channel.privacy === PrivacyEnum.PASSWORD)
-                users_id = this.websocketService.clients.filter((u) => u.channelId === channel.id).map((u) => u.userId)
-            else if (user_validate.length > 0)
-                users_id = channel.users.map((u) => u.id)
-
-            const users_in_channel = this.websocketService.clients.filter((u) => users_id.includes(u.userId))
-            const real_text = message.text
-            const curr_user = await this.userService.findOne(sub)
-            for (const user of users_in_channel) {
-
-                const tmp_user = await this.userService.findOne(user.userId)
-
-                if (tmp_user.users_id_blocked.includes(sub) || curr_user.users_id_blocked.includes(tmp_user.id)) {
-                    message.text = BLOCKED_MSG
-                }
-                else
-                    message.text = real_text
-
-                user.socket.emit('SendLastMessagesToClient', message)
-            }
-        }
+        await this.chatsService.messageToServer(sub, payload)
     }
 
 
@@ -193,7 +163,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
             if ((channel.privacy === PrivacyEnum.PUBLIC) ||
                 (channel.privacy === PrivacyEnum.PRIVATE && await this.chatsService.isUserInChannel(sub, channel) ||
                 (channel.privacy === PrivacyEnum.PASSWORD && payload.password === channel.password))) {
-                messages = await this.chatsService.getMessageFromChannel(sub, payload.channel_id)
+                messages = await this.chatsService.getMessageFromChannel(sub, payload.channel_id, payload.page)
             } else {
                 return {
                     error: "Invalid password"

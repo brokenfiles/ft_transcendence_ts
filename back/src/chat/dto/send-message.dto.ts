@@ -8,6 +8,4 @@ export class SendMessageDto {
     @IsNotEmpty()
     message: string
 
-    @IsNotEmpty()
-    user_id: number
 }

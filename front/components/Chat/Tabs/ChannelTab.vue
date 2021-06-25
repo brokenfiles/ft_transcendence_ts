@@ -78,7 +78,6 @@ export default class ChannelTab extends Vue {
       this.$socket.client.emit('msgToServer', {
         channel_id: this.curr_channel.id,
         message: this.model_message,
-        user_id: (this.$auth.user as any).id
       }, (data: any) => {
       	if (data.error)
 			this.$toast.error(data.error)

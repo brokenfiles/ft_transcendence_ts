@@ -141,7 +141,7 @@ export class ChatsService {
         }
     }
 
-    async getMessageFromChannel(sub: number, id: number): Promise<Message[]> {
+    async getMessageFromChannel(sub: number, id: number, page: number): Promise<Message[]> {
         try {
             const channel = await this.channelRepository.findOne(id)
             const curr_user = await this.usersService.findOne(sub)
@@ -151,9 +151,9 @@ export class ChatsService {
                     where: {
                         channel
                     },
-                    order: {
-                        created_at: "ASC"
-                    }
+                    order: { created_at: "DESC" },
+                    take: 30,
+                    skip: page * 30
                 })
 
                 if (messages && curr_user)
@@ -182,9 +182,45 @@ export class ChatsService {
         }
     }
 
+    async messageToServer(sub: number, payload: SendMessageDto) {
+        let message = await this.pushMsgInChannel(sub, payload)
+        message = await this.messageRepository.findOne({
+            where: { id: message.id },
+            relations: ['owner']
+        })
+        const channel = await this.findOneChannel(payload.channel_id)
 
+        let user_validate = channel.users.filter((user) => user.id === sub)
 
-    async pushMsgInChannel(sendMessageDto: SendMessageDto) {
+        if (channel && channel.muted_users.map((u) => u.id).includes(sub))
+            return { error: "You are muted !" }
+
+        if (channel && message) {
+            let users_id = []
+            if (channel.privacy === PrivacyEnum.PUBLIC || channel.privacy === PrivacyEnum.PASSWORD)
+                users_id = this.websocketService.clients.filter((u) => u.channelId === channel.id).map((u) => u.userId)
+            else if (user_validate.length > 0)
+                users_id = channel.users.map((u) => u.id)
+
+            const users_in_channel = this.websocketService.clients.filter((u) => users_id.includes(u.userId))
+            const real_text = message.text
+            const curr_user = await this.usersService.findOne(sub)
+            for (const user of users_in_channel) {
+
+                const tmp_user = await this.usersService.findOneWithoutRelations(user.userId)
+
+                if (tmp_user.users_id_blocked.includes(sub) || curr_user.users_id_blocked.includes(tmp_user.id)) {
+                    message.text = BLOCKED_MSG
+                }
+                else
+                    message.text = real_text
+
+                user.socket.emit('SendLastMessagesToClient', message)
+            }
+        }
+    }
+
+    async pushMsgInChannel(sub: number, sendMessageDto: SendMessageDto) {
         try {
             let newMessage = await this.messageRepository.create({
                     text: sendMessageDto.message
@@ -198,7 +234,7 @@ export class ChatsService {
                 }
             })
 
-            let owner = await this.usersService.findOne(sendMessageDto.user_id, ["messages", "channels"])
+            let owner = await this.usersService.findOneWithoutRelations(sub)
             newMessage.channel = channel[0]
             newMessage.owner = owner
             return this.messageRepository.save(newMessage)
