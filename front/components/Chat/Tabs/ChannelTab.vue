@@ -1,8 +1,8 @@
 <template>
   <div>
     <div v-if="curr_channel" class="relative">
-      <div class="absolute bg-primary z-50 w-full">
-        <div class="items-stretch flex">
+      <div class="fixed md:w-96 bg-primary z-50 w-full">
+        <div class="items-stretch flex px-4">
           <back-button @back="goBack" class="left-0 w-full">Back to channels</back-button>
           <button @click="$emit('adminPanelOpened')" v-if="isChannelAdmin" class="focus:outline-none text-cream">
             <font-awesome-icon class="mr-1" :icon="['fas', 'user-shield']"/>
@@ -18,14 +18,14 @@
           </span>
           {{ curr_channel.name }}
         </p>
-        <hr class="mt-1">
+        <hr class="mt-1 mx-4">
       </div>
-      <div class="messages pt-16">
+      <div class="messages pt-16 px-4">
         <div v-for="(message, index) in messages" :key="`message-${index}`" class="">
           <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
         </div>
       </div>
-      <div class="flex flex-col justify-end mb-4">
+      <div class="flex flex-col justify-end mb-4 px-4">
         <form @submit.prevent="sendMessage()" class="flex mt-2">
           <input v-model="model_message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream"
                  type="text" placeholder="Send message">

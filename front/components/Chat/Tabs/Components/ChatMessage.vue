@@ -1,16 +1,14 @@
 <template>
   <div class="w-full">
-    <nuxt-link :to="`/users/${message.owner.login}`" class="flex flex-wrap items-center mt-8"
+    <nuxt-link :to="`/users/${message.owner.login}`" class="flex flex-wrap items-center mt-4"
          :class="{'text-right': authenticatedId === message.owner.id}"
          v-if="!previous_message || previous_message.owner.id !== message.owner.id">
-      <span :class="userNameClasses" class="text-gray-400 text-xs font-light block absolute -mt-16 pt-4">
-        <client-only>
-          <p>{{ message.owner.display_name }}</p>
-        </client-only>
-      </span>
-      <avatar class="z-40 h-8 w-8"
-              :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
-              :image-url="message.owner.avatar"/>
+      <div class="flex w-full items-center" :class="{'justify-end': authenticatedId === message.owner.id}">
+        <p :class="userNameClasses" class="text-gray-400 text-xs font-light">{{ message.owner.display_name }}</p>
+        <avatar class="z-40 h-8 w-8"
+                :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
+                :image-url="message.owner.avatar"/>
+      </div>
       <p class="flex-1"
         :class="{'ml-2': authenticatedId !== message.owner.id}">
       </p>
@@ -85,9 +83,9 @@ export default class ChatMessage extends Vue {
 
   get userNameClasses(): string[] {
     if (this.authenticatedId !== this.message.owner.id)
-      return []
+      return ['order-2 ml-2']
     else
-      return ['right-0']
+      return ['order-1']
   }
 
 }

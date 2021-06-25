@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full md:w-auto fixed bottom-0 right-0 bg-red-500 md:mr-10 bg-primary text-cream z-40"
+  <div class="w-full md:w-96 fixed bottom-0 right-0 bg-red-500 md:mr-10 bg-primary text-cream z-40"
        :class="{'closed': !isChatOpen, 'open': isChatOpen}" id="chat-rooms">
     <div class="flex py-2 px-4 md:px-32 items-center cursor-pointer w-full" @click="isChatOpen = !isChatOpen"
          id="chat-header">
@@ -12,10 +12,10 @@
       </svg>
     </div>
     <div class="overflow-y-hidden chat-body">
-      <div class="overflow-y-auto px-4 chat-body" ref="chatBody">
+      <div class="overflow-y-auto chat-body" ref="chatBody">
 
         <div v-show="curr_channel === null">
-          <home-tab @channelChanged="changeCurrChannel" :channels="channels"/>
+          <home-tab class="px-4" @channelChanged="changeCurrChannel" :channels="channels"/>
         </div>
 
         <div v-show="curr_channel !== null && admin_mode === false">
@@ -24,7 +24,7 @@
         </div>
 
         <div v-if="admin_mode === true && curr_channel">
-          <admin-tab @channelSaved="channelSaved" @back="admin_mode = false" :current_channel="curr_channel"/>
+          <admin-tab class="px-4" @channelSaved="channelSaved" @back="admin_mode = false" :current_channel="curr_channel"/>
         </div>
       </div>
     </div>
@@ -61,6 +61,7 @@ export default class Chat extends Vue {
   /** Variables */
   channels: ChannelInterface[] = []
   messages: MessageInterface[] = []
+  page: number = 0
   curr_channel: any = null
   admin_mode: boolean = false
   isChatOpen: boolean = false
@@ -87,7 +88,8 @@ export default class Chat extends Vue {
   changeCurrChannel(channel: ChannelInterface) {
     this.$socket.client.emit('channelChanged', {
       channel_id: channel.id,
-      password: channel.password
+      password: channel.password,
+      page: this.page
     }, (data: any) => {
       if (data.error) {
         this.$toast.error(data.error)
