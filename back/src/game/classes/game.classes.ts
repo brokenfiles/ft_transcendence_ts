@@ -257,7 +257,7 @@ export class GameClass {
             return ;
         let pad = this.getPadByUser(sub)
         pad.setCoordinates(coordinates)
-        this.sendEventToPlayers('otherPlayerPadUpdated', coordinates, sub)
+        this.sendEventToPlayers('otherPlayerPadUpdated', { coordinates, sub }, sub)
     }
 
     /**

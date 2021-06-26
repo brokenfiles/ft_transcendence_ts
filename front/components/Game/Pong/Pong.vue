@@ -84,6 +84,7 @@ export default class Pong extends Vue {
       this.game_state = GameState.IN_GAME
       // avert the backend that the player is ready to play
       this.$socket.client.emit(`clientJoinedSpectator`, this.match.uuid)
+      this.loop_id = window.setInterval(this.updateGame, 20)
     }
   }
 
@@ -183,6 +184,14 @@ export default class Pong extends Vue {
       this.player_1_points = points
   }
 
+  otherPlayerPad(id: number): string {
+    const map = this.match.players.map(u => u.id)
+    if (map[0] === id)
+      return 'rightPad'
+    else
+      return 'leftPad'
+  }
+
   /** Sockets */
   @Socket("gameStarted")
   gameStartedEvent () {
@@ -200,11 +209,17 @@ export default class Pong extends Vue {
   }
 
   @Socket("otherPlayerPadUpdated")
-  otherPlayerPadUpdatedEvent(coordinates: Coordinates) {
+  otherPlayerPadUpdatedEvent(payload: any) {
     let match = this.match as any
-    let pad = match[this.otherPad] as Pad
+    let pad
+    if (this.isAPlayer) {
+      pad = match[this.otherPad] as Pad
+    } else {
+      const id = payload.sub
+      pad = match[this.otherPlayerPad(id)]
+    }
     this.clearRect(pad.coordinates, pad.width, pad.height)
-    pad.coordinates = coordinates
+    pad.coordinates = payload.coordinates
     this.printRectangle(pad.coordinates, pad.width, pad.height, 'red')
   }
 
@@ -291,6 +306,8 @@ export default class Pong extends Vue {
     if (process.client) {
       if (window.innerWidth <= this.match.gameWith) {
         return this.match.gameWith / 1.5
+      } else if (window.innerWidth >= 900) {
+        return this.match.gameWith * 1.5
       }
     }
     return this.match.gameWith
