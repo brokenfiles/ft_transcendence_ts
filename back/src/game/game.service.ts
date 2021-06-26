@@ -2,7 +2,7 @@ import {HttpException, HttpStatus, Injectable} from "@nestjs/common";
 import {Coordinates, GameClass} from "./classes/game.classes";
 import {Socket} from "socket.io";
 import {SchedulerRegistry} from "@nestjs/schedule";
-import {MatchInterface} from "./interfaces/game.interfaces";
+import {ChallengeInterface, MatchInterface} from "./interfaces/game.interfaces";
 import {InjectRepository} from "@nestjs/typeorm";
 import {In, Repository} from "typeorm";
 import {Game} from "./entity/game.entity";
@@ -18,6 +18,7 @@ import {ChallengeUserInterface} from "../gateways/websocket/interfaces/challenge
 export class GameService {
 
     games: GameClass[] = []
+    challenges: ChallengeInterface[] = []
 
     constructor(@InjectRepository(Game) private gameRepository: Repository<Game>,
                 private schedulerRegistry: SchedulerRegistry,
@@ -190,7 +191,7 @@ export class GameService {
             let game = this.getGameByUserId(sub)
             if (game) {
                 game.clientLeft(sub)
-                this.removeGameFromGameArray(game.uuid)
+                // this.removeGameFromGameArray(game.uuid)
             }
         }
     }
@@ -212,23 +213,50 @@ export class GameService {
 
         if (requester && receiver)
         {
-            return {
-                requester_elo: requester.elo,
-                requester_name: requester.display_name,
-                requester_id: requester.id
+            if (this.findChallenge(requester.id, receiver.id) === undefined) {
+                this.challenges.push({ requester_id: requester.id, requested_id: receiver.id, created_at: new Date().getTime() })
+                return {
+                    requester_elo: requester.elo,
+                    requester_name: requester.display_name,
+                    requester_id: requester.id
+                }
+            } else {
+                return {
+                    error: "You already challenged this user (wait 60 seconds)"
+                }
             }
         }
+    }
 
+    /**
+     * Find the channel by requester and requested id
+     * @param requester_id
+     * @param requested_id
+     * @returns the channel if found, undefined otherwise
+     */
+    findChallenge (requester_id: number, requested_id: number) : ChallengeInterface | undefined {
+        for (const challenge of this.challenges) {
+            if (challenge.requester_id === requester_id && challenge.requested_id === requested_id) {
+                // if the created_at of the challenge is more than one minute, delete the challenge and return undefined
+                if ((new Date().getTime() - challenge.created_at) / 1000 > 60) {
+                    this.challenges.splice(this.challenges.indexOf(challenge), 1)
+                    return undefined
+                }
+                return challenge
+            }
+        }
+        return undefined
     }
 
     async startChallenge(sub: any, payload: ChallengeUserInterface) {
 
         const players = [sub, payload.user_id]
 
-        if (this.websocketService.onlineClients.some(r => players.includes(r)))
-        {
-            const players_entity = await Promise.all(players.map(userId => this.userService.findOne(userId)))
-            const uuid = await this.initGame(players)
+        const challenge = this.findChallenge(payload.user_id, sub)
+        if (challenge) {
+            if (this.websocketService.onlineClients.some(r => players.includes(r))) {
+                const players_entity = await Promise.all(players.map(userId => this.userService.findOne(userId)))
+                const uuid = await this.initGame(players_entity)
                 for (const clientId of players) {
                     const client = this.websocketService.getClient(clientId)
                     if (client) {
@@ -237,7 +265,12 @@ export class GameService {
                         })
                     }
                 }
-            console.log(uuid)
+                console.log(uuid)
+            }
+        } else {
+            return {
+                error: 'This challenge has expired'
+            }
         }
     }
 }

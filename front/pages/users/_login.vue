@@ -232,11 +232,12 @@ export default class Account extends Vue {
    * Launch a match between the logged user and the user he challenged
    */
 	challengeUser() {
-
 		this.$socket.client.emit("challengeUser", {
 			user_id: this.user.id
 		}, (data: any) => {
-			this.$toast.info(data)
+		  if (data.error) {
+		    this.$toast.error(data.error)
+      }
 		})
 
   }

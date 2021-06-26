@@ -40,3 +40,9 @@ export interface GameFinishedInterface {
     winner: User
     points: any
 }
+
+export interface ChallengeInterface {
+    requester_id: number,
+    requested_id: number
+    created_at: number
+}

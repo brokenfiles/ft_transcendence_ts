@@ -3,12 +3,11 @@
 		<div class="text-yellow p-2">INVITATION TO PLAY</div>
 		<span class="text-cream">name: {{ this.requester_name }}</span>
 		<span class="text-cream">elo: {{ this.requester_elo }}</span>
-		<button class="p-2 m-2 bg-yellow text-black font-bold" @click="StartDuel">Accept Duel</button>
+		<button class="p-2 m-2 bg-yellow text-black font-bold" @click="startDuel">Accept Duel</button>
 	</div>
 </template>
 
 <script lang="ts">
-
 import {Component} from "nuxt-property-decorator";
 import Vue from 'vue';
 import {Socket} from "vue-socket.io-extended";
@@ -20,8 +19,6 @@ export default class Queue extends Vue {
 	requester_name: string = ""
 	requester_elo?: number
 	requester_id?: number
-
-
 
 	@Socket('receiveGameNotify')
 	addMessage(payload: any) {
@@ -36,19 +33,21 @@ export default class Queue extends Vue {
 		}, 7000)
 	}
 
-	StartDuel()
+	startDuel()
 	{
 		this.active = false
 		this.$socket.client.emit("startPrivateChallenge", {
 			user_id: this.requester_id
 		}, (data: any) => {
-			// this.$toast.info(data)
+		  if (data.error) {
+		    this.$toast.error(data.error)
+      }
 		})
 	}
 
 	@Socket("gameDuelStarting")
 	gameStartingEvent (gameStartingOptions: any) {
-		if (gameStartingOptions.players_entity.length === 2) {
+		if (gameStartingOptions.players_entity && gameStartingOptions.players_entity.length === 2) {
 			this.$toast.info(`Match ${gameStartingOptions.players_entity[0].display_name} VS ${gameStartingOptions.players_entity[1].display_name} starting...`)
 			setTimeout(() => {
 				this.$router.push(`/game/${gameStartingOptions.uuid}`)

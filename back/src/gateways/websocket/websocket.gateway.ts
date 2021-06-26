@@ -297,9 +297,14 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @SubscribeMessage('challengeUser')
     async challengeUserEvent(client: Socket, payload: ChallengeUserInterface) {
         const {sub} = (client.handshake as any).user
-        console.log(sub, payload.user_id)
         const challengePayload = await this.gameService.challengeUser(sub, payload)
-        this.websocketService.getClient(payload.user_id).socket.emit("receiveGameNotify", challengePayload)
+        if (challengePayload.error === undefined) {
+            const requestedClient = this.websocketService.getClient(payload.user_id)
+            if (requestedClient) {
+                requestedClient.socket.emit("receiveGameNotify", challengePayload)
+            }
+        }
+        return challengePayload
     }
 
 
