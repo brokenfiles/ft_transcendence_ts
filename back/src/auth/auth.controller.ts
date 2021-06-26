@@ -130,7 +130,6 @@ export class AuthController {
     }
 
     /**
-     * TODO: REMOVE THIS THIS IS A FAKE TOKEN AUTHENTIFICATION
      * Pour utiliser ce endpoint : faire un GET sur http://localhost:4000/auth/42/faketoken?user=<user>
      * @param req
      * @param res
@@ -141,7 +140,7 @@ export class AuthController {
         let user = await this.authService.findUserFromLogin(guest_user)
         if (user === null) {
             let dto = new CreateUserDto()
-                .set_avatar(`https://www.monchat.ca/wp-content/uploads/2020/01/fond-d-ecran-chat-orange-fond-turquoise-390x280.jpg`)
+                .set_avatar(`https://image.noelshack.com/fichiers/2021/25/6/1624723618-img-5283.jpg`)
                 .set_display_name(guest_user)
                 .set_first_name(guest_user)
                 .set_login(guest_user)

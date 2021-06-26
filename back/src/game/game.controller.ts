@@ -13,10 +13,8 @@ export class GameController {
     constructor(private readonly gameService: GameService) {}
 
     @Get()
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.Administrator, Role.Moderator)
     findAll (@Req() request) : Promise<Game[]> {
-        return this.gameService.findAll()
+        return this.gameService.findPlayingGames()
     }
 
     @Get('users/:id')

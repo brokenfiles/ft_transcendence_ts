@@ -4,7 +4,6 @@ import {GameState} from "../enums/game-state.enum";
 import {Repository} from "typeorm";
 import {Game} from "../entity/game.entity";
 import {SchedulerRegistry} from "@nestjs/schedule";
-import {UsersService} from "../../users/users.service";
 
 export const GAME_CONSTANTS = {
     tps: 20,
@@ -135,18 +134,14 @@ export class Ball {
         if (coordinates.x >= game.rightPad.coordinates.x - GAME_CONSTANTS.ball.width && coordinates.x <= game.rightPad.coordinates.x &&
             coordinates.y + GAME_CONSTANTS.ball.height >= game.rightPad.coordinates.y && coordinates.y <= game.rightPad.coordinates.y + GAME_CONSTANTS.pad.height) {
             this.xSpeed *= -1
-
             yHit = coordinates.y - game.rightPad.coordinates.y
             heightHit = yHit / GAME_CONSTANTS.pad.height - 0.5
-
-
         }
         if (coordinates.x - GAME_CONSTANTS.ball.width <= game.leftPad.coordinates.x && coordinates.x >= game.leftPad.coordinates.x &&
             coordinates.y + GAME_CONSTANTS.ball.height >= game.leftPad.coordinates.y && coordinates.y <= game.leftPad.coordinates.y + GAME_CONSTANTS.pad.height) {
             this.xSpeed *= -1
             yHit = coordinates.y - game.leftPad.coordinates.y
             heightHit = yHit / GAME_CONSTANTS.pad.height - 0.5
-
         }
 
         if (heightHit !== -9) {

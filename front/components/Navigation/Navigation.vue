@@ -1,7 +1,7 @@
 <template>
   <nav id="navbar" class="navbar fixed left-0 right-0 top-0 z-10 bg-secondary text-cream z-20">
     <ul class="flex items-center py-4 pr-4">
-      <li class="nav-item hidden md:inline-block navbar-brand w-10 h-10 font-bold mx-4 text-4xl text-center">
+      <li class="nav-item inline-block navbar-brand w-10 h-10 font-bold ml-4 md:mx-4 text-4xl text-center">
         <nuxt-link to="/">
           T
         </nuxt-link>

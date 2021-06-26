@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="game">
-      <single-game :game="game"></single-game>
+      <single-game :game="game"/>
     </div>
   </div>
 </template>
@@ -23,6 +23,11 @@ export default class ViewRecord extends Vue {
   game: GameInterface | null = null
 
   /** Methods */
+  mounted () {
+    if (this.$auth.loggedIn)
+      this.$auth.fetchUser()
+  }
+
   async fetch () {
     this.game = await this.$axios.$get(`games/${this.$route.params.uuid}`)
   }

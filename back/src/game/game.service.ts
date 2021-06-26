@@ -27,10 +27,10 @@ export class GameService {
         this.schedulerRegistry.addInterval('checkGames', interval_id)
     }
 
-    async findAll() : Promise<Game[]> {
+    async findPlayingGames() : Promise<Game[]> {
         return this.gameRepository.find({
-            where: { state: GameState.FINISHED },
-            relations: ['winner', 'looser']
+            where: { state: GameState.IN_GAME },
+            relations: ['players']
         })
     }
 

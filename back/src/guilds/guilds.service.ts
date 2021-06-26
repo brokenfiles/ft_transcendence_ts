@@ -103,7 +103,6 @@ export class GuildsService {
         if (guild.owner.id === user.id) {
             return this.guildRepository.remove(guild)
         } else {
-            //TODO: à tester : le leave
             const index = guild.users.map(u => u.id).indexOf(sub)
             if (index === -1)
                 throw new HttpException({

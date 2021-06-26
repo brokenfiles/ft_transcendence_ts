@@ -12,6 +12,12 @@
               <nuxt-link to="/queue">Join a queue</nuxt-link>
             </div>
             <div class="item-link my-2 text-xl" @click="extended = false">
+              <nuxt-link to="/game/tv">
+                Live games
+                <span class="live"></span>
+              </nuxt-link>
+            </div>
+            <div class="item-link my-2 text-xl" @click="extended = false">
               <nuxt-link to="/rules">See the rules</nuxt-link>
             </div>
           </div>
@@ -72,6 +78,14 @@ export default class Sidebar extends Vue {
   top: 72px;
   max-width: 72px;
   transition: all 0.3s ease;
+}
+
+.live {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background-color: #ff5037;
+  @apply rounded-full
 }
 
 @media screen and (max-width: 768px) {

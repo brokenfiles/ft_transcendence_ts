@@ -5,7 +5,6 @@ import {AuthGuard} from "@nestjs/passport";
 export class WsJwtAuthGuard extends AuthGuard('ws-jwt') {
 
     /**
-     * TODO: explain this function
      * @param context
      */
     getRequest<T = any>(context: ExecutionContext): T {
