@@ -1,5 +1,5 @@
 <template>
-	<div :class="active ? 'flex' : 'hidden'" class="notification flex-col items-center bg-primary z-50 rounded shadow-md">
+	<div :class="active ? 'show_part' : 'hidden_part'" class="notification flex-col items-center bg-primary z-50 rounded shadow-md">
 		<div class="text-yellow p-2">INVITATION TO PLAY</div>
 		<span class="text-cream">name: {{ this.requester_name }}</span>
 		<span class="text-cream">elo: {{ this.requester_elo }}</span>
@@ -20,6 +20,9 @@ export default class Queue extends Vue {
 	requester_name: string = ""
 	requester_elo?: number
 	requester_id?: number
+
+
+
 	@Socket('receiveGameNotify')
 	addMessage(payload: any) {
 
@@ -30,9 +33,8 @@ export default class Queue extends Vue {
 		this.active = true
 		setTimeout(() => {
 			this.active = false
-		}, 10000)
+		}, 7000)
 	}
-
 
 	StartDuel()
 	{
@@ -40,7 +42,7 @@ export default class Queue extends Vue {
 		this.$socket.client.emit("startPrivateChallenge", {
 			user_id: this.requester_id
 		}, (data: any) => {
-			this.$toast.info(data)
+			// this.$toast.info(data)
 		})
 	}
 
@@ -59,15 +61,29 @@ export default class Queue extends Vue {
 
 <style scoped>
 
+.hidden_part
+{
+	display: none;
+	top: 0;
+}
+
+.show_part
+{
+	display: flex;
+	top: 30%;
+	transition: all 1s;
+
+}
+
 .notification
 {
 	position: fixed;
 	width: 250px;
 	/*height: 200px;*/
-	top: 30%;
 	left: 50%;
 	margin-top: -100px; /* Negative half of height. */
 	margin-left: -125px; /* Negative half of width. */
+	transition: top 1s;
 }
 
 </style>
