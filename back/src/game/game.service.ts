@@ -12,6 +12,7 @@ import {GameState} from "./enums/game-state.enum";
 import {ClientJoinMatchInterface} from "../gateways/websocket/interfaces/client-join-match.interface";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
 import {GuildsService} from "../guilds/guilds.service";
+import {ChallengeUserInterface} from "../gateways/websocket/interfaces/challenge-user.interface";
 
 @Injectable()
 export class GameService {
@@ -201,6 +202,42 @@ export class GameService {
                 const spectator = await this.userService.findOne(sub)
                 game.addSpectator(spectator)
             } catch {}
+        }
+    }
+
+    async challengeUser(sub: any, payload: ChallengeUserInterface) {
+
+        const requester = await this.userService.findOne(sub)
+        const receiver = await this.userService.findOne(payload.user_id)
+
+        if (requester && receiver)
+        {
+            return {
+                requester_elo: requester.elo,
+                requester_name: requester.display_name,
+                requester_id: requester.id
+            }
+        }
+
+    }
+
+    async startChallenge(sub: any, payload: ChallengeUserInterface) {
+
+        const players = [sub, payload.user_id]
+
+        if (this.websocketService.onlineClients.some(r => players.includes(r)))
+        {
+            const players_entity = await Promise.all(players.map(userId => this.userService.findOne(userId)))
+            const uuid = await this.initGame(players)
+                for (const clientId of players) {
+                    const client = this.websocketService.getClient(clientId)
+                    if (client) {
+                        client.socket.emit('gameDuelStarting', {
+                            players_entity, uuid
+                        })
+                    }
+                }
+            console.log(uuid)
         }
     }
 }

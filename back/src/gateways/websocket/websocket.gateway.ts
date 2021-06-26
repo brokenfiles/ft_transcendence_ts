@@ -29,6 +29,7 @@ import {Coordinates} from "../../game/classes/game.classes";
 import {UsersService} from "../../users/users.service";
 import {RemoveChannelInterface} from "./interfaces/remove-channel.interface";
 import {LeaveChannelInterface} from "./interfaces/leave-channel.interface";
+import {ChallengeUserInterface} from "./interfaces/challenge-user.interface";
 
 
 @WebSocketGateway(81,
@@ -196,9 +197,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
             }
         }
         return { messages: messages }
-        // client.emit('SendMessagesToClient', messages)
     }
-
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
@@ -221,7 +220,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
             muted: mute_state
         }
     }
-
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
@@ -293,6 +291,28 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         await this.gameService.updatePadCoordinates(sub, coordinates)
     }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('challengeUser')
+    async challengeUserEvent(client: Socket, payload: ChallengeUserInterface) {
+        const {sub} = (client.handshake as any).user
+        console.log(sub, payload.user_id)
+        const challengePayload = await this.gameService.challengeUser(sub, payload)
+        this.websocketService.getClient(payload.user_id).socket.emit("receiveGameNotify", challengePayload)
+    }
+
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('startPrivateChallenge')
+    async startPrivateChallengeEvent(client: Socket, payload: ChallengeUserInterface) {
+        const {sub} = (client.handshake as any).user
+        console.log(sub, payload.user_id)
+
+        await this.gameService.startChallenge(sub, payload)
+    }
+
 
 
 }

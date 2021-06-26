@@ -233,6 +233,12 @@ export default class Account extends Vue {
    */
 	challengeUser() {
 
+		this.$socket.client.emit("challengeUser", {
+			user_id: this.user.id
+		}, (data: any) => {
+			this.$toast.info(data)
+		})
+
   }
 
 	/**
