@@ -62,7 +62,7 @@
 							 :color="achievement.color"/>
 			</div>
 			<div class="w-full flex flex-wrap items-center">
-				<single-game v-for="(game, index) in games" :key="`game-${index}`" :user="$auth.user"
+				<single-game v-for="(game, index) in games" :key="`game-${index}`" :user="user"
 							 :is-full-display="false" :game="game" class="w-full md:w-1/2"/>
 			</div>
 		</div>

@@ -1,6 +1,6 @@
 <template>
   <nav id="navbar" class="navbar fixed left-0 right-0 top-0 z-10 bg-secondary text-cream z-20">
-    <ul class="flex flex-wrap items-center py-4 pr-4">
+    <ul class="flex items-center py-4 pr-4">
       <li class="nav-item hidden md:inline-block navbar-brand w-10 h-10 font-bold mx-4 text-4xl text-center">
         <nuxt-link to="/">
           T
@@ -14,7 +14,10 @@
       </li>
       <li class="nav-item" v-if="!isAuthenticated">
         <nuxt-link to="/login">
-          <button class="py-2 px-8 bg-yellow text-primary">login or register</button>
+          <button class="py-2 px-8 bg-yellow text-primary">
+            <span class="inline md:hidden">login</span>
+            <span class="hidden md:inline">login or register</span>
+          </button>
         </nuxt-link>
       </li>
       <li class="nav-item hidden md:inline-block" v-if="isAuthenticated">

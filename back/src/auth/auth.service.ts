@@ -49,7 +49,7 @@ export class AuthService {
     async getFortyTwoUser(code: string): Promise<any | null>
     {
         try {
-            const tokens = await this.httpService.post(`https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=${process.env.FORTYTWO_OAUTH_UID}&client_secret=${process.env.FORTYTWO_OAUTH_SECRET}&code=${code}&redirect_uri=http://localhost:3000/auth/42`)
+            const tokens = await this.httpService.post(`https://api.intra.42.fr/oauth/token?grant_type=authorization_code&client_id=${process.env.FORTYTWO_OAUTH_UID}&client_secret=${process.env.FORTYTWO_OAUTH_SECRET}&code=${code}&redirect_uri=${process.env.OAUTH_REDIRECT_URL}`)
                 .toPromise()
                 .then(response => response.data)
             const fortyTwoUser = await this.httpService.get(`https://api.intra.42.fr/v2/me`,{

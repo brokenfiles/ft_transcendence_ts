@@ -21,7 +21,7 @@
         </span>
       </span>
     </p>
-    <canvas ref="game" :width="this.match.gameWith" :height="this.match.gameHeight"
+    <canvas ref="game" :width="clientWidth" :height="clientHeight"
             class="border border-primary bg-game" :style="{backgroundImage: `url(${background})`}">
     </canvas>
   </div>
@@ -77,8 +77,6 @@ export default class Pong extends Vue {
     this.player_1_points = 0
     /* Event listeners */
     if (this.isAPlayer) {
-      document.addEventListener('keydown', this.keyDownEvent)
-      document.addEventListener('keyup', this.keyUpEvent)
       document.addEventListener('mousemove', this.mouseMoveEvent)
       // avert the backend that the player is ready to play
       this.$socket.client.emit(`clientReadyToPlay`)
@@ -87,14 +85,12 @@ export default class Pong extends Vue {
       // avert the backend that the player is ready to play
       this.$socket.client.emit(`clientJoinedSpectator`, this.match.uuid)
     }
-    this.printScene()
   }
 
   beforeDestroy() {
     // destroying the component
     if (this.isAPlayer) {
-      document.removeEventListener('keydown', this.keyDownEvent)
-      document.removeEventListener('keyup', this.keyUpEvent)
+      document.removeEventListener('mousemove', this.mouseMoveEvent)
       this.$socket.client.emit(`clientLeftGame`)
     }
     clearInterval(this.loop_id)
@@ -107,7 +103,7 @@ export default class Pong extends Vue {
       if (this.canvas) {
         let rect = this.canvas.getBoundingClientRect();
         const mouseCoordinates = {
-          y: event.clientY - rect.top
+          y: (event.clientY - rect.top) * this.ratioHeight
         }
         if (mouseCoordinates.y - pad.height / 2 <= 0) {
           mouseCoordinates.y = pad.height / 2
@@ -119,29 +115,7 @@ export default class Pong extends Vue {
         this.$socket.client.emit(`clientUpdatedPadPosition`, pad.coordinates)
         this.printRectangle(this.match.leftPad.coordinates, this.match.leftPad.width, this.match.leftPad.height, 'red')
         this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height, 'red')
-
       }
-    }
-  }
-
-  /**
-   * When a user press on a key
-   * @param {KeyboardEvent} event
-   */
-  keyDownEvent(event: KeyboardEvent) {
-    if (!this.keys.pressed.includes(event.code)) {
-      this.keys.pressed.push(event.code)
-    }
-  }
-
-  /**
-   * When a user releases a key
-   * @param {KeyboardEvent} event
-   */
-  keyUpEvent(event: KeyboardEvent) {
-    if (this.keys.pressed.includes(event.code)) {
-      const idx = this.keys.pressed.indexOf(event.code)
-      this.keys.pressed.splice(idx, 1)
     }
   }
 
@@ -150,13 +124,15 @@ export default class Pong extends Vue {
       // this.context.clearRect(coordinates.x, coordinates.y, w, h)
       this.context.beginPath()
       this.context.fillStyle = `${color}`
-      this.context.fillRect(coordinates.x, coordinates.y, w, h)
+      this.context.fillRect(coordinates.x / this.ratioWidth, coordinates.y / this.ratioHeight,
+        w / this.ratioWidth, h / this.ratioHeight)
     }
   }
 
   clearRect(coordinates: Coordinates, w: number, h: number) {
     if (this.context) {
-      this.context.clearRect(coordinates.x, coordinates.y - 1, w, h + 2)
+      this.context.clearRect(coordinates.x / this.ratioWidth - 1, coordinates.y / this.ratioHeight - 1,
+        w / this.ratioWidth + 2, h / this.ratioHeight + 2)
     }
   }
 
@@ -197,18 +173,6 @@ export default class Pong extends Vue {
       'red')
     this.printRectangle(this.match.rightPad.coordinates, this.match.rightPad.width, this.match.rightPad.height,
       'red')
-    this.printScene()
-  }
-
-  printScene () {
-    if (!this.canvas && this.context) {
-      this.context.beginPath()
-      this.context.setLineDash([5, 15])
-      this.context.moveTo(this.match.gameWith / 2, 0)
-      this.context.lineTo(this.match.gameWith / 2, this.match.gameHeight)
-      this.context.strokeStyle = 'white'
-      this.context.stroke()
-    }
   }
 
   setPoints (playerId: number, points: number) {
@@ -315,7 +279,6 @@ export default class Pong extends Vue {
   get background(): string {
     const uuid = this.match.uuid
     const images = [
-      "https://image.freepik.com/free-vector/battle-versus-vs-background-sports-game_1017-23766.jpg",
       "https://image.freepik.com/free-vector/versus-vs-screen-banner-battle-comparision_1017-26142.jpg",
       "https://image.freepik.com/free-vector/low-poly-style-vs-versus-banner_1017-26141.jpg",
       "https://image.freepik.com/free-vector/battle-screen-versus-vs-background-template-design_1017-27090.jpg",
@@ -324,8 +287,30 @@ export default class Pong extends Vue {
     return images[uuid.charCodeAt(0) % images.length]
   }
 
-  get opponent(): UserInterface {
-    return this.match.players[1].id === this.$auth.user.id ? this.match.players[0] : this.match.players[1]
+  get clientWidth () : number {
+    if (process.client) {
+      if (window.innerWidth <= this.match.gameWith) {
+        return this.match.gameWith / 1.5
+      }
+    }
+    return this.match.gameWith
+  }
+
+  get clientHeight () : number {
+    if (process.client) {
+      if (window.innerWidth <= this.match.gameWith) {
+        return this.match.gameHeight / 1.5
+      }
+    }
+    return this.match.gameHeight
+  }
+
+  get ratioWidth () : number {
+    return this.match.gameWith / this.clientWidth
+  }
+
+  get ratioHeight () : number {
+    return this.match.gameHeight / this.clientHeight
   }
 
 }
@@ -337,7 +322,6 @@ export default class Pong extends Vue {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 480px;
 }
 
 </style>
