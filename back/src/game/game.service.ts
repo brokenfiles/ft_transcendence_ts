@@ -211,8 +211,7 @@ export class GameService {
         const requester = await this.userService.findOne(sub)
         const receiver = await this.userService.findOne(payload.user_id)
 
-        if (requester && receiver)
-        {
+        if (requester && receiver && sub !== payload.user_id) {
             if (this.findChallenge(requester.id, receiver.id) === undefined) {
                 this.challenges.push({ requester_id: requester.id, requested_id: receiver.id, created_at: new Date().getTime() })
                 return {
@@ -224,6 +223,10 @@ export class GameService {
                 return {
                     error: "You already challenged this user (wait 60 seconds)"
                 }
+            }
+        } else {
+            return {
+                error: "You can't duel yourself or a unknown player"
             }
         }
     }
