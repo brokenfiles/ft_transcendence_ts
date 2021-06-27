@@ -21,8 +21,8 @@ export default class Queue extends Vue {
   /** Variables */
 	active: boolean = false
 	requester_name: string = ""
-	requester_elo?: number
-	requester_id?: number
+	requester_elo: number = -1
+	requester_id: number = -1
 	time: number = 10
 	interval: number = -1
 

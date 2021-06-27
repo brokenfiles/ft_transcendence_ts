@@ -11,6 +11,7 @@ import Vue from 'vue'
 import {Component} from "nuxt-property-decorator";
 import {MatchInterface} from "~/utils/interfaces/game/match.interface";
 import Pong from "~/components/Game/Pong/Pong.vue";
+import {GameState} from "~/utils/enums/game-state.enum";
 
 @Component({
   middleware: ['auth'],
@@ -28,13 +29,12 @@ export default class Game extends Vue {
   mounted () {
     this.$socket.client.emit(`getMatch`, {
       uuid: this.$route.params.uuid
-    }, (match: MatchInterface | undefined) => {
-      console.log('match', match)
-      if (!match) {
-        this.$toast.error(`This game does not exist`)
+    }, (match: MatchInterface | any) => {
+      if (match.error) {
+        this.$toast.error(match.error)
         this.$router.push('/')
       } else {
-        this.match = match
+        this.match = match as MatchInterface
       }
     })
   }

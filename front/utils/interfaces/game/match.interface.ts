@@ -31,7 +31,8 @@ export interface MatchInterface {
   players: UserInterface[]
   ball: Ball
   rightPad: Pad
-  leftPad: Pad
+  leftPad: Pad,
+  state: string
 }
 
 export interface PlayerMarkedInterface {

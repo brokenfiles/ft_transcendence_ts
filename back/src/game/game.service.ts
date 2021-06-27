@@ -168,10 +168,10 @@ export class GameService {
         return null
     }
 
-    getGameBySocketAndUUID(client: Socket, payload: ClientJoinMatchInterface): MatchInterface | null {
+    getGameBySocketAndUUID(client: Socket, payload: ClientJoinMatchInterface): MatchInterface | any {
         const game = this.getGameByUUID(payload.uuid)
         if (!game)
-            return null
+            return { error: `This game does not exist` }
         return game.serialize()
     }
 
