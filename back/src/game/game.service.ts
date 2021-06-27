@@ -253,7 +253,7 @@ export class GameService {
         const players = [sub, payload.user_id]
 
         const challenge = this.findChallenge(payload.user_id, sub)
-        if (challenge) {
+        if (challenge === undefined) {
             if (this.websocketService.onlineClients.some(r => players.includes(r))) {
                 const players_entity = await Promise.all(players.map(userId => this.userService.findOne(userId)))
                 const uuid = await this.initGame(players_entity)
