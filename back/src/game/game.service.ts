@@ -238,7 +238,7 @@ export class GameService {
         for (const challenge of this.challenges) {
             if (challenge.requester_id === requester_id && challenge.requested_id === requested_id) {
                 // if the created_at of the challenge is more than one minute, delete the challenge and return undefined
-                if ((new Date().getTime() - challenge.created_at) / 1000 > 1) {
+                if ((new Date().getTime() - challenge.created_at) / 1000 > 60) {
                     this.challenges.splice(this.challenges.indexOf(challenge), 1)
                     return undefined
                 }
@@ -249,12 +249,12 @@ export class GameService {
     }
 
     async startChallenge(sub: any, payload: ChallengeUserInterface) {
-
         const players = [sub, payload.user_id]
-
         const challenge = this.findChallenge(payload.user_id, sub)
-        if (challenge === undefined) {
+        // if the challenge has been found
+        if (challenge !== undefined) {
             if (this.websocketService.onlineClients.some(r => players.includes(r))) {
+                this.challenges.splice(this.challenges.indexOf(challenge), 1)
                 const players_entity = await Promise.all(players.map(userId => this.userService.findOne(userId)))
                 const uuid = await this.initGame(players_entity)
                 for (const clientId of players) {
@@ -265,7 +265,6 @@ export class GameService {
                         })
                     }
                 }
-                console.log(uuid)
             }
         } else {
             return {

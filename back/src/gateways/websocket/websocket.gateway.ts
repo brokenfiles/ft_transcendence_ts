@@ -313,9 +313,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @SubscribeMessage('startPrivateChallenge')
     async startPrivateChallengeEvent(client: Socket, payload: ChallengeUserInterface) {
         const {sub} = (client.handshake as any).user
-        console.log(sub, payload.user_id)
-
-        await this.gameService.startChallenge(sub, payload)
+        return await this.gameService.startChallenge(sub, payload)
     }
 
 

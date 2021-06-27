@@ -3,7 +3,6 @@
 		<div class="flex">
 			<div class="text-yellow p-2">INVITATION TO PLAY</div>
 			<div @click="stopInterval" class="p-2 cursor-pointer">✖️</div>
-
 		</div>
 		<span class="text-cream">name: {{ this.requester_name }}</span>
 		<span class="text-cream">elo: {{ this.requester_elo }}</span>
@@ -19,44 +18,28 @@ import {Socket} from "vue-socket.io-extended";
 @Component({})
 export default class Queue extends Vue {
 
+  /** Variables */
 	active: boolean = false
 	requester_name: string = ""
 	requester_elo?: number
 	requester_id?: number
 	time: number = 10
 	interval: number = -1
-	@Socket('receiveGameNotify')
-	addMessage(payload: any) {
 
-		this.requester_name = payload.requester_name
-		this.requester_elo = payload.requester_elo
-		this.requester_id = payload.requester_id
+  /** Methods */
+  beforeDestroy () {
+    this.stopInterval()
+  }
 
-
-		this.active = true
-		const interval = window.setInterval(() => {
-			this.time--
-		}, 1000)
-
-		window.setTimeout(() => {
-			clearInterval(interval);
-			this.active = false
-			this.time = 10
-		}, 1000 * 10);
-	}
-
-	stopInterval()
-	{
-		if (this.interval)
-		{
+	stopInterval() {
+		if (this.interval) {
 			clearInterval(this.interval);
 			this.active = false
 			this.time = 10
 		}
 	}
 
-	startDuel()
-	{
+	startDuel() {
 		this.active = false
 		this.$socket.client.emit("startPrivateChallenge", {
 			user_id: this.requester_id
@@ -66,6 +49,24 @@ export default class Queue extends Vue {
       }
 		})
 	}
+
+  @Socket('receiveGameNotify')
+  addMessage(payload: any) {
+    this.requester_name = payload.requester_name
+    this.requester_elo = payload.requester_elo
+    this.requester_id = payload.requester_id
+
+    this.active = true
+    const interval = window.setInterval(() => {
+      this.time--
+    }, 1000)
+
+    window.setTimeout(() => {
+      clearInterval(interval);
+      this.active = false
+      this.time = 10
+    }, 1000 * 10);
+  }
 
 	@Socket("gameDuelStarting")
 	gameStartingEvent (gameStartingOptions: any) {
