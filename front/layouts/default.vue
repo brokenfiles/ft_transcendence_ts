@@ -119,7 +119,6 @@ export default class Default extends Vue {
 	@Socket('inAGameClientsUpdated')
   inAGameClientsUpdatedEvent(clients: number[]) {
 	  this.setClientsInAGame(clients)
-    console.log(clients)
   }
 
 	/**

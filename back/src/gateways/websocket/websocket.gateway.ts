@@ -212,7 +212,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     {
         const {sub} = (client.handshake as any).user
         const mute_state = await this.chatsService.muteUserFromChannel(sub, payload)
-        console.log(mute_state)
         return {
             muted: mute_state
         }

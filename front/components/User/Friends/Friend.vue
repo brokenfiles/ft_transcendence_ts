@@ -3,7 +3,7 @@
     <nuxt-link :to="`/users/${friend.login}`"
                class="bg-secondary py-8 px-2 flex flex-col items-center justify-center">
       <avatar class="h-20 w-20" :image-url="friend.avatar">
-        <user-online-icon class="absolute h-5 w-5 top-0 right-0" :is-online="isOnline"/>
+        <user-online-icon class="absolute h-5 w-5 top-0 right-0" :is-online="isOnline" :is-in-game="false"/>
       </avatar>
       <h2 class="font-semibold mt-2 text-xl">
         {{ friend.display_name }}

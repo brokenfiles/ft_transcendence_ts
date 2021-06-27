@@ -50,12 +50,12 @@
 					</button>
 				</div>
 			</div>
-			<button class="w-full pr-1 focus:outline-none" @click="saveChannel">
+			<button class="w-full focus:outline-none" @click="saveChannel">
 			  <span class="block text-cream bg-secondary border border-cream p-2">
 				  Save
 			  </span>
 			</button>
-			<button v-if="$auth.user.id === channel.owner.id" class="w-full pr-1 pt-2 focus:outline-none" @click="removeChannel">
+			<button v-if="$auth.user.id === channel.owner.id" class="w-full mt-2 focus:outline-none" @click="removeChannel">
 			  <span class="block text-cream bg-red-500 border border-cream p-2">
 				  Remove Channel
 			  </span>
