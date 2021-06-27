@@ -305,7 +305,8 @@ export default class Pong extends Vue {
   get clientWidth () : number {
     if (process.client) {
       if (window.innerWidth <= this.match.gameWith) {
-        return this.match.gameWith / 1.5
+        const ratio = this.match.gameWith / window.innerWidth
+        return this.match.gameWith / ratio
       } else if (window.innerWidth >= 900) {
         return this.match.gameWith * 1.5
       }
@@ -316,7 +317,8 @@ export default class Pong extends Vue {
   get clientHeight () : number {
     if (process.client) {
       if (window.innerWidth <= this.match.gameWith) {
-        return this.match.gameHeight / 1.5
+        const ratio = this.match.gameWith / window.innerWidth
+        return this.match.gameHeight / ratio
       }
     }
     return this.match.gameHeight

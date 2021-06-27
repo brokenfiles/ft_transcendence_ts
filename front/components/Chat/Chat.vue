@@ -20,7 +20,7 @@
 
         <div v-show="curr_channel !== null && admin_mode === false">
           <channel-tab @back="closedChannel" @adminPanelOpened="admin_mode = true"
-                       :messages="sortedMessages" :curr_channel="curr_channel"/>
+                       :messages="sortedMessages" :curr_channel="curr_channel" :open="isChatOpen"/>
         </div>
 
         <div v-if="admin_mode === true && curr_channel">

@@ -25,9 +25,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {Component} from 'nuxt-property-decorator'
+import {Component, namespace} from 'nuxt-property-decorator'
 import Avatar from "~/components/User/Profile/Avatar.vue";
 import {GameInterface} from "~/utils/interfaces/game/game.interface";
+
+const onlineClients = namespace('onlineClients')
+const inGameClients = namespace('inGameClients')
 
 @Component({
   middleware: ['auth'],
@@ -40,6 +43,12 @@ export default class GameTv extends Vue {
   /** Variables */
   matchs: GameInterface[] = []
 
+  @onlineClients.Getter
+  clients!: number[]
+
+  @inGameClients.Getter
+  inAGame!: number[]
+
   /** Methods */
   async fetch() {
     this.matchs = await this.$axios.$get(`games`)
@@ -49,7 +58,6 @@ export default class GameTv extends Vue {
   get validMatchs(): GameInterface[] {
     return this.matchs.filter((match) => {
       return (match.players && match.players.length === 2);
-
     })
   }
 

@@ -53,7 +53,7 @@
         <div class="w-full md:w-1/2 p-2">
           <!-- statistics -->
           <div class="text-primary">
-            <div class="bg-cream flex px-4 py-2">
+            <div class="bg-gray-300 flex px-4 py-2">
               <p class="flex-1 font-semibold">Created</p>
               <client-only>
                 <p>
@@ -61,13 +61,9 @@
                 </p>
               </client-only>
             </div>
-            <div class="bg-gray-300 flex px-4 py-2">
+            <div class="bg-cream flex px-4 py-2">
               <p class="flex-1 font-semibold">Guild points</p>
               <p>{{ guild.points }}</p>
-            </div>
-            <div class="bg-cream flex px-4 py-2">
-              <p class="flex-1 font-semibold">War points</p>
-              <p>{{ guild.war_points }}</p>
             </div>
             <div class="bg-gray-300 flex px-4 py-2">
               <p class="flex-1 font-semibold">Members</p>

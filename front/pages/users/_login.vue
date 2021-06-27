@@ -240,6 +240,8 @@ export default class Account extends Vue {
 		}, (data: any) => {
 		  if (data.error) {
 		    this.$toast.error(data.error)
+      } else if (this.user) {
+		    this.$toast.info(`You challenged ${this.user.login}`)
       }
 		})
   }

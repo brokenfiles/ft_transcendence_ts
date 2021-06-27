@@ -18,10 +18,6 @@
           <span class="font-semibold">{{ guild.points }} </span>
           points
         </p>
-        <p class="bg-primary px-4">
-          ratio
-          <span class="font-semibold">{{ 45 }} </span>
-        </p>
       </div>
       <p class="mt-4">
         Owner :
