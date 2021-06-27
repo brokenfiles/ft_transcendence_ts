@@ -238,7 +238,7 @@ export class GameService {
         for (const challenge of this.challenges) {
             if (challenge.requester_id === requester_id && challenge.requested_id === requested_id) {
                 // if the created_at of the challenge is more than one minute, delete the challenge and return undefined
-                if ((new Date().getTime() - challenge.created_at) / 1000 > 60) {
+                if ((new Date().getTime() - challenge.created_at) / 1000 > 1) {
                     this.challenges.splice(this.challenges.indexOf(challenge), 1)
                     return undefined
                 }

@@ -1,9 +1,13 @@
 <template>
-	<div :class="active ? 'show_part' : 'hidden_part'" class="notification flex-col items-center bg-primary z-50 rounded shadow-md">
-		<div class="text-yellow p-2">INVITATION TO PLAY</div>
+	<div :class="active ? 'show_part' : 'hidden_part'" class="notification flex flex-col items-center bg-primary bg-opacity-95 z-50 rounded border border-yellow shadow-2xl">
+		<div class="flex">
+			<div class="text-yellow p-2">INVITATION TO PLAY</div>
+			<div @click="stopInterval" class="p-2 cursor-pointer">✖️</div>
+
+		</div>
 		<span class="text-cream">name: {{ this.requester_name }}</span>
 		<span class="text-cream">elo: {{ this.requester_elo }}</span>
-		<button class="p-2 m-2 bg-yellow text-black font-bold" @click="startDuel">Accept Duel</button>
+		<button class="p-2 m-2 bg-yellow hover:bg-yellow_less text-black font-bold rounded text-center w-36" @click="startDuel">Accept Duel [{{ this.time }}]</button>
 	</div>
 </template>
 
@@ -19,7 +23,8 @@ export default class Queue extends Vue {
 	requester_name: string = ""
 	requester_elo?: number
 	requester_id?: number
-
+	time: number = 10
+	interval: number = -1
 	@Socket('receiveGameNotify')
 	addMessage(payload: any) {
 
@@ -27,10 +32,27 @@ export default class Queue extends Vue {
 		this.requester_elo = payload.requester_elo
 		this.requester_id = payload.requester_id
 
+
 		this.active = true
-		setTimeout(() => {
+		const interval = window.setInterval(() => {
+			this.time--
+		}, 1000)
+
+		window.setTimeout(() => {
+			clearInterval(interval);
 			this.active = false
-		}, 7000)
+			this.time = 10
+		}, 1000 * 10);
+	}
+
+	stopInterval()
+	{
+		if (this.interval)
+		{
+			clearInterval(this.interval);
+			this.active = false
+			this.time = 10
+		}
 	}
 
 	startDuel()
@@ -62,13 +84,14 @@ export default class Queue extends Vue {
 
 .hidden_part
 {
-	display: none;
-	top: 0;
+	/*visibility: hidden;*/
+	top: -50%;
+	transition: all 1s;
+
 }
 
 .show_part
 {
-	display: flex;
 	top: 30%;
 	transition: all 1s;
 
