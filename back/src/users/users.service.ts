@@ -6,7 +6,8 @@ import {In, Repository} from "typeorm";
 import {User} from "./entities/user.entity";
 import {UpdateMeDto} from "./dto/update-me.dto";
 import {WebsocketService} from "../gateways/websocket/websocket.service";
-import {Guild} from "../guilds/entities/guild.entity";
+import {AchievementsService} from "../achievement/achievements.service";
+import {CreateAchievementInterface} from "../achievement/interfaces/create-achievement.interface";
 
 @Injectable()
 export class UsersService {
@@ -14,7 +15,8 @@ export class UsersService {
     mailjet: any = null
 
     constructor(@InjectRepository(User) private usersRepository: Repository<User>,
-                private chatService: WebsocketService) {
+                private chatService: WebsocketService,
+                private achievementsService: AchievementsService) {
         this.mailjet = require ('node-mailjet')
             .connect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_SECRET)
     }
@@ -122,12 +124,46 @@ export class UsersService {
     }
 
     async checkAchievements(playersId: number[]) {
-        let players = await Promise.all(playersId.map((p) => this.findOne(p)))
+        let players = await Promise.all(playersId
+            .map((p) => this.findOneWithoutRelations(p, ['achievements', 'games', 'games.winner', 'games.looser'])))
         for (const player of players) {
-            let achievements = player.achievements
-            // if (player.games.length >= 30)
-            //     achievements.push()
+            const wins = player.games.filter((g) => g.winner.id === player.id)
+            const loses = player.games.filter((g) => g.looser.id === player.id)
+            if (player.games.length >= 30)
+                await this.addAchievement(player, {
+                    name: 'Beginner',
+                    description: 'Play 30 games',
+                    color: '#BB6BD9'
+                })
+            if (wins.length >= 50)
+                await this.addAchievement(player, {
+                    name: 'Challenger',
+                    description: 'Win 50 games',
+                    color: '#BB6BD9'
+                })
+            if (wins.length >= 200)
+                await this.addAchievement(player, {
+                    name: 'Fighter',
+                    description: 'Win 200 games',
+                    color: '#BB6BD9'
+                })
+            if (wins.length >= 500)
+                await this.addAchievement(player, {
+                    name: 'Champion',
+                    description: 'Win 500 games',
+                    color: '#BB6BD9'
+                })
         }
+    }
+
+    async addAchievement (player: User, achievementPayload: CreateAchievementInterface) : Promise<User | undefined> {
+        const achievement = await this.achievementsService.findAchievement(achievementPayload.name, achievementPayload)
+        let playerAchievements = player.achievements
+        if (!playerAchievements.map(a => a.id).includes(achievement.id)) {
+            playerAchievements.push(achievement)
+            return this.usersRepository.save(player)
+        }
+        return undefined
     }
 
     async findUsersByIds(users_id: number[]): Promise<User[]>

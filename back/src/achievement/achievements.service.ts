@@ -4,6 +4,7 @@ import {Achievement} from "./entities/achievement.entity";
 import {Repository} from "typeorm";
 import {CreateAchievementDto} from "./dtos/create-achievement.dto";
 import {UpdateAchievementDto} from "./dtos/update-achievement.dto";
+import {CreateAchievementInterface} from "./interfaces/create-achievement.interface";
 
 @Injectable()
 export class AchievementsService {
@@ -21,12 +22,28 @@ export class AchievementsService {
             })
     }
 
+    async findOneByName (name: string) {
+        return this.achievementRepository.findOne({ name })
+    }
+
+    async findAchievement(achievementName: string, achievementPayload: CreateAchievementInterface) : Promise<Achievement | undefined> {
+        let achievement = await this.findOneByName(achievementName)
+        if (achievement === undefined)
+            achievement = await this.addNew(achievementPayload)
+        return achievement
+    }
+
     async find(): Promise<Achievement[]> {
         return this.achievementRepository.find()
     }
 
     async create(createAchievementDto: CreateAchievementDto): Promise<Achievement> {
         const achievement = this.achievementRepository.create(createAchievementDto)
+        return this.achievementRepository.save(achievement)
+    }
+
+    async addNew(createAchievement: CreateAchievementInterface) : Promise<Achievement> {
+        const achievement = this.achievementRepository.create(createAchievement)
         return this.achievementRepository.save(achievement)
     }
 
@@ -45,5 +62,4 @@ export class AchievementsService {
         const user = await this.findOne(id)
         return this.achievementRepository.remove(user)
     }
-
 }

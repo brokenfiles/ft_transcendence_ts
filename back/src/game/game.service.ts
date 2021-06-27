@@ -189,10 +189,8 @@ export class GameService {
             const sub = client.userId
 
             let game = this.getGameByUserId(sub)
-            if (game) {
+            if (game)
                 game.clientLeft(sub)
-                // this.removeGameFromGameArray(game.uuid)
-            }
         }
     }
 

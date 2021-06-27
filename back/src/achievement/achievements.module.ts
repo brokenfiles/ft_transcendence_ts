@@ -9,6 +9,7 @@ import {Achievement} from "./entities/achievement.entity";
         TypeOrmModule.forFeature([Achievement])
     ],
     controllers: [AchievementsController],
-    providers: [AchievementsService]
+    providers: [AchievementsService],
+    exports: [AchievementsService]
 })
 export class AchievementsModule {}
