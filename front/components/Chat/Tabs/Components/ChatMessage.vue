@@ -46,7 +46,7 @@ export default class ChatMessage extends Vue {
 
   /** Variables */
   showMessageSendingDate: boolean = false
-  
+
   @onlineClients.Getter
   clients!: number[]
 
@@ -57,6 +57,8 @@ export default class ChatMessage extends Vue {
     }, (data: any) => {
       if (data.error) {
         this.$toast.error(data.error)
+      } else if (this.$auth.user) {
+        this.$toast.info(`You challenged ${this.$auth.user.login}`)
       }
     })
   }
