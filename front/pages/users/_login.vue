@@ -4,7 +4,7 @@
 			<avatar class="h-24 w-24" :image-url="user.avatar">
 				<image-uploader v-if="this.$auth.loggedIn && this.$auth.user.id === user.id"
 								@imageUploaded="changeAvatar" class="absolute top-0 left-0"/>
-				<user-online-icon class="absolute h-7 w-7 top-0 right-0" :is-online="isOnline"/>
+				<user-online-icon class="absolute h-7 w-7 top-0 right-0" :is-online="isOnline" :is-in-game="isInGame"/>
 			</avatar>
 			<h1 class="font-semibold mt-2 text-2xl">
 				<nuxt-link class="text-yellow" :to="`/guilds/${guild.anagram}`" v-if="guild">[{{ guild.anagram }}]
@@ -90,6 +90,7 @@ import SingleGame from "~/components/Game/Records/SingleGame.vue";
 import {GameInterface} from "~/utils/interfaces/game/game.interface";
 
 const onlineClients = namespace('onlineClients')
+const inGameClients = namespace('inGameClients')
 
 interface ImageInterface {
 	uuid: string
@@ -126,6 +127,9 @@ export default class Account extends Vue {
 
 	@onlineClients.Getter
 	clients!: number[]
+
+	@inGameClients.Getter
+	inAGame!: number[]
 
 	async validate({params}: Context) {
 		return (params.login.length >= 3 && params.login.length <= 16)
@@ -319,6 +323,10 @@ export default class Account extends Vue {
 	get isOnline(): boolean {
 		return (this.user && this.clients.indexOf(this.user.id) !== -1)
 	}
+
+	get isInGame(): boolean {
+	  return (this.inAGame && this.user && this.inAGame.indexOf(this.user.id) !== -1)
+  }
 
 	/**
 	 * Is friend with user

@@ -12,6 +12,8 @@ import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 export class WebsocketService {
 
     private _clients: ClientInterface[] = []
+    private _inAGame: ClientInterface[] = []
+    private _server: Server
 
     constructor(
         @InjectRepository(Channel) private channelRepository: Repository<Channel>,
@@ -24,6 +26,42 @@ export class WebsocketService {
 
     sendOnlineClientsToClient(client: Socket) {
         client.emit('onlineClientsUpdated', this.onlineClients)
+    }
+
+    broadcastInAGameClients() {
+        this._server.emit('inAGameClientsUpdated', this.inAGameClients)
+    }
+
+    sendInAGameToClient(client: Socket) {
+        client.emit('inAGameClientsUpdated', this.inAGameClients)
+    }
+
+    addClientToInAGame (sub: number) {
+        const client = this.getClient(sub)
+        if (client !== undefined && !this._inAGame.includes(client)) {
+            this._inAGame.push(client)
+            this.broadcastInAGameClients()
+        }
+    }
+
+    removeClientFromInAGame (sub: number) {
+        const index = this._inAGame.map((c) => c.userId).indexOf(sub)
+        if (index !== -1) {
+            this._inAGame.splice(index, 1)
+            this.broadcastInAGameClients()
+        }
+    }
+
+    addClientsToInAGame (subs: number[]) {
+        for (const sub of subs) {
+            this.addClientToInAGame(sub)
+        }
+    }
+
+    removeClientsFromInAGame (subs: number[]) {
+        for (const sub of subs) {
+            this.removeClientFromInAGame(sub)
+        }
     }
 
     /**
@@ -59,6 +97,7 @@ export class WebsocketService {
         const index = this._clients.map(clt => clt.id).indexOf(clientUid)
         if (index !== -1) {
             const sub = this._clients[index].userId
+            this.removeClientFromInAGame(sub)
             this._clients.splice(index, 1)
             this.broadcastOnlineClients(server)
             return sub
@@ -66,8 +105,12 @@ export class WebsocketService {
         return (-1)
     }
 
-    public get onlineClients() {
+    public get onlineClients () {
         return this._clients.map(client => client.userId)
+    }
+
+    public get inAGameClients () {
+        return this._inAGame.map(client => client.userId)
     }
 
     public get clients() {
@@ -106,4 +149,11 @@ export class WebsocketService {
         if (c)
             c.channelId = payload.channel_id
     }
+
+    /** SETTERS */
+
+    set server(value: Server) {
+        this._server = value;
+    }
+
 }

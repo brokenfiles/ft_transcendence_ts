@@ -24,6 +24,7 @@ import {Socket} from "vue-socket.io-extended";
 import {NotifyOptions} from "~/utils/interfaces/notifications/notify.options.interface";
 import GameNotification from "~/components/Game/GameNotification.vue";
 
+const inAGameClients = namespace('inGameClients')
 const onlineClients = namespace('onlineClients')
 
 @Component({
@@ -90,8 +91,14 @@ export default class Default extends Vue {
 	@onlineClients.Getter
 	public clients!: number[]
 
+  @inAGameClients.Getter
+  public inAGame!: number[]
+
 	@onlineClients.Mutation
 	public setClients!: (clients: number[]) => void
+
+	@inAGameClients.Mutation
+	public setClientsInAGame!: (inAGame: number[]) => void
 
 	/**
 	 * When a client status changed to online -> offline or inverse
@@ -103,6 +110,17 @@ export default class Default extends Vue {
 	onlineClientUpdatedEvent(clients: number[]) {
 		this.setClients(clients)
 	}
+
+  /**
+   * When a client status changed to not in a game -> in a game or inverse
+   *
+   * @param {number[]} clients
+   */
+	@Socket('inAGameClientsUpdated')
+  inAGameClientsUpdatedEvent(clients: number[]) {
+	  this.setClientsInAGame(clients)
+    console.log(clients)
+  }
 
 	/**
 	 * Notification system from the backend

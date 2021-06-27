@@ -127,8 +127,7 @@ export class UsersService {
         let players = await Promise.all(playersId
             .map((p) => this.findOneWithoutRelations(p, ['achievements', 'games', 'games.winner', 'games.looser'])))
         for (const player of players) {
-            const wins = player.games.filter((g) => g.winner.id === player.id)
-            const loses = player.games.filter((g) => g.looser.id === player.id)
+            const wins = player.games.filter((g) => g.winner && g.winner.id === player.id)
             if (player.games.length >= 30)
                 await this.addAchievement(player, {
                     name: 'Beginner',

@@ -116,9 +116,7 @@ export default class AdminTab extends Vue {
 	}
 
 	removeChannel() {
-
-		if (confirm(`You're going to delete the channel, are you sure ??`)) {
-
+		if (confirm(`You're going to delete the channel, are you sure ?`)) {
 			this.$socket.client.emit('removeChannel', {
 				channel_id: this.channel.id
 			}, (data: any) => {

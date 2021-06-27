@@ -20,12 +20,12 @@
         </p>
         <hr class="mt-1 mx-4">
       </div>
-      <div class="messages pt-16 px-4">
+      <div class="messages pt-16 pb-16 px-4">
         <div v-for="(message, index) in messages" :key="`message-${index}`" class="">
           <chat-message class="mb-1" :previous_message="index === 0 ? null : messages[index - 1]" :message="message"/>
         </div>
       </div>
-      <div class="flex flex-col justify-end mb-4 px-4">
+      <div class="fixed w-full md:w-96 z-50 bottom-0 flex flex-col justify-end mb-4 px-4">
         <form @submit.prevent="sendMessage()" class="flex mt-2">
           <input v-model="model_message" class="flex-1 focus:outline-none p-2 bg-secondary border border-cream"
                  type="text" placeholder="Send message">
@@ -79,8 +79,9 @@ export default class ChannelTab extends Vue {
         channel_id: this.curr_channel.id,
         message: this.model_message,
       }, (data: any) => {
+        this.$root.$emit('scrollToBottom')
       	if (data.error)
-			this.$toast.error(data.error)
+			    this.$toast.error(data.error)
 	  })
       this.model_message = ''
     }

@@ -46,6 +46,7 @@ export default class ChatMessage extends Vue {
 
   /** Variables */
   showMessageSendingDate: boolean = false
+  
   @onlineClients.Getter
   clients!: number[]
 

@@ -76,6 +76,7 @@ export default class Chat extends Vue {
       await this.$auth.fetchUser()
       await this.$socket.client.emit('getChannels')
       this.$root.$on('receivedMessage', this.scrollToBottom)
+      this.$root.$on('scrollToBottom', () => this.scrollToBottom(true))
       const $refs = this.$refs as any
       const element = $refs.chatBody as HTMLElement
       if (element) {

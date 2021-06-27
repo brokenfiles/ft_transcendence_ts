@@ -14,7 +14,7 @@ import {UnauthorizedExceptionFilter} from "./exceptions/UnauthorizedExceptionFil
 import {ChatsService} from "../../chat/chats.service";
 import {CreateChannelDto, CreateDirectChannelDto} from "../../chat/dto/create-channel.dto";
 import {SendMessageDto} from "../../chat/dto/send-message.dto";
-import {BLOCKED_MSG, PrivacyEnum} from "../../chat/enums/privacy.enum";
+import {PrivacyEnum} from "../../chat/enums/privacy.enum";
 import {ChangeChannelInterface} from "./interfaces/change-channel.interface";
 import {ChangeChannelPropertyInterface} from "./interfaces/change-channel-property.interface";
 import {
@@ -45,17 +45,16 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
                 private websocketService: WebsocketService,
                 private chatsService: ChatsService,
                 private gameService: GameService,
-                private queueService: QueueService,
-                private userService: UsersService) {
+                private queueService: QueueService) {
     }
 
     @WebSocketServer() server: Server
 
     private logger: Logger = new Logger('ChatGateway')
 
-
     afterInit(server: Server) {
         this.logger.log('Gateway server initiated');
+        this.websocketService.server = this.server
     }
 
     handleConnection(client: Socket, ...args: any[]) {
@@ -74,6 +73,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
         }
         this.websocketService.sendOnlineClientsToClient(client)
+        this.websocketService.sendInAGameToClient(client)
     }
 
     async handleDisconnect(client: Socket) {
@@ -88,7 +88,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     /************************ CHAT EVENTS PART ************************/
 
-
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('msgToServer')
@@ -96,7 +95,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         await this.chatsService.messageToServer(sub, payload)
     }
-
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
@@ -138,7 +136,6 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
         const {sub} = (client.handshake as any).user
         return await this.chatsService.removeChannel(payload, sub)
     }
-
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())

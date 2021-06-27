@@ -217,12 +217,14 @@ export class GameClass {
      */
     public startGame () {
         this.sendEventToPlayers(`gameStarted`)
+        this.websocketService.addClientsToInAGame(this.players.map((u) => u.id))
         setTimeout(() => this.setState(GameState.IN_GAME), GAME_CONSTANTS.starting_time + 1000)
         const intervalId = setInterval(() => this.gameLoop(this), GAME_CONSTANTS.tps)
         this.schedulerRegistry.addInterval(this.uuid, intervalId)
     }
 
     public stopGame (winner: User) {
+        this.websocketService.removeClientsFromInAGame(this.players.map((u) => u.id))
         const looser = this.players.filter(u => u.id !== winner.id)[0]
         if (this.schedulerRegistry.getIntervals().includes(this.uuid))
             this.schedulerRegistry.deleteInterval(this.uuid)
