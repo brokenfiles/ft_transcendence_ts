@@ -202,8 +202,7 @@ export default class Account extends Vue {
 		})
 	}
 
-	inviteToChat()
-	{
+	inviteToChat() {
 		if (this.$auth.loggedIn && this.$auth.user)
 		{
 			const curr_channel = `mp: ${this.user.login} ${this.$auth.user.login}`
@@ -239,7 +238,6 @@ export default class Account extends Vue {
 		    this.$toast.error(data.error)
       }
 		})
-
   }
 
 	/**

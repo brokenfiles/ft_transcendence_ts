@@ -8,6 +8,7 @@
         <avatar class="z-40 h-8 w-8"
                 :class="{'order-2 ml-2': authenticatedId === message.owner.id}"
                 :image-url="message.owner.avatar"/>
+        <button @click.prevent="duelUser" class="focus:outline-none ml-2 order-3" v-if="message.owner.id !== authenticatedId && isOwnerOnline">🏓</button>
       </div>
       <p class="flex-1"
         :class="{'ml-2': authenticatedId !== message.owner.id}">
@@ -26,9 +27,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {Component, Prop} from 'nuxt-property-decorator'
+import {Component, namespace, Prop} from 'nuxt-property-decorator'
 import {MessageInterface} from "~/utils/interfaces/chat/message.interface";
 import Avatar from "~/components/User/Profile/Avatar.vue";
+
+const onlineClients = namespace('onlineClients')
 
 @Component({
   components: {
@@ -43,6 +46,19 @@ export default class ChatMessage extends Vue {
 
   /** Variables */
   showMessageSendingDate: boolean = false
+  @onlineClients.Getter
+  clients!: number[]
+
+  /** Methods */
+  duelUser () {
+    this.$socket.client.emit("challengeUser", {
+      user_id: this.message.owner.id
+    }, (data: any) => {
+      if (data.error) {
+        this.$toast.error(data.error)
+      }
+    })
+  }
 
   /** Computed */
   get authenticatedId(): number {
@@ -86,6 +102,10 @@ export default class ChatMessage extends Vue {
       return ['order-2 ml-2']
     else
       return ['order-1']
+  }
+
+  get isOwnerOnline () : boolean {
+    return this.clients.includes(this.message.owner.id)
   }
 
 }
