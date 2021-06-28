@@ -93,7 +93,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     @SubscribeMessage('msgToServer')
     async msgToServerEvent(client: Socket, payload: SendMessageDto): Promise<any> {
         const {sub} = (client.handshake as any).user
-        await this.chatsService.messageToServer(sub, payload)
+        return await this.chatsService.messageToServer(sub, payload)
     }
 
     @UseGuards(WsJwtAuthGuard)

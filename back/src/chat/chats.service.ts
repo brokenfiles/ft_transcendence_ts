@@ -183,17 +183,18 @@ export class ChatsService {
     }
 
     async messageToServer(sub: number, payload: SendMessageDto) {
+        const channel = await this.findOneChannel(payload.channel_id)
+
+        let user_validate = channel.users.filter((user) => user.id === sub)
+        if (channel && channel.muted_users.map((u) => u.id).includes(sub)) {
+            return { error: "You are muted !" }
+        }
+
         let message = await this.pushMsgInChannel(sub, payload)
         message = await this.messageRepository.findOne({
             where: { id: message.id },
             relations: ['owner']
         })
-        const channel = await this.findOneChannel(payload.channel_id)
-
-        let user_validate = channel.users.filter((user) => user.id === sub)
-
-        if (channel && channel.muted_users.map((u) => u.id).includes(sub))
-            return { error: "You are muted !" }
 
         if (channel && message) {
             let users_id = []
