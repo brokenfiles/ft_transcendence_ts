@@ -49,8 +49,7 @@ export class Pad {
         this.height = GAME_CONSTANTS.pad.height
     }
 
-    public setCoordinates(coordinates: Coordinates)
-    {
+    public setCoordinates(coordinates: Coordinates) {
         this.coordinates.y = coordinates.y
     }
 }
@@ -317,8 +316,9 @@ export class GameClass {
     }
 
     public addSpectator (user: User) {
-        if (!this.spectators.includes(user))
+        if (!this.spectators.includes(user)) {
             this.spectators.push(user)
+        }
     }
 
     public findUserById (sub: number) : User | undefined {

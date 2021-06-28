@@ -101,6 +101,10 @@ export default class Navigation extends Vue {
   async logout() {
     this.$socket.client.disconnect()
     await this.$auth.logout()
+    // remove the token when disconnect
+    this.$socket.client.io.opts.query = {
+      token: ''
+    }
     this.$socket.client.connect()
     this.$toast.success(`Successfully logged out`)
   }

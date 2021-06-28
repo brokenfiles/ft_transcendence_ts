@@ -282,6 +282,13 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
     @UseGuards(WsJwtAuthGuard)
     @UseFilters(new UnauthorizedExceptionFilter())
+    @SubscribeMessage('spectatorLeftGame')
+    async spectatorLeft(client: Socket, uuid: string) {
+        this.gameService.spectatorLeft(client, uuid)
+    }
+
+    @UseGuards(WsJwtAuthGuard)
+    @UseFilters(new UnauthorizedExceptionFilter())
     @SubscribeMessage('clientUpdatedPadPosition')
     async clientUpdatedPadPosition(client: Socket, coordinates: Coordinates) {
         const {sub} = (client.handshake as any).user

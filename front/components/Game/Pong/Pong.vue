@@ -93,6 +93,8 @@ export default class Pong extends Vue {
     if (this.isAPlayer) {
       document.removeEventListener('mousemove', this.mouseMoveEvent)
       this.$socket.client.emit(`clientLeftGame`)
+    } else {
+      this.$socket.client.emit(`spectatorLeftGame`, this.match.uuid)
     }
     clearInterval(this.loop_id)
   }

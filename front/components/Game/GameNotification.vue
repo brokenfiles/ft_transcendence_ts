@@ -52,6 +52,11 @@ export default class Queue extends Vue {
 
   @Socket('receiveGameNotify')
   addMessage(payload: any) {
+    if (!this.isAvailable) {
+      this.$toast.error(`You received a game request, but you can't accept here`)
+      return ;
+    }
+
     this.requester_name = payload.requester_name
     this.requester_elo = payload.requester_elo
     this.requester_id = payload.requester_id
@@ -77,6 +82,11 @@ export default class Queue extends Vue {
 			}, 3000)
 		}
 	}
+
+	/** Computed */
+	get isAvailable () : boolean {
+	  return (process.client && !this.$route.path.includes('/game/'))
+  }
 
 }
 </script>

@@ -194,6 +194,18 @@ export class GameService {
         }
     }
 
+    spectatorLeft(client: Socket, uuid: string) {
+        const clientIdx = this.websocketService.clients.map(c => c.id).indexOf(client.id)
+        if (clientIdx !== -1) {
+            const client = this.websocketService.clients[clientIdx]
+            const sub = client.userId
+
+            let game = this.getGameByUUID(uuid)
+            if (game)
+                game.clientLeft(sub)
+        }
+    }
+
     async clientJoinedSpectator(sub: number, uuid: string) {
         let game = this.getGameByUUID(uuid)
         if (game !== null) {
